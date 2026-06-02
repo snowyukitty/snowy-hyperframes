@@ -2,36 +2,40 @@
 
 Date: 2026-06-02
 
-This workspace currently has no `.git` directory and no configured GitHub remote, so changes cannot be committed or pushed from here yet.
-
-## Suggested Commit Message
+Repository created and pushed:
 
 ```text
-Complete Pi TTS voice cloning HyperFrames project
+https://github.com/snowyukitty/snowy-hyperframes
 ```
 
-## Suggested Commit Body
+Current local branch:
 
 ```text
-- Add full 11-slide Pi-led HyperFrames project for latest TTS and AI voice cloning research
-- Add generated slide images, Edge-TTS narration text/MP3s, captions, and no-cut render metadata
-- Add audio audit to prevent MP3 clips being truncated by slide duration
-- Fix dev/preview script to use real HyperFrames Studio preview
-- Document Pi workflow strengths, limitations, preview gate, and audio timing lessons
-- Add project completion summary and update root/shared/Pi documentation
+main -> origin/main
 ```
 
-## Recommended Git Commands Once Repo Is Initialized
+## Initial Commit Message
+
+```text
+Publish Snowy HyperFrames workflow demos
+```
+
+## Initial Commit Body
+
+```text
+- Add public demo/reference projects for codex, codex-pi, and pi workflows
+- Add generated images, Edge-TTS narration, captions, metadata, and MP4 demo renders
+- Add workflow comparison, production playbook, and GitHub publication policy
+- Guard future production projects with a .gitignore allowlist
+```
+
+## Useful Git Commands
 
 ```bash
-git init
-git add .
-git commit -m "Complete Pi TTS voice cloning HyperFrames project"
-git remote add origin <your-github-repo-url>
-git push -u origin main
+git status --short
+git remote -v
+git push
 ```
-
-If this workspace should connect to an existing GitHub repository, add the remote first instead of creating a new repository.
 
 ## Files Worth Reviewing Before Commit
 
