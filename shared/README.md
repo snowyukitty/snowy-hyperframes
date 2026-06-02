@@ -39,6 +39,12 @@ shared/docs/tts-pronunciation-strategy.md
 shared/schemas/pronunciation-map.schema.json
 ```
 
+No-API-key / local-first TTS 升級路線：
+
+```text
+shared/docs/local-tts-no-api-key-strategy.md
+```
+
 ## Production Notes
 
 完整製作手冊放在：

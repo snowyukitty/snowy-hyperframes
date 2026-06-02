@@ -123,6 +123,12 @@ shared/docs/hyperframes-production-playbook.md
 shared/docs/hyperframes-production-playbook.md
 ```
 
+No-API-key / local-first TTS 升級路線在：
+
+```text
+shared/docs/local-tts-no-api-key-strategy.md
+```
+
 三條 workflow 的實測比較在：
 
 ```text

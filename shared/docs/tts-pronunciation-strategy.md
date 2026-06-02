@@ -56,8 +56,16 @@ Use the Taiwan Mandarin voices for final Traditional Chinese narration unless a 
 1. Edge-TTS with display/TTS split and pronunciation map.
 2. Edge-TTS voice A/B test on a 10-20 second technical sample.
 3. Segment-level bilingual audio only for high-value phrases, then concatenate with FFmpeg.
-4. Azure Speech SSML for exact phoneme, alias, lexicon, and language-tag control.
-5. Open-source models such as MeloTTS only after installation, license, voice quality, and Windows runtime are verified.
+4. No-API-key local TTS bakeoff with Kokoro and MeloTTS.
+5. Consent-based local voice cloning / conversion experiment with OpenVoice.
+6. Azure Speech SSML for exact phoneme, alias, lexicon, and language-tag control when an API-backed fallback is acceptable.
+7. Heavier open-source models such as CosyVoice, F5-TTS, and Fish Speech only after installation, license, voice quality, and Windows runtime are verified.
+
+The no-API-key route is tracked separately:
+
+```text
+shared/docs/local-tts-no-api-key-strategy.md
+```
 
 ## Sources Checked
 
@@ -65,6 +73,12 @@ Use the Taiwan Mandarin voices for final Traditional Chinese narration unless a 
 - Microsoft Learn: Azure Speech SSML pronunciation documentation: https://learn.microsoft.com/en-us/azure/ai-services/speech-service/speech-synthesis-markup-pronunciation
 - Microsoft Learn: Azure Speech language and voice support documentation: https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=tts
 - GitHub: myshell-ai/MeloTTS README for mixed Chinese-English support: https://github.com/myshell-ai/MeloTTS
+- GitHub: hexgrad/kokoro README for Kokoro-82M local inference and Apache-licensed weights: https://github.com/hexgrad/kokoro
+- GitHub: myshell-ai/OpenVoice README for local voice cloning / conversion and MIT license: https://github.com/myshell-ai/OpenVoice
+- GitHub: FunAudioLLM/CosyVoice README for multilingual Chinese-focused local TTS research: https://github.com/FunAudioLLM/CosyVoice
+- GitHub: SWivid/F5-TTS README for local voice-conditioned TTS and model license caution: https://github.com/SWivid/F5-TTS
+- GitHub: fishaudio/fish-speech README for Fish Audio S2 research and license caution: https://github.com/fishaudio/fish-speech
 - GitHub: 2noise/ChatTTS README for experimental Chinese/English dialogue TTS context: https://github.com/2noise/ChatTTS
+- GitHub: rhasspy/piper README for archived fast local TTS reference: https://github.com/rhasspy/piper
 - GitHub: m-bain/whisperX for optional speech alignment: https://github.com/m-bain/whisperX
 - GitHub: MontrealCorpusTools/Montreal-Forced-Aligner for optional forced alignment: https://github.com/MontrealCorpusTools/Montreal-Forced-Aligner
