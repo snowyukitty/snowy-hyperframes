@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://snowy.local/schemas/research.schema.json",
+  "title": "Research Data",
+  "type": "object",
+  "required": ["title", "language", "retrievedAt", "scope", "coreFinding", "official", "communityReports", "estimates", "sources"],
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "language": {
+      "type": "string"
+    },
+    "retrievedAt": {
+      "type": "string",
+      "format": "date"
+    },
+    "scope": {
+      "type": "string"
+    },
+    "coreFinding": {
+      "type": "string"
+    },
+    "official": {
+      "type": "array"
+    },
+    "communityReports": {
+      "type": "array"
+    },
+    "estimates": {
+      "type": "array"
+    },
+    "sources": {
+      "type": "array"
+    }
+  },
+  "additionalProperties": true
+}

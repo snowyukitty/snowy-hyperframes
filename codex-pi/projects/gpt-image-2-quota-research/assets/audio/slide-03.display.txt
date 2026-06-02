@@ -1,0 +1,1 @@
+API 文件提供另一個參考：GPT Image 2 是高品質生成與編輯模型，但 API 的 Free tier 不支援 gpt-image-2。付費 API 額度看的是每分鐘圖片請求，不等於 ChatGPT 訂閱每天可用量。

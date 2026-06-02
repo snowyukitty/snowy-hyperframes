@@ -1,0 +1,44 @@
+{
+  "$schema": "../../../shared/schemas/project.schema.json",
+  "id": "latest-tts-voice-clone-research",
+  "title": "2026 年最新 TTS 與 AI Voice Clone 技術研究：為自然旁白打造決策藍圖",
+  "workflow": "pi",
+  "createdAt": "2026-06-02T00:00:00+09:00",
+  "updatedAt": "2026-06-02T09:15:00+09:00",
+  "status": "rendered",
+  "format": "hyperframes-presentation",
+  "language": "zh-Hant",
+  "durationSeconds": 486,
+  "sourceConfidence": "mixed",
+  "tools": [
+    "hyperframes",
+    "edge-tts",
+    "codex_generate_image",
+    "tavily_search"
+  ],
+  "auth": {
+    "required": [
+      "openai-codex"
+    ],
+    "notes": "Pi requires openai-codex login for codex_generate_image. No API keys or credentials are stored in this project. TTS research references public APIs and open-source models without storing auth tokens."
+  },
+  "imageGeneration": {
+    "mode": "generated",
+    "provider": "codex_generate_image via pi openai-codex auth",
+    "notes": "All research visualizations (tech maps, decision matrices, comparison charts) generated via Pi's codex_generate_image tool to create research-quality imagery."
+  },
+  "paths": {
+    "entry": "index.html",
+    "research": "data/research.json",
+    "storyboard": "data/storyboard.json",
+    "references": "docs/references.md",
+    "renderOutput": "renders/latest-tts-voice-clone-research-nocut.mp4"
+  },
+  "checks": {
+    "npmRunCheck": "pass",
+    "audioAudit": "pass",
+    "hyperframesLint": "pass",
+    "render": "pass",
+    "notes": "Final no-cut render is audio-driven. Original 168s render had severe audio truncation because MP3 durations exceeded storyboard durations."
+  }
+}

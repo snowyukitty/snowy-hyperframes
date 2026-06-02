@@ -1,0 +1,1 @@
+隱性成本不能忽略。訂閱工具可能有動態限制；Copilot AI credit 會影響代理和 CLI 功能；Claude Code 若設定 API key，可能轉成 API 計費；圖片模型和 TTS 服務也會變。對長期專案來說，成本控制其實是風險控制。

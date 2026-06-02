@@ -1,0 +1,215 @@
+{
+  "title": "2026 年最新 TTS 與 AI Voice Clone 技術研究：為自然旁白打造決策藍圖",
+  "targetDurationSeconds": 180,
+  "language": "zh-Hant",
+  "voice": {
+    "tool": "edge-tts",
+    "voice": "zh-TW-HsiaoChenNeural",
+    "rate": "+0%",
+    "pitch": "+0Hz",
+    "volume": "+0%"
+  },
+  "slides": [
+    {
+      "id": "slide-01",
+      "number": 1,
+      "type": "title-slide",
+      "duration": 12.0,
+      "title": "2026 年最新 TTS 與 AI Voice Clone 技術研究",
+      "subtitle": "為自然旁白打造決策藍圖",
+      "displayText": "我們如何讓 Snowy HyperFrames 的 AI 旁白更自然、更像真人？",
+      "ttsText": "",
+      "speaker": "narrator",
+      "visuals": {
+        "description": "Opening slide with modern TTS visualization",
+        "imageName": "slide-01-tts-technology-landscape.png",
+        "imagePrompt": "Create a modern, professional infographic showing the landscape of TTS technologies in 2026. Include icons/symbols for commercial TTS (clouds, premium), open-source models (code brackets, local machines), and AI voice synthesis (waveforms, neural networks). Use a color palette of blues, oranges, and silvers. Style: clean, minimalist, tech-forward."
+      },
+      "originalTargetDuration": 12,
+      "start": 0,
+      "mp3Duration": 5.376
+    },
+    {
+      "id": "slide-02",
+      "number": 2,
+      "type": "content",
+      "duration": 29,
+      "title": "現狀：Snowy Narration 的挑戰",
+      "displayText": "目前 Snowy HyperFrames 使用 Edge-TTS\n• 免費、本機、無 API key\n• 支持台灣普通話多種聲音\n• 局限：自訂 SSML 已移除，無法精細韻律控制\n• 問題：英文技術詞、產品名在繁中混讀時不自然",
+      "ttsText": "Snowy HyperFrames 目前使用 Edge-TTS，優點是免費、本機運行、無需 API 金鑰。支持台灣普通話的多種聲音選項。但是，Edge-TTS 的自訂 SSML 已被移除，無法實現精細的韻律控制。最大的問題在於，當英文技術詞語和產品名稱在繁體中文旁白中混讀時，聽起來並不自然。",
+      "speaker": "narrator",
+      "visuals": {
+        "description": "Edge-TTS limitations diagram",
+        "imageName": "slide-02-edgetts-limitations.png",
+        "imagePrompt": "Create a clean, split-screen comparison showing Edge-TTS on the left with green checkmarks for strengths (free, local, no API key, multiple Taiwan voices) and red X marks for limitations (no custom SSML, limited prosody control, awkward English/Chinese mixing). Right side should show a waveform diagram representing natural vs. robotic speech patterns. Use professional tech design with clear iconography."
+      },
+      "originalTargetDuration": 15,
+      "start": 12.0,
+      "mp3Duration": 27.576
+    },
+    {
+      "id": "slide-03",
+      "number": 3,
+      "type": "content",
+      "duration": 46,
+      "title": "商用高端方案：品質優先",
+      "displayText": "2026 年商用 TTS 領導者\n\nElevenLabs Multilingual v2 (70+ 語言)\n• 中文混英文最自然\n• 成本：$30-120 per 1M chars\n• 支持聲音複製、情感表達\n\nInworld TTS ($5-10/1M)\n• 盲測勝 ElevenLabs 60%\n• 低延遲、免費聲音複製\n\nOpenAI Realtime-2（對話優先）\n• 實時翻譯、推理邊聽邊做\n• 高成本 ($32/1M input + $64/1M output)",
+      "ttsText": "2026 年商用 TTS 的領導者是 ElevenLabs 的 Multilingual v2，支持七十多種語言，中文混英文時最為自然。成本約每百萬字符三十到一百二十美元。它支持聲音複製和情感表達功能。另一個值得關注的是 Inworld TTS，價格只需每百萬字符五到十美元，在盲測中勝過 ElevenLabs 百分之六十，而且提供免費聲音複製。OpenAI 的 Realtime-2 模型面向實時對話，具有邊聽邊翻譯、邊思考邊執行工具的能力，但成本最高，每百萬輸入 token 要三十二美元，輸出 token 六十四美元。",
+      "speaker": "narrator",
+      "visuals": {
+        "description": "Commercial TTS comparison matrix",
+        "imageName": "slide-03-commercial-tts-comparison.png",
+        "imagePrompt": "Create a professional comparison chart/matrix showing 3-4 commercial TTS solutions (ElevenLabs, Inworld, OpenAI, Azure Speech). Use columns for: cost per 1M chars, language support, voice cloning, prosody control, latency, and natural quality. Use color-coding for relative performance (green=best, yellow=good, orange=fair). Include small icons for each service. Professional enterprise-style design."
+      },
+      "originalTargetDuration": 18,
+      "start": 41.0,
+      "mp3Duration": 44.64
+    },
+    {
+      "id": "slide-04",
+      "number": 4,
+      "type": "content",
+      "duration": 46,
+      "title": "開源高效方案：零成本本機",
+      "displayText": "2026 年頂級開源 TTS\n\nKokoro-82M（最輕量）\n• 只有 82M 參數，CPU 可運行\n• Apache 2.0，完全開源\n• 38+ 語言，自然發音\n\nFish Speech 1.5（中英混讀冠軍）\n• ELO 1339，TTS Arena 頂級\n• 支持中文混英文\n• CC-BY-NC 許可（非商用須另議）\n\nF5-TTS（流匹配架構）\n• 零樣本聲音複製（5-15 秒）\n• MIT 推理代碼許可\n• RTX 4090 上 300-500ms 延遲\n\nCosyVoice 2.0 / MeloTTS\n• 多語言，CPU 實時推理",
+      "ttsText": "2026 年的開源 TTS 世界有幾個值得關注的項目。首先是 Kokoro，只有八十二百萬參數，輕量到可以在 CPU 上運行，採用 Apache 2.0 許可，支持三十八種以上語言。Fish Speech 1.5 在 TTS Arena 排名頂級，特別適合中文混英文的場景，不過它採用 CC-BY-NC 許可，非商用用途需另外協商。F5-TTS 採用流匹配架構，支持零樣本聲音複製，只需五到十五秒的參考音頻，推理代碼採用 MIT 許可。CosyVoice 2.0 和 MeloTTS 都支持多語言和 CPU 實時推理。",
+      "speaker": "narrator",
+      "visuals": {
+        "description": "Open-source TTS ecosystem visualization",
+        "imageName": "slide-04-opensource-tts-ecosystem.png",
+        "imagePrompt": "Create a visualization of the open-source TTS ecosystem showing 4-5 models as interconnected nodes. Each node should show: model name, parameter count (in a size-proportional manner), supported languages, and license type. Color-code by efficiency (small params=green, large=yellow), and add arrows showing performance metrics (ELO ratings). Style: network diagram, tech-forward, educational."
+      },
+      "originalTargetDuration": 18,
+      "start": 87.0,
+      "mp3Duration": 44.664
+    },
+    {
+      "id": "slide-05",
+      "number": 5,
+      "type": "content",
+      "duration": 44,
+      "title": "聲音複製的法律邊界",
+      "displayText": "Voice Cloning 2026 合法框架\n\n✓ 合法（清晰授權）\n• 複製自己的聲音（任何用途）\n• 員工/承包商聲音（明確書面同意 + 許可）\n• 公眾人物（明確合約 + 補償框架）\n\n✗ 違法（無同意）\n• 複製他人聲音無同意\n• 用於詐騙、冒充\n• 隱含同意無法保護\n\n📋 最佳實踐\n• 明確書面同意（指明用途、期限、地域）\n• AI 生成標籤（EU/中國/多州要求）\n• 商用授權清楚（ElevenLabs / 平台檢查）\n• 可撤銷條款（尊重原聲者權利）",
+      "ttsText": "聲音複製的法律框架在 2026 年已相對清楚。首先，複製自己的聲音是完全合法的，沒有任何限制。如果涉及員工或承包商的聲音，需要明確的書面同意，並清楚說明許可使用途徑。複製公眾人物的聲音同樣需要明確合約和補償框架。但是，在沒有同意的情況下複製他人聲音是違法的，無論聲音是否來自公開渠道。最佳實踐包括明確的書面同意文件、在適用地區進行 AI 生成內容標籤、確保商用授權清楚，以及提供可撤銷條款。",
+      "speaker": "narrator",
+      "visuals": {
+        "description": "Voice cloning legal framework flowchart",
+        "imageName": "slide-05-voice-clone-legal-framework.png",
+        "imagePrompt": "Create a clear flowchart/decision tree showing the legal path for voice cloning. Start with 'Whose voice?' Then branch into: Your voice (green checkmark - legal), Employee/Contractor (orange - needs consent), Public figure (orange - needs contract), Others without consent (red X - illegal). Each branch should show key requirements (written consent, documentation, compensation). Use professional legal design with icons and color coding."
+      },
+      "originalTargetDuration": 15,
+      "start": 133.0,
+      "mp3Duration": 42.768
+    },
+    {
+      "id": "slide-06",
+      "number": 6,
+      "type": "content",
+      "duration": 48,
+      "title": "Pronunciation Map 與韻律控制策略",
+      "displayText": "讓 TTS 朗讀更自然的技術手段\n\n1. Pronunciation Map（發音替換）\n   GPT → G P T\n   OpenAI → Open A I\n   ChatGPT → Chat G P T\n   API → A P I\n   Free/Plus/Pro → 免費版/Plus 版/Pro 版\n\n2. SSML 韻律標籤（Azure / 商用方案）\n   <prosody rate=\"-10%\" pitch=\"+5%\">\n   <break time=\"300ms\"/>\n   <phoneme alphabet=\"ipa\" ph=\"...\">詞彙</phoneme>\n\n3. 強制對齐與字幕同步（WhisperX）\n   詞級時間戳 ±50ms 精度\n   自動化 SRT 字幕生成\n   多說話者分段\n\n4. 旁白文本切句策略\n   避免超長句，適合朗讀\n   保留自然停頓和呼吸",
+      "ttsText": "讓 TTS 朗讀更自然有幾個技術手段。第一，發音替換圖，例如將 GPT 替換成 G P T，OpenAI 替換成 Open A I，技術詞語逐字念出。計畫名稱可以用對應的繁中表達，比如 Free Plus Pro 改為免費版 Plus 版 Pro 版。第二，SSML 韻律標籤，適用於 Azure 或商用方案，可以控制朗讀速率、音調、暫停時間。第三，使用 WhisperX 強制對齐技術，可以達到正負五十毫秒的詞級時間戳精度，自動生成 SRT 字幕。第四，優化旁白文本的切句策略，避免超長句子，保留自然的停頓和呼吸。",
+      "speaker": "narrator",
+      "visuals": {
+        "description": "TTS enhancement techniques visualization",
+        "imageName": "slide-06-tts-enhancement-techniques.png",
+        "imagePrompt": "Create a technical infographic showing 4 layers of TTS enhancement: 1) Pronunciation mapping (show before/after examples), 2) SSML prosody tags (XML-style markup examples), 3) WhisperX word-level alignment (waveform with time markers), 4) Text segmentation for natural reading (show good vs bad sentence breaks). Each layer should be visually distinct with color-coding. Use monospace fonts for code/markup examples."
+      },
+      "originalTargetDuration": 20,
+      "start": 177.0,
+      "mp3Duration": 46.896
+    },
+    {
+      "id": "slide-07",
+      "number": 7,
+      "type": "content",
+      "duration": 48,
+      "title": "Snowy Narration Pipeline 短中長期建議",
+      "displayText": "如何升級 Snowy 旁白系統\n\n短期（現在 - 1 個月）\n✓ 保留 Edge-TTS + pronunciation map\n✓ 錄製 A/B 測試樣本\n✓ 評估 ElevenLabs Turbo、Azure Speech\n✓ 建立發音替換規則庫\n\n中期（1-3 個月）\n✓ 若預算允許，切換至 Inworld / ElevenLabs Turbo\n✓ 自動化 pronunciation map 應用\n✓ 整合 WhisperX 強制對齐字幕生成\n✓ 建立 TTS 品質 QA 流程\n\n長期（3-6 個月）\n✓ 錄製自己或合作 narrator 的聲音\n✓ 建立合法授權 voice profile\n✓ 整合本機 Kokoro / Fish Speech 作 fallback\n✓ 自動化 prosody 標記生成",
+      "ttsText": "升級 Snowy 旁白系統分短中長三個階段。短期階段，保留 Edge-TTS 和 pronunciation map 的組合，錄製 A/B 測試樣本評估 ElevenLabs Turbo 和 Azure Speech 的品質優勢，建立發音替換規則庫。中期階段，如果預算允許，考慮切換至 Inworld 或 ElevenLabs Turbo，自動化 pronunciation map 的應用流程，整合 WhisperX 強制對齐技術自動生成字幕，建立 TTS 品質的品質保證流程。長期階段，錄製自己或合作旁白演員的聲音，建立有合法授權的 voice profile，整合本機運行的 Kokoro 或 Fish Speech 作為 fallback 方案，自動化 prosody 標記生成。",
+      "speaker": "narrator",
+      "visuals": {
+        "description": "Snowy narration roadmap timeline",
+        "imageName": "slide-07-snowy-roadmap.png",
+        "imagePrompt": "Create a professional roadmap/timeline visualization showing three phases: SHORT-TERM (0-1 month), MID-TERM (1-3 months), and LONG-TERM (3-6 months). Each phase should have 4-5 bullet points showing key actions/implementations. Use a horizontal timeline format with color-coding for each phase (green for current, blue for near, purple for future). Include icons for: settings (configuration), chart (testing), cloud (API), and lock (legal). Professional project management style."
+      },
+      "originalTargetDuration": 18,
+      "start": 225.0,
+      "mp3Duration": 46.368
+    },
+    {
+      "id": "slide-08",
+      "number": 8,
+      "type": "content",
+      "duration": 55,
+      "title": "TTS 方案成本與品質的權衡",
+      "displayText": "成本 vs 品質矩陣\n\n高品質 - 高成本\nElevenLabs / Inworld / OpenAI Realtime\n→ 最自然、情感豐富、語言多\n→ 企業應用、商業影片最佳\n\n中等品質 - 中等成本\nAzure Speech / Google Cloud TTS\n→ SSML 精細控制、可靠\n→ 定製化需求、可控發音\n\n高品質 - 零成本（本機）\nKokoro / Fish Speech 1.5 / F5-TTS\n→ 免費、無延遲、隱私保護\n→ 開源社區、企業自建方案\n→ 自然度快速進步（2026 已媲美商用早期版本）\n\nSnowy 建議\n對於研究與教育：開源 (Kokoro / Fish Speech)\n對於商業內容：商用 (ElevenLabs / Inworld)\n對於快速原型：Edge-TTS + pronunciation map",
+      "ttsText": "TTS 方案的成本與品質需要權衡。商用方案如 ElevenLabs、Inworld 和 OpenAI Realtime 提供最自然、情感豐富的聲音，支持多語言，但成本較高，最適合企業應用和商業影片。Azure Speech 和 Google Cloud TTS 提供中等品質、中等成本的方案，但 SSML 精細控制更強，適合有定製化發音需求的場景。開源方案如 Kokoro、Fish Speech 1.5 和 F5-TTS 完全免費、本機運行、無延遲、保護隱私，而且 2026 年已經達到可以媲美商用早期版本的品質。對於 Snowy 的建議是，研究和教育場景使用開源方案，商業內容使用商用方案，快速原型使用 Edge-TTS 加 pronunciation map 的組合。",
+      "speaker": "narrator",
+      "visuals": {
+        "description": "TTS cost-quality tradeoff matrix",
+        "imageName": "slide-08-cost-quality-matrix.png",
+        "imagePrompt": "Create a scatter plot/matrix visualization showing TTS solutions positioned by cost (x-axis: free to expensive) and quality (y-axis: low to high). Place solutions appropriately: ElevenLabs (high cost, high quality), Inworld (medium cost, high quality), Azure (medium cost, medium quality), Kokoro (free, medium quality), Fish Speech (free, high quality), Edge-TTS (free, low quality), OpenAI Realtime (very high cost, very high quality). Use different colors/icons for commercial vs open-source. Add annotations with use cases. Professional data visualization style."
+      },
+      "originalTargetDuration": 15,
+      "start": 273.0,
+      "mp3Duration": 53.784
+    },
+    {
+      "id": "slide-09",
+      "number": 9,
+      "type": "content",
+      "duration": 47,
+      "title": "WhisperX 強制對齐的價值",
+      "displayText": "為影片旁白自動對齐字幕\n\nWhisperX 的三大能力\n✓ 詞級時間戳：±50ms（vs Whisper ±500ms）\n✓ 說話者分段：多說話者自動標籤\n✓ 批量推理：RTX 4090 達 70× 實時速度\n\n應用到 Snowy\n 生成 SRT 字幕精準對齐到 TTS 音頻\n 支持多說話者分段（訪談、對話內容）\n 自動化字幕生成流程，減少手工編輯\n 改進字幕與影片視覺內容的同步\n\n成本：零（開源 BSD-2-Clause 許可）\n資源：需要 HuggingFace 令牌接受 pyannote 條款\n\n下一步\n 測試 WhisperX 在 Snowy 影片樣本上的表現\n 評估對字幕準度與製作效率的改進",
+      "ttsText": "WhisperX 是一個開源工具，結合了更快的 Whisper、詞級強制對齐和說話者分段功能。相比標準 Whisper 的五百毫秒時間戳誤差，WhisperX 可以達到正負五十毫秒的詞級精度。對 Snowy 的應用包括，自動生成與 TTS 音頻精準對齐的 SRT 字幕，支持多說話者分段，自動化字幕生成流程，改進字幕與影片視覺內容的同步。成本完全免費，採用 BSD-2-Clause 許可，只需要 HuggingFace 令牌接受 pyannote 的條款。建議的下一步是測試 WhisperX 在 Snowy 影片樣本上的表現，評估它對字幕準度和製作效率的改進。",
+      "speaker": "narrator",
+      "visuals": {
+        "description": "WhisperX alignment accuracy visualization",
+        "imageName": "slide-09-whisperx-alignment.png",
+        "imagePrompt": "Create a waveform visualization showing WhisperX word-level alignment precision. Show audio waveform at the top, with color-coded words below showing their precise timestamps (±50ms accuracy in green vs ±500ms in standard Whisper shown in gray/faded). Include a sample video frame on the side to show how subtitle timing syncs with speaker mouth movement. Use technical but clear visualization style with frequency spectrum colors."
+      },
+      "originalTargetDuration": 12,
+      "start": 328.0,
+      "mp3Duration": 46.008
+    },
+    {
+      "id": "slide-10",
+      "number": 10,
+      "type": "content",
+      "duration": 53,
+      "title": "Snowy 團隊的決策清單",
+      "displayText": "立即行動項目\n\n【本周】\n□ 評估 Edge-TTS 當前的 3 個聲音（HsiaoYu / HsiaoChen / YunJhe）\n□ 錄製 10-20 秒技術詞混讀的測試樣本\n□ 用 ElevenLabs / Azure / Inworld 試讀\n\n【本月】\n□ 建立 pronunciation map 規則庫（API / GPT / TTS 等高頻詞）\n□ 自動化 .display.txt → .tts.txt 生成\n□ 試驗 WhisperX 在一個完成影片上的效果\n\n【下月】\n□ 評估成本：0 (Edge-TTS) vs $10-30/month (Inworld/Azure)\n□ 若認可預算，測試 Inworld TTS 集成\n□ 記錄 TTS 品質改進的量化指標\n\n【長期】\n□ 與旁白演員討論聲音複製授權\n□ 研究本機部署 Kokoro 或 Fish Speech 的技術可行性",
+      "ttsText": "為了實現這些建議，Snowy 團隊需要一份清晰的決策清單。本周的行動包括評估 Edge-TTS 當前的三種聲音選項，錄製十到二十秒的技術詞混讀測試樣本，用 ElevenLabs、Azure 和 Inworld 進行試讀對比。本月的工作包括建立 pronunciation map 規則庫，涵蓋 API、GPT 等高頻技術詞，自動化 display 文本到 TTS 文本的生成流程，在一個完整影片上試驗 WhisperX 的效果。下月的重點是評估成本差異，若認可預算，測試 Inworld TTS 的集成，並記錄 TTS 品質改進的量化指標。長期行動包括與旁白演員討論聲音複製授權，研究本機部署 Kokoro 或 Fish Speech 的技術可行性。",
+      "speaker": "narrator",
+      "visuals": {
+        "description": "Action checklist visualization",
+        "imageName": "slide-10-action-checklist.png",
+        "imagePrompt": "Create a professional project management checklist/roadmap visualization showing 4 time horizons: THIS WEEK, THIS MONTH, NEXT MONTH, LONG-TERM. Each section should display 3-4 checkbox items with clear descriptions. Use checkboxes (some checked, some unchecked to show progress). Color-code by urgency/timeline (red for immediate, orange for this month, blue for next month, gray for long-term). Include small icons for: testing, automation, budget, and partnerships. Professional project tracker style."
+      },
+      "originalTargetDuration": 15,
+      "start": 375.0,
+      "mp3Duration": 51.72
+    },
+    {
+      "id": "slide-11",
+      "number": 11,
+      "type": "closing",
+      "duration": 58,
+      "title": "結論：從快速迭代到長期自動化",
+      "displayText": "三個核心洞察\n\n1️⃣ 最好的 TTS 取決於優先次序\n   時間優先 → Edge-TTS\n   品質優先 → ElevenLabs / Inworld\n   成本優先 → Kokoro / Fish Speech\n\n2️⃣ Pronunciation map + WhisperX 是低掛果實\n   立即提升旁白品質\n   零成本、開源、可自動化\n   建立基礎設施，為未來擴展做準備\n\n3️⃣ 聲音複製須先明確授權框架\n   法律風險明確可控\n   與旁白演員的合約須清楚\n   未來可持續發展\n\n下一步\n執行這份決策清單，開始數據蒐集\n建立 pronunciation map 與 WhisperX 自動化流程\n為 Snowy 的 AI 旁白建立更自然、更可維持的技術棧",
+      "ttsText": "總結一下，這份研究提出三個核心洞察。第一，最好的 TTS 取決於你的優先次序。如果時間優先，Edge-TTS 已經足夠；如果品質優先，選擇 ElevenLabs 或 Inworld；如果成本優先，開源的 Kokoro 或 Fish Speech 是最佳選擇。第二，pronunciation map 加上 WhisperX 是低掛的果實，可以立即提升旁白品質，完全零成本、開源且可自動化，同時為未來擴展打下基礎。第三，聲音複製必須先明確授權框架，法律風險可控，與旁白演員的合約須清楚，這樣才能長期可持續發展。建議立即執行這份決策清單開始數據蒐集，建立 pronunciation map 和 WhisperX 自動化流程，為 Snowy 的 AI 旁白打造更自然、更可維持的技術棧。",
+      "speaker": "narrator",
+      "visuals": {
+        "description": "Conclusion summary with next steps",
+        "imageName": "slide-11-conclusion-summary.png",
+        "imagePrompt": "Create a clean, modern conclusion slide showing 3 key insights as large numbered circles (1, 2, 3) with accompanying text. Below that, show a forward-pointing arrow or pathway leading to 'Next Steps'. Use a minimalist design with a gradient background (light to medium blue/purple). Include icons for: clock (time), quality/diamond (quality), dollar sign (cost), checklist (action items). Professional presentation closing style."
+      },
+      "originalTargetDuration": 10,
+      "start": 428.0,
+      "mp3Duration": 57.048
+    }
+  ],
+  "durationSeconds": 486.0,
+  "timingPolicy": "audio-driven-no-cut; slide durations expanded to fit measured MP3 lengths plus safety buffer"
+}

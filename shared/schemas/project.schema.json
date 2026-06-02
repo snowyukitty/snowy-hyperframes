@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://snowy.local/schemas/hyperframes-project.schema.json",
+  "title": "Snowy HyperFrames Project Metadata",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "workflow",
+    "createdAt",
+    "status",
+    "format",
+    "language",
+    "durationSeconds",
+    "tools",
+    "auth",
+    "imageGeneration",
+    "paths"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "title": {
+      "type": "string"
+    },
+    "workflow": {
+      "enum": ["codex-pi", "codex", "pi"]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "enum": ["draft", "ready-to-preview", "ready-to-render", "rendered", "archived"]
+    },
+    "format": {
+      "enum": ["hyperframes-presentation", "hyperframes-video", "hyperframes-demo"]
+    },
+    "language": {
+      "type": "string"
+    },
+    "durationSeconds": {
+      "type": "number",
+      "minimum": 1
+    },
+    "tools": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "auth": {
+      "type": "object",
+      "required": ["required", "notes"],
+      "properties": {
+        "required": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "imageGeneration": {
+      "type": "object",
+      "required": ["mode", "provider", "notes"],
+      "properties": {
+        "mode": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "sourceConfidence": {
+      "enum": ["official-only", "mixed", "estimate-heavy", "unknown"]
+    },
+    "paths": {
+      "type": "object",
+      "required": ["entry", "research", "storyboard", "references", "renderOutput"],
+      "properties": {
+        "entry": {
+          "type": "string"
+        },
+        "research": {
+          "type": "string"
+        },
+        "storyboard": {
+          "type": "string"
+        },
+        "references": {
+          "type": "string"
+        },
+        "renderOutput": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

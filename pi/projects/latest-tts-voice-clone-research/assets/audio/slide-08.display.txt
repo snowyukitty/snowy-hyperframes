@@ -1,0 +1,22 @@
+成本 vs 品質矩陣
+
+高品質 - 高成本
+ElevenLabs / Inworld / OpenAI Realtime
+→ 最自然、情感豐富、語言多
+→ 企業應用、商業影片最佳
+
+中等品質 - 中等成本
+Azure Speech / Google Cloud TTS
+→ SSML 精細控制、可靠
+→ 定製化需求、可控發音
+
+高品質 - 零成本（本機）
+Kokoro / Fish Speech 1.5 / F5-TTS
+→ 免費、無延遲、隱私保護
+→ 開源社區、企業自建方案
+→ 自然度快速進步（2026 已媲美商用早期版本）
+
+Snowy 建議
+對於研究與教育：開源 (Kokoro / Fish Speech)
+對於商業內容：商用 (ElevenLabs / Inworld)
+對於快速原型：Edge-TTS + pronunciation map

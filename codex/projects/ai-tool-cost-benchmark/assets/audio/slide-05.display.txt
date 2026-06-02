@@ -1,0 +1,1 @@
+Pi 加 GitHub Copilot 的優勢是可重用、可封裝、可接多種 provider。若你有學生或 Copilot 方案，固定成本可能很低。但 Copilot 本身不等於圖片生成、搜尋 API 或 TTS；要做完整影片，還是要把 Tavily、Brave、Edge-TTS、OpenAI Codex 生圖或其他工具接好。

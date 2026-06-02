@@ -1,0 +1,20 @@
+立即行動項目
+
+【本周】
+□ 評估 Edge-TTS 當前的 3 個聲音（HsiaoYu / HsiaoChen / YunJhe）
+□ 錄製 10-20 秒技術詞混讀的測試樣本
+□ 用 ElevenLabs / Azure / Inworld 試讀
+
+【本月】
+□ 建立 pronunciation map 規則庫（API / GPT / TTS 等高頻詞）
+□ 自動化 .display.txt → .tts.txt 生成
+□ 試驗 WhisperX 在一個完成影片上的效果
+
+【下月】
+□ 評估成本：0 (Edge-TTS) vs $10-30/month (Inworld/Azure)
+□ 若認可預算，測試 Inworld TTS 集成
+□ 記錄 TTS 品質改進的量化指標
+
+【長期】
+□ 與旁白演員討論聲音複製授權
+□ 研究本機部署 Kokoro 或 Fish Speech 的技術可行性

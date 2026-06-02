@@ -1,0 +1,80 @@
+{
+  "generatedBy": "Codex built-in image generation",
+  "generatedAt": "2026-06-02",
+  "style": "cinematic research film, no baked-in readable text, scenario-specific visual tone",
+  "assets": [
+    {
+      "file": "assets/images/00-prologue-branching-futures.png",
+      "slideCopy": "assets/images/slide-01-prologue-branching-futures.png",
+      "prompt": "A cinematic branching timeline of the year 2030, showing three possible futures emerging from one present-day observatory desk, no readable text."
+    },
+    {
+      "file": "assets/images/01-evidence-observatory.png",
+      "slideCopies": [
+        "assets/images/slide-02-evidence-observatory.png",
+        "assets/images/slide-03-method-observatory.png"
+      ],
+      "prompt": "A global 2030 evidence observatory with layers for population, AI, climate, energy, jobs, health, and education, no readable text."
+    },
+    {
+      "file": "assets/images/optimistic-01-regenerative-city.png",
+      "slideCopy": "assets/images/slide-04-optimistic-city.png",
+      "prompt": "Optimistic 2030 regenerative city morning, clean transit, shaded walkways, rooftop farms, small drones doing maintenance, community spaces."
+    },
+    {
+      "file": "assets/images/optimistic-02-ai-clinic-classroom.png",
+      "slideCopy": "assets/images/slide-05-optimistic-care-learning.png",
+      "prompt": "Optimistic 2030 AI-assisted clinic and classroom hybrid, humane technology helping teachers, nurses, and students."
+    },
+    {
+      "file": "assets/images/optimistic-03-clean-energy-landscape.png",
+      "slideCopy": "assets/images/slide-06-optimistic-energy.png",
+      "prompt": "Optimistic 2030 clean energy landscape where renewables, storage, smart grids, and restored ecosystems coexist."
+    },
+    {
+      "file": "assets/images/optimistic-04-civic-dashboard.png",
+      "slideCopy": "assets/images/slide-07-optimistic-governance.png",
+      "prompt": "Optimistic 2030 public trust dashboard showing transparent AI governance and citizen participation without text."
+    },
+    {
+      "file": "assets/images/baseline-01-dense-adaptive-city.png",
+      "slideCopy": "assets/images/slide-08-baseline-city.png",
+      "prompt": "Baseline 2030 dense adaptive city where AI tools, heat adaptation, mixed mobility, and old infrastructure coexist."
+    },
+    {
+      "file": "assets/images/baseline-02-hybrid-work-school.png",
+      "slideCopy": "assets/images/slide-09-baseline-work-school.png",
+      "prompt": "Baseline 2030 hybrid work and school life with AI copilots everywhere, productivity gains but attention fragmentation."
+    },
+    {
+      "file": "assets/images/baseline-03-uneven-energy-transition.png",
+      "slideCopy": "assets/images/slide-10-baseline-energy.png",
+      "prompt": "Baseline 2030 uneven energy transition: new renewable infrastructure beside aging fossil infrastructure and overloaded transmission lines."
+    },
+    {
+      "file": "assets/images/baseline-04-public-systems-triage.png",
+      "slideCopy": "assets/images/slide-11-baseline-triage.png",
+      "prompt": "Baseline 2030 public systems triage, overwhelmed but functional health, climate, education, and emergency response center."
+    },
+    {
+      "file": "assets/images/pessimistic-01-fragmented-city.png",
+      "slideCopy": "assets/images/slide-12-pessimistic-fragmented-city.png",
+      "prompt": "Pessimistic 2030 fragmented city with protected high-tech districts beside under-served neighborhoods and broken civic trust."
+    },
+    {
+      "file": "assets/images/pessimistic-02-climate-shock-grid.png",
+      "slideCopy": "assets/images/slide-13-pessimistic-climate-grid.png",
+      "prompt": "Pessimistic 2030 climate shock and grid failure, heatwave, flood, emergency cooling shelters, darkened city blocks."
+    },
+    {
+      "file": "assets/images/pessimistic-03-disinfo-work-crisis.png",
+      "slideCopy": "assets/images/slide-14-pessimistic-disinfo-work.png",
+      "prompt": "Pessimistic 2030 disinformation and job anxiety visual, fractured AI feeds, synthetic media, exhausted workers."
+    },
+    {
+      "file": "assets/images/finale-choice-room.png",
+      "slideCopy": "assets/images/slide-15-finale-choice-room.png",
+      "prompt": "2030 three-futures decision room where optimistic, baseline, and pessimistic futures are shown as three large translucent landscape windows."
+    }
+  ]
+}

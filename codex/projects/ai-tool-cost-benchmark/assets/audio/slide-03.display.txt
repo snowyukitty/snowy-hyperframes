@@ -1,0 +1,1 @@
+官方價格提供了基準。Codex 有 Free、Go、Plus 和 Pro 層級；GitHub Copilot 從 Free、Pro 到 Max 和組織方案；Claude Code 則隨 Claude Pro 和 Max 提供。這些是固定成本錨點，但圖片 API、web search、Claude API credit 和額外媒體服務，仍然要分開估算。

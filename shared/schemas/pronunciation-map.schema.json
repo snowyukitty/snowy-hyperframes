@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://snowy.local/schemas/pronunciation-map.schema.json",
+  "title": "Snowy HyperFrames TTS Pronunciation Map",
+  "type": "object",
+  "required": ["version", "strategy", "entries"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "strategy": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "defaultVoice": {
+      "type": "string"
+    },
+    "candidateVoices": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["match", "tts", "reason"],
+        "properties": {
+          "match": {
+            "type": "string"
+          },
+          "tts": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "matchType": {
+            "enum": ["literal", "regex"],
+            "default": "literal"
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": true
+}

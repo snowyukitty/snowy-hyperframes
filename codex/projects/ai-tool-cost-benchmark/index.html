@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #090d10;
+        color: #f6f8f5;
+        font-family: system-ui, sans-serif;
+      }
+
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #090d10;
+      }
+
+      .slide {
+        position: absolute;
+        inset: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+      }
+
+      .bg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .shade {
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(90deg, rgba(6, 10, 13, 0.92) 0%, rgba(6, 10, 13, 0.76) 42%, rgba(6, 10, 13, 0.46) 100%),
+          linear-gradient(0deg, rgba(5, 8, 11, 0.94) 0%, rgba(5, 8, 11, 0.36) 40%, rgba(5, 8, 11, 0.28) 100%);
+      }
+
+      .content {
+        position: relative;
+        z-index: 2;
+        width: 1380px;
+        padding: 86px 0 0 94px;
+      }
+
+      .wide {
+        width: 1560px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 44px;
+        padding: 0 18px;
+        border: 1px solid rgba(116, 232, 220, 0.36);
+        background: rgba(7, 20, 24, 0.72);
+        color: #8beee4;
+        font-size: 25px;
+        font-weight: 700;
+        letter-spacing: 0;
+      }
+
+      h1 {
+        max-width: 1240px;
+        margin-top: 28px;
+        color: #fffdf5;
+        font-size: 76px;
+        line-height: 1.06;
+        font-weight: 900;
+        letter-spacing: 0;
+      }
+
+      .lead {
+        max-width: 1120px;
+        margin-top: 26px;
+        color: #dfe8e1;
+        font-size: 34px;
+        line-height: 1.42;
+        font-weight: 560;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 20px;
+        margin-top: 38px;
+        max-width: 1320px;
+      }
+
+      .grid.two {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .panel,
+      .metric,
+      .risk {
+        min-height: 168px;
+        border: 1px solid rgba(255, 255, 255, 0.13);
+        background: rgba(7, 16, 20, 0.72);
+        border-radius: 8px;
+        padding: 24px 26px;
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.25);
+      }
+
+      .panel strong,
+      .risk strong {
+        display: block;
+        margin-bottom: 12px;
+        color: #ffffff;
+        font-size: 31px;
+        line-height: 1.15;
+      }
+
+      .panel p,
+      .risk p {
+        color: #cbd7d0;
+        font-size: 24px;
+        line-height: 1.32;
+      }
+
+      .metric .label {
+        color: #8beee4;
+        font-size: 23px;
+        font-weight: 800;
+      }
+
+      .metric .value {
+        margin-top: 8px;
+        color: #fff3bf;
+        font-size: 42px;
+        line-height: 1.08;
+        font-weight: 900;
+      }
+
+      .metric .note {
+        margin-top: 10px;
+        color: #d1dad4;
+        font-size: 22px;
+        line-height: 1.26;
+      }
+
+      .table {
+        width: 1510px;
+        margin-top: 36px;
+        border: 1px solid rgba(255, 255, 255, 0.13);
+        background: rgba(5, 12, 16, 0.76);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: 260px 340px 330px 580px;
+        min-height: 92px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.11);
+      }
+
+      .row:last-child {
+        border-bottom: 0;
+      }
+
+      .row.header {
+        min-height: 64px;
+        background: rgba(120, 238, 226, 0.12);
+      }
+
+      .cell {
+        display: flex;
+        align-items: center;
+        min-width: 0;
+        padding: 18px 22px;
+        color: #e8efe9;
+        font-size: 23px;
+        line-height: 1.22;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .cell:last-child {
+        border-right: 0;
+      }
+
+      .header .cell {
+        color: #9df3e9;
+        font-size: 21px;
+        font-weight: 900;
+      }
+
+      .plan {
+        color: #ffffff;
+        font-weight: 900;
+      }
+
+      .price {
+        color: #ffd37a;
+        font-weight: 900;
+      }
+
+      .safe {
+        color: #9ef0b5;
+        font-weight: 900;
+      }
+
+      .warn {
+        color: #ffcc7a;
+        font-weight: 900;
+      }
+
+      .caption {
+        position: absolute;
+        z-index: 3;
+        left: 86px;
+        right: 86px;
+        bottom: 44px;
+        min-height: 116px;
+        padding: 24px 30px;
+        border-top: 1px solid rgba(255, 255, 255, 0.16);
+        background: rgba(5, 10, 13, 0.86);
+        border-radius: 8px;
+        box-shadow: 0 22px 70px rgba(0, 0, 0, 0.34);
+      }
+
+      .caption p {
+        color: #f2f6ef;
+        font-size: 28px;
+        line-height: 1.34;
+        font-weight: 650;
+      }
+
+      .source {
+        position: absolute;
+        z-index: 3;
+        left: 94px;
+        bottom: 184px;
+        max-width: 1260px;
+        color: rgba(235, 242, 235, 0.72);
+        font-size: 19px;
+        line-height: 1.25;
+      }
+
+      .side-note {
+        position: absolute;
+        z-index: 3;
+        top: 118px;
+        right: 92px;
+        width: 390px;
+        padding: 24px 26px;
+        border-left: 4px solid #ffd37a;
+        background: rgba(5, 12, 16, 0.78);
+        color: #f7edd6;
+        font-size: 25px;
+        line-height: 1.28;
+        font-weight: 760;
+      }
+
+      .stack {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+        width: 850px;
+        margin-top: 34px;
+      }
+
+      .stack-row {
+        display: grid;
+        grid-template-columns: 210px 1fr;
+        align-items: center;
+        min-height: 62px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(6, 15, 19, 0.72);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .stack-label {
+        height: 100%;
+        padding: 17px 20px;
+        background: rgba(139, 238, 228, 0.13);
+        color: #8beee4;
+        font-size: 21px;
+        font-weight: 900;
+      }
+
+      .stack-text {
+        padding: 16px 20px;
+        color: #e3ebe6;
+        font-size: 23px;
+      }
+
+      .decision {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+        margin-top: 32px;
+        width: 1450px;
+      }
+
+      .decision .panel {
+        min-height: 306px;
+      }
+
+      .decision ul {
+        margin-top: 14px;
+        list-style: none;
+      }
+
+      .decision li {
+        margin-top: 11px;
+        color: #d5ded8;
+        font-size: 22px;
+        line-height: 1.25;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="202" data-width="1920" data-height="1080">
+      <audio id="audio-slide-01" class="clip narration-audio" data-start="0" data-duration="18" data-track-index="0" src="assets/audio/slide-01.mp3"></audio>
+      <audio id="audio-slide-02" class="clip narration-audio" data-start="18" data-duration="20" data-track-index="0" src="assets/audio/slide-02.mp3"></audio>
+      <audio id="audio-slide-03" class="clip narration-audio" data-start="38" data-duration="21.8" data-track-index="0" src="assets/audio/slide-03.mp3"></audio>
+      <audio id="audio-slide-04" class="clip narration-audio" data-start="59.8" data-duration="20.1" data-track-index="0" src="assets/audio/slide-04.mp3"></audio>
+      <audio id="audio-slide-05" class="clip narration-audio" data-start="79.9" data-duration="23.5" data-track-index="0" src="assets/audio/slide-05.mp3"></audio>
+      <audio id="audio-slide-06" class="clip narration-audio" data-start="103.4" data-duration="21.8" data-track-index="0" src="assets/audio/slide-06.mp3"></audio>
+      <audio id="audio-slide-07" class="clip narration-audio" data-start="125.2" data-duration="25" data-track-index="0" src="assets/audio/slide-07.mp3"></audio>
+      <audio id="audio-slide-08" class="clip narration-audio" data-start="150.2" data-duration="20.5" data-track-index="0" src="assets/audio/slide-08.mp3"></audio>
+      <audio id="audio-slide-09" class="clip narration-audio" data-start="170.7" data-duration="30.5" data-track-index="0" src="assets/audio/slide-09.mp3"></audio>
+
+      <section id="slide-01" class="clip slide" data-start="0" data-duration="18" data-track-index="1">
+        <img class="bg" data-layout-allow-overflow="" src="assets/images/slide-01-workflow-cost-map.png" alt="">
+        <div class="shade"></div>
+        <div class="content">
+          <div class="eyebrow">Snowy HyperFrames · Codex workflow benchmark</div>
+          <h1>AI 工具做研究影片，成本不是單一月費</h1>
+          <p class="lead">比較 Codex、Pi + GitHub Copilot、Claude Code 時，要把訂閱、API、媒體生成、重跑與維護分開看。</p>
+          <div class="grid">
+            <div class="metric"><div class="label">固定成本</div><div class="value">月費</div><div class="note">決定基礎容量與用量上限。</div></div>
+            <div class="metric"><div class="label">邊際成本</div><div class="value">API / credits</div><div class="note">搜尋、生圖、模型 token 會另外計費。</div></div>
+            <div class="metric"><div class="label">真實成本</div><div class="value">重跑 + QA</div><div class="note">長期最貴的是穩定重現與人工檢查。</div></div>
+          </div>
+        </div>
+        <div class="source">來源層級：官方價格頁、官方 billing docs、Pi provider docs、合理推估。</div>
+        <div class="caption"><p>這份報告的結論很直接：做 HyperFrames 研究影片，成本不是單一月費，而是一個工作流組合。Codex、Pi 加 GitHub Copilot、Claude Code 的差別，主要在媒體完整度、自動化深度、使用限制和重跑成本。</p></div>
+      </section>
+
+      <section id="slide-02" class="clip slide" data-start="18" data-duration="20" data-track-index="2">
+        <img class="bg" data-layout-allow-overflow="" src="assets/images/slide-02-cost-stack.png" alt="">
+        <div class="shade"></div>
+        <div class="content">
+          <div class="eyebrow">成本模型</div>
+          <h1>把 research-to-video 拆成七層</h1>
+          <div class="stack">
+            <div class="stack-row"><div class="stack-label">Research</div><div class="stack-text">搜尋、讀來源、引用整理、可信度分層。</div></div>
+            <div class="stack-row"><div class="stack-label">Agent Work</div><div class="stack-text">推理、分鏡、資料結構、HTML/CSS/腳本。</div></div>
+            <div class="stack-row"><div class="stack-label">Media</div><div class="stack-text">圖片生成、TTS、字幕、音訊重生、時間軸。</div></div>
+            <div class="stack-row"><div class="stack-label">Render / QA</div><div class="stack-text">HyperFrames lint、validate、inspect、render、人工抽查。</div></div>
+          </div>
+        </div>
+        <div class="side-note">公式：projectCost = 月費攤提 + AI usage + 搜尋 + 圖片 + TTS + render + QA</div>
+        <div class="caption"><p>我把成本拆成七層：研究搜尋，推理與編碼，圖片生成，配音，字幕，渲染與檢查，以及日後維護。月費只能覆蓋其中一部分；真正決定長期成本的，是哪一層可以穩定重跑，哪一層需要額外 API 或人工補洞。</p></div>
+      </section>
+
+      <section id="slide-03" class="clip slide" data-start="38" data-duration="21.8" data-track-index="3">
+        <img class="bg" data-layout-allow-overflow="" src="assets/images/slide-03-cost-stack.png" alt="">
+        <div class="shade"></div>
+        <div class="content wide">
+          <div class="eyebrow">官方價格錨點 · 2026-06-01</div>
+          <h1>訂閱是入口，API 與 credits 是變動項</h1>
+          <div class="table">
+            <div class="row header"><div class="cell">工具</div><div class="cell">月費錨點</div><div class="cell">變動計費</div><div class="cell">對 HyperFrames 的含義</div></div>
+            <div class="row"><div class="cell plan">Codex</div><div class="cell price">$0 / $8 / $20 / $100 / $200</div><div class="cell">API 另計</div><div class="cell">端到端能力強；API 生圖、web search 與模型 token 需另算。</div></div>
+            <div class="row"><div class="cell plan">Copilot</div><div class="cell price">$0 / $10 / $39 / $100</div><div class="cell">AI credits</div><div class="cell">適合 Pi provider；chat、CLI、agents 消耗 credits，媒體工具另接。</div></div>
+            <div class="row"><div class="cell plan">Claude Code</div><div class="cell price">$20 / $100 / $200</div><div class="cell">API credits 可選</div><div class="cell">長上下文強；圖片、TTS 與媒體 pipeline 通常另接。</div></div>
+          </div>
+        </div>
+        <div class="source">來源：OpenAI Codex Pricing；OpenAI API Pricing；GitHub Copilot Plans and AI Credits docs；Claude plan and Claude Code docs。</div>
+        <div class="caption"><p>官方價格提供了基準。Codex 有 Free、Go、Plus 和 Pro 層級；GitHub Copilot 從 Free、Pro 到 Max 和組織方案；Claude Code 則隨 Claude Pro 和 Max 提供。這些是固定成本錨點，但圖片 API、web search、Claude API credit 和額外媒體服務，仍然要分開估算。</p></div>
+      </section>
+
+      <section id="slide-04" class="clip slide" data-start="59.8" data-duration="20.1" data-track-index="4">
+        <img class="bg" data-layout-allow-overflow="" src="assets/images/slide-04-workflow-cost-map.png" alt="">
+        <div class="shade"></div>
+        <div class="content wide">
+          <div class="eyebrow">Codex workflow</div>
+          <h1>最像端到端研究影片工作台</h1>
+          <div class="decision">
+            <div class="panel"><strong>強項</strong><p>研究、檔案編輯、生圖、TTS、字幕、HyperFrames 檢查可在同一操作回路完成。</p></div>
+            <div class="panel"><strong>成本型態</strong><p>固定訂閱攤提為主；若改走 API，模型、web search、GPT-Image-2 都需逐項計價。</p></div>
+            <div class="panel"><strong>風險</strong><p>內建能力與用量受方案、會話、模型可用性影響；長專案要保存 prompts 與資料層。</p></div>
+          </div>
+        </div>
+        <div class="caption"><p>Codex workflow 最適合我們目前這類研究影片。它能在同一輪裡查資料、建立檔案、生成圖片、呼叫 Edge-TTS、跑 HyperFrames 檢查。它的現金邊際成本低，但會受到方案用量、內建生圖可用性與工作階段長度影響。</p></div>
+      </section>
+
+      <section id="slide-05" class="clip slide" data-start="79.9" data-duration="23.5" data-track-index="5">
+        <img class="bg" data-layout-allow-overflow="" src="assets/images/slide-05-workflow-cost-map.png" alt="">
+        <div class="shade"></div>
+        <div class="content wide">
+          <div class="eyebrow">Pi + GitHub Copilot workflow</div>
+          <h1>便宜、可封裝，但媒體鏈要自己補齊</h1>
+          <div class="grid">
+            <div class="metric"><div class="label">Provider router</div><div class="value">高</div><div class="note">Pi 可用 OAuth 或 API key 接多 provider。</div></div>
+            <div class="metric"><div class="label">Copilot AI credits</div><div class="value">可控</div><div class="note">1 credit = $0.01；chat、CLI、agent 會消耗。</div></div>
+            <div class="metric"><div class="label">媒體完整度</div><div class="value">需外掛</div><div class="note">搜尋、生圖、TTS、字幕要額外工具或 auth。</div></div>
+          </div>
+        </div>
+        <div class="source">來源：Pi Providers；GitHub Copilot usage-based billing；GitHub Copilot models and pricing。</div>
+        <div class="caption"><p>Pi 加 GitHub Copilot 的優勢是可重用、可封裝、可接多種 provider。若你有學生或 Copilot 方案，固定成本可能很低。但 Copilot 本身不等於圖片生成、搜尋 API 或 TTS；要做完整影片，還是要把 Tavily、Brave、Edge-TTS、OpenAI Codex 生圖或其他工具接好。</p></div>
+      </section>
+
+      <section id="slide-06" class="clip slide" data-start="103.4" data-duration="21.8" data-track-index="6">
+        <img class="bg" data-layout-allow-overflow="" src="assets/images/slide-06-decision-matrix.png" alt="">
+        <div class="shade"></div>
+        <div class="content wide">
+          <div class="eyebrow">Claude Code workflow</div>
+          <h1>長上下文與程式碼品質強，媒體工廠要外接</h1>
+          <div class="grid two">
+            <div class="risk"><strong>適合</strong><p>大型 codebase 理解、重構、設計評審、長文檔整理、複雜前端與腳本修改。</p></div>
+            <div class="risk"><strong>注意</strong><p>Pro/Max 用量與 Claude app 共用；若 `ANTHROPIC_API_KEY` 存在，可能變成 API 計費。</p></div>
+          </div>
+        </div>
+        <div class="source">來源：Claude plan docs；Claude Code billing docs；Claude API pricing。</div>
+        <div class="caption"><p>Claude Code 的長處是長上下文、程式碼理解、重構和大型專案推理。對 HyperFrames 這種前端加資料加自動化的專案，它可以很強；但它不是完整媒體工廠。圖片、搜尋、TTS、字幕校準和渲染，通常還需要外部工具或 API credit。</p></div>
+      </section>
+
+      <section id="slide-07" class="clip slide" data-start="125.2" data-duration="25" data-track-index="7">
+        <img class="bg" data-layout-allow-overflow="" src="assets/images/slide-07-cost-stack.png" alt="">
+        <div class="shade"></div>
+        <div class="content wide">
+          <div class="eyebrow">專案規模估算</div>
+          <h1>小看攤提，中看媒體，大看可重現性</h1>
+          <div class="table">
+            <div class="row header"><div class="cell">規模</div><div class="cell">典型範圍</div><div class="cell">主要成本</div><div class="cell">最佳 workflow 傾向</div></div>
+            <div class="row"><div class="cell plan">小型</div><div class="cell">2-3 分鐘 / 8-10 slides</div><div class="cell safe">月費攤提</div><div class="cell">Codex 直接做最省心；Pi 可做自動化練習。</div></div>
+            <div class="row"><div class="cell plan">中型</div><div class="cell">5 分鐘 / 12-18 slides</div><div class="cell warn">圖片與搜尋重跑</div><div class="cell">Codex 主線；Pi 管工具封裝；Claude Code 做 code review。</div></div>
+            <div class="row"><div class="cell plan">大型</div><div class="cell">10+ 分鐘 / 25+ slides</div><div class="cell warn">上下文 + QA</div><div class="cell">三者分工：Codex 出片、Pi 重跑、Claude Code 深審。</div></div>
+          </div>
+        </div>
+        <div class="caption"><p>以 Snowy 的工作來看，小型兩到三分鐘影片，若已有訂閱與 Edge-TTS，本金幾乎是月費攤提。中型五分鐘報告，成本會轉向圖片重生、搜尋次數和字幕時間。大型十幾分鐘或基準研究，最貴的反而是上下文管理、QA、重跑穩定性，以及把結果記錄成可複用流程。</p></div>
+      </section>
+
+      <section id="slide-08" class="clip slide" data-start="150.2" data-duration="20.5" data-track-index="8">
+        <img class="bg" data-layout-allow-overflow="" src="assets/images/slide-08-decision-matrix.png" alt="">
+        <div class="shade"></div>
+        <div class="content wide">
+          <div class="eyebrow">隱性成本</div>
+          <h1>價格頁之外，才是真實風險</h1>
+          <div class="grid">
+            <div class="risk"><strong>限流與動態配額</strong><p>訂閱不等於無限；模型與工作負載會改變可用量。</p></div>
+            <div class="risk"><strong>Auth 與 API key</strong><p>provider token、OAuth、API key 混用時，容易錯走付費路徑。</p></div>
+            <div class="risk"><strong>媒體一致性</strong><p>圖片、旁白、字幕、時間軸每重跑一次都可能產生 QA 成本。</p></div>
+          </div>
+        </div>
+        <div class="caption"><p>隱性成本不能忽略。訂閱工具可能有動態限制；Copilot AI credit 會影響代理和 CLI 功能；Claude Code 若設定 API key，可能轉成 API 計費；圖片模型和 TTS 服務也會變。對長期專案來說，成本控制其實是風險控制。</p></div>
+      </section>
+
+      <section id="slide-09" class="clip slide" data-start="170.7" data-duration="30.5" data-track-index="9">
+        <img class="bg" data-layout-allow-overflow="" src="assets/images/slide-09-workflow-cost-map.png" alt="">
+        <div class="shade"></div>
+        <div class="content wide">
+          <div class="eyebrow">Snowy 採用策略</div>
+          <h1>三條 workflow 不互斥，應該分工</h1>
+          <div class="decision">
+            <div class="panel"><strong>Codex</strong><p>主線出片：研究、素材、TTS、字幕、HyperFrames 驗證。</p></div>
+            <div class="panel"><strong>Pi</strong><p>可重跑工具台：packages、providers、search、批次腳本、成本 ledger。</p></div>
+            <div class="panel"><strong>Claude Code</strong><p>深層審核：長上下文、架構、重構、複雜前端和腳本可靠性。</p></div>
+          </div>
+        </div>
+        <div class="source">建議：每個 project 保留 `cost-model.json`、`research.json`、`storyboard.json`、TTS 發音稿、render 指令與 retrospective。</div>
+        <div class="caption"><p>我的建議是三條 workflow 各司其職。Codex 作為第一條主線，負責高品質研究影片的端到端產出。Pi 作為可重跑的工具台，用 Copilot 或其他 provider 降低自動化成本。Claude Code 用在大型程式碼、長上下文和架構審核。每個專案都要記錄訂閱、API、圖片、TTS、渲染和人工 QA 的成本，這會成為 Snowy HyperFrames 的長期資產。</p></div>
+      </section>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      const slides = [
+        ["#slide-01", 0],
+        ["#slide-02", 18],
+        ["#slide-03", 38],
+        ["#slide-04", 59.8],
+        ["#slide-05", 79.9],
+        ["#slide-06", 103.4],
+        ["#slide-07", 125.2],
+        ["#slide-08", 150.2],
+        ["#slide-09", 170.7],
+      ];
+
+      const addIfFound = (selector, vars, position) => {
+        const targets = document.querySelectorAll(selector);
+        if (targets.length > 0) {
+          tl.from(targets, vars, position);
+        }
+      };
+
+      slides.forEach(([selector, start]) => {
+        addIfFound(`${selector} .bg`, { scale: 1.055, opacity: 0.86, duration: 1.2, ease: "power2.out" }, start);
+        addIfFound(`${selector} .eyebrow`, { opacity: 0, y: 18, duration: 0.5, ease: "power2.out" }, start + 0.18);
+        addIfFound(`${selector} h1`, { opacity: 0, y: 32, duration: 0.72, ease: "power2.out" }, start + 0.35);
+        addIfFound(`${selector} .lead, ${selector} .grid, ${selector} .stack, ${selector} .table, ${selector} .decision`, { opacity: 0, y: 26, duration: 0.74, ease: "power2.out" }, start + 0.68);
+        addIfFound(`${selector} .side-note, ${selector} .source`, { opacity: 0, y: 18, duration: 0.58, ease: "power2.out" }, start + 1.0);
+        addIfFound(`${selector} .caption`, { opacity: 0, y: 28, duration: 0.62, ease: "power2.out" }, start + 1.16);
+      });
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

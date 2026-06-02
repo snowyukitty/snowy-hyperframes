@@ -1,0 +1,52 @@
+{
+  "$schema": "../../../shared/schemas/project.schema.json",
+  "id": "ai-tool-cost-benchmark",
+  "title": "AI 工具做 HyperFrames 研究影片的成本比較",
+  "workflow": "codex",
+  "createdAt": "2026-06-01T21:00:00+09:00",
+  "updatedAt": "2026-06-01T22:02:00+09:00",
+  "status": "ready-to-render",
+  "format": "hyperframes-presentation",
+  "language": "zh-Hant",
+  "durationSeconds": 202,
+  "sourceConfidence": "mixed",
+  "tools": [
+    "codex",
+    "codex-image-generation",
+    "web-research",
+    "hyperframes@0.6.64",
+    "edge-tts@7.2.8",
+    "ffmpeg",
+    "ffprobe",
+    "powershell",
+    "tts-pronunciation-map"
+  ],
+  "auth": {
+    "required": [],
+    "optional": [
+      "openai-codex",
+      "github-copilot",
+      "anthropic-api",
+      "openai-api"
+    ],
+    "notes": "This codex workflow project does not require Pi auth and does not store credentials. API keys are only needed if reproducing through API-backed image, speech, or Claude/OpenAI usage."
+  },
+  "imageGeneration": {
+    "mode": "codex-built-in",
+    "provider": "Codex image generation tool",
+    "notes": "Project images are stored in assets/images/. Prompts are preserved in data/image-prompts.json."
+  },
+  "paths": {
+    "entry": "index.html",
+    "research": "data/research.json",
+    "storyboard": "data/storyboard.json",
+    "pronunciationMap": "data/pronunciation-map.json",
+    "references": "docs/references.md",
+    "renderOutput": "renders/ai-tool-cost-benchmark.mp4"
+  },
+  "checks": {
+    "lastCommand": "npm run check",
+    "lastResult": "0 lint errors, 0 lint warnings, 0 layout issues; Chrome AudioContext validation warning only.",
+    "rendered": false
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "ai-tool-cost-benchmark",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx --yes hyperframes@0.6.64 preview",
+    "check": "npx --yes hyperframes@0.6.64 lint && npx --yes hyperframes@0.6.64 validate && npx --yes hyperframes@0.6.64 inspect",
+    "tts:prepare": "powershell -ExecutionPolicy Bypass -File scripts/prepare-tts.ps1",
+    "tts": "npm run tts:prepare && powershell -ExecutionPolicy Bypass -File scripts/generate-tts.ps1",
+    "render": "npx --yes hyperframes@0.6.64 render . --output renders/ai-tool-cost-benchmark.mp4",
+    "publish": "npx --yes hyperframes@0.6.64 publish"
+  }
+}

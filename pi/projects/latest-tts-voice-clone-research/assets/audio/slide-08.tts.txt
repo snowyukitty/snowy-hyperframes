@@ -1,0 +1,1 @@
+T T S 方案的成本與品質需要權衡。商用方案如 Eleven Labs、Inworld 和 Open A I Realtime 提供最自然、情感豐富的聲音，支持多語言，但成本較高，最適合企業應用和商業影片。Azure Speech 和 Google Cloud T T S 提供中等品質、中等成本的方案，但 S S M L 精細控制更強，適合有定製化發音需求的場景。開源方案如 Kokoro、Fish Speech 1.5 和 F5-T T S 完全免費、本機運行、無延遲、保護隱私，而且 2026 年已經達到可以媲美商用早期版本的品質。對於 Snowy 的建議是，研究和教育場景使用開源方案，商業內容使用商用方案，快速原型使用 Edge-T T S 加 pronunciation map 的組合。

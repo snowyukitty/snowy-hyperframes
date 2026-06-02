@@ -1,0 +1,1 @@
+為了實現這些建議，Snowy 團隊需要一份清晰的決策清單。本周的行動包括評估 Edge-T T S 當前的三種聲音選項，錄製十到二十秒的技術詞混讀測試樣本，用 Eleven Labs、Azure 和 Inworld 進行試讀對比。本月的工作包括建立 pronunciation map 規則庫，涵蓋 A P I、G P T 等高頻技術詞，自動化 display 文本到 T T S 文本的生成流程，在一個完整影片上試驗 WhisperX 的效果。下月的重點是評估成本差異，若認可預算，測試 Inworld T T S 的集成，並記錄 T T S 品質改進的量化指標。長期行動包括與旁白演員討論聲音複製授權，研究本機部署 Kokoro 或 Fish Speech 的技術可行性。

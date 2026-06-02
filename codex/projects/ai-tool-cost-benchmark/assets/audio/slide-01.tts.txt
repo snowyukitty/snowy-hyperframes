@@ -1,0 +1,1 @@
+這份報告的結論很直接：做 Hyper Frames 研究影片，成本不是單一月費，而是一個工作流組合。Codex、P I 加 GitHub Copilot、Claude Code 的差別，主要在媒體完整度、自動化深度、使用限制和重跑成本。

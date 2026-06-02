@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Latest TTS & Voice Cloning Research</title>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<style>
+:root{--bg:#08111f;--panel:#101b2d;--text:#f3f7ff;--muted:#b7c3d8;--accent:#60a5fa;--line:rgba(255,255,255,.13)}
+*{box-sizing:border-box} html{scroll-behavior:smooth} #composition{position:relative;width:100vw;height:100vh;overflow:hidden} body{margin:0;overflow:hidden;font-family:sans-serif;background:radial-gradient(circle at top left,#1d4ed855,transparent 32%),var(--bg);color:var(--text)}
+header{position:sticky;top:0;z-index:5;display:flex;gap:18px;align-items:center;justify-content:space-between;padding:16px 4vw;background:rgba(8,17,31,.86);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+h1{font-size:clamp(20px,3vw,38px);margin:0} nav{display:flex;gap:7px;flex-wrap:wrap} nav a{color:var(--text);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:13px} nav a:hover{background:#2563eb}
+main{position:relative;width:100%;height:100%} .slide{position:absolute;inset:86px 4vw 34px 4vw;display:grid;grid-template-columns:minmax(280px,.72fr) minmax(420px,1.28fr);gap:26px;align-items:center;padding:28px;border:1px solid var(--line);border-radius:28px;background:linear-gradient(135deg,rgba(255,255,255,.075),rgba(255,255,255,.025));box-shadow:0 24px 90px rgba(0,0,0,.22);opacity:0;pointer-events:none}
+.kicker{color:var(--accent);letter-spacing:.14em;text-transform:uppercase;font-weight:800} h2{font-size:clamp(28px,4vw,54px);line-height:1.1;margin:.25em 0} p{color:var(--muted);font-size:clamp(17px,1.5vw,22px);line-height:1.65} audio{width:100%;margin-top:18px} .visual{position:relative} img{width:100%;max-height:68vh;object-fit:contain;border-radius:18px;background:#0f172a;box-shadow:0 18px 52px rgba(0,0,0,.25)} .placeholder{display:none;place-items:center;min-height:380px;border:2px dashed rgba(255,255,255,.25);border-radius:18px;color:var(--muted);text-align:center} .placeholder span{color:var(--text);font-weight:800}
+.narration-audio{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+@media(max-width:900px){header{position:relative;display:block} nav{margin-top:12px} .slide{grid-template-columns:1fr;min-height:auto}}
+</style></head><body>
+<div id="composition" data-composition-id="latest-tts-voice-clone-research" data-start="0" data-width="1920" data-height="1080">
+<header><h1>Latest TTS & AI Voice Cloning Research</h1><nav><a href="#slide-01">01</a><a href="#slide-02">02</a><a href="#slide-03">03</a><a href="#slide-04">04</a><a href="#slide-05">05</a><a href="#slide-06">06</a><a href="#slide-07">07</a><a href="#slide-08">08</a><a href="#slide-09">09</a><a href="#slide-10">10</a><a href="#slide-11">11</a></nav></header>
+<main>
+    <section class="slide clip" id="slide-01" data-start="0" data-duration="12.0" data-track-index="1">
+      <div class="copy">
+        <p class="kicker">Slide 01 · 12s</p>
+        <h2>2026 年最新 TTS 與 AI Voice Clone 技術研究</h2>
+        <p>我們如何讓 Snowy HyperFrames 的 AI 旁白更自然、更像真人？</p>
+        <audio class="narration-audio" id="audio-slide-01" preload="metadata" src="assets/audio/slide-01.mp3" data-start="0" data-duration="12.0"></audio>
+      </div>
+      <div class="visual">
+        <img src="assets/images/slide-01.png" alt="2026 年最新 TTS 與 AI Voice Clone 技術研究" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid'">
+        <div class="placeholder">Image placeholder<br><span>2026 年最新 TTS 與 AI Voice Clone 技術研究</span></div>
+      </div>
+    </section>
+    <section class="slide clip" id="slide-02" data-start="12.0" data-duration="29" data-track-index="2">
+      <div class="copy">
+        <p class="kicker">Slide 02 · 15s</p>
+        <h2>現狀：Snowy Narration 的挑戰</h2>
+        <p>目前 Snowy HyperFrames 使用 Edge-TTS
+• 免費、本機、無 API key
+• 支持台灣普通話多種聲音
+• 局限：自訂 SSML 已移除，無法精細韻律控制
+• 問題：英文技術詞、產品名在繁中混讀時不自然</p>
+        <audio class="narration-audio" id="audio-slide-02" preload="metadata" src="assets/audio/slide-02.mp3" data-start="12.0" data-duration="29"></audio>
+      </div>
+      <div class="visual">
+        <img src="assets/images/slide-02.png" alt="現狀：Snowy Narration 的挑戰" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid'">
+        <div class="placeholder">Image placeholder<br><span>現狀：Snowy Narration 的挑戰</span></div>
+      </div>
+    </section>
+    <section class="slide clip" id="slide-03" data-start="41.0" data-duration="46" data-track-index="3">
+      <div class="copy">
+        <p class="kicker">Slide 03 · 18s</p>
+        <h2>商用高端方案：品質優先</h2>
+        <p>2026 年商用 TTS 領導者
+
+ElevenLabs Multilingual v2 (70+ 語言)
+• 中文混英文最自然
+• 成本：$30-120 per 1M chars
+• 支持聲音複製、情感表達
+
+Inworld TTS ($5-10/1M)
+• 盲測勝 ElevenLabs 60%
+• 低延遲、免費聲音複製
+
+OpenAI Realtime-2（對話優先）
+• 實時翻譯、推理邊聽邊做
+• 高成本 ($32/1M input + $64/1M output)</p>
+        <audio class="narration-audio" id="audio-slide-03" preload="metadata" src="assets/audio/slide-03.mp3" data-start="41.0" data-duration="46"></audio>
+      </div>
+      <div class="visual">
+        <img src="assets/images/slide-03.png" alt="商用高端方案：品質優先" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid'">
+        <div class="placeholder">Image placeholder<br><span>商用高端方案：品質優先</span></div>
+      </div>
+    </section>
+    <section class="slide clip" id="slide-04" data-start="87.0" data-duration="46" data-track-index="4">
+      <div class="copy">
+        <p class="kicker">Slide 04 · 18s</p>
+        <h2>開源高效方案：零成本本機</h2>
+        <p>2026 年頂級開源 TTS
+
+Kokoro-82M（最輕量）
+• 只有 82M 參數，CPU 可運行
+• Apache 2.0，完全開源
+• 38+ 語言，自然發音
+
+Fish Speech 1.5（中英混讀冠軍）
+• ELO 1339，TTS Arena 頂級
+• 支持中文混英文
+• CC-BY-NC 許可（非商用須另議）
+
+F5-TTS（流匹配架構）
+• 零樣本聲音複製（5-15 秒）
+• MIT 推理代碼許可
+• RTX 4090 上 300-500ms 延遲
+
+CosyVoice 2.0 / Mel...</p>
+        <audio class="narration-audio" id="audio-slide-04" preload="metadata" src="assets/audio/slide-04.mp3" data-start="87.0" data-duration="46"></audio>
+      </div>
+      <div class="visual">
+        <img src="assets/images/slide-04.png" alt="開源高效方案：零成本本機" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid'">
+        <div class="placeholder">Image placeholder<br><span>開源高效方案：零成本本機</span></div>
+      </div>
+    </section>
+    <section class="slide clip" id="slide-05" data-start="133.0" data-duration="44" data-track-index="5">
+      <div class="copy">
+        <p class="kicker">Slide 05 · 15s</p>
+        <h2>聲音複製的法律邊界</h2>
+        <p>Voice Cloning 2026 合法框架
+
+✓ 合法（清晰授權）
+• 複製自己的聲音（任何用途）
+• 員工/承包商聲音（明確書面同意 + 許可）
+• 公眾人物（明確合約 + 補償框架）
+
+✗ 違法（無同意）
+• 複製他人聲音無同意
+• 用於詐騙、冒充
+• 隱含同意無法保護
+
+📋 最佳實踐
+• 明確書面同意（指明用途、期限、地域）
+• AI 生成標籤（EU/中國/多州要求）
+• 商用授權清楚（ElevenLabs / 平台檢查）
+• 可撤銷條款（尊重原聲者權利）</p>
+        <audio class="narration-audio" id="audio-slide-05" preload="metadata" src="assets/audio/slide-05.mp3" data-start="133.0" data-duration="44"></audio>
+      </div>
+      <div class="visual">
+        <img src="assets/images/slide-05.png" alt="聲音複製的法律邊界" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid'">
+        <div class="placeholder">Image placeholder<br><span>聲音複製的法律邊界</span></div>
+      </div>
+    </section>
+    <section class="slide clip" id="slide-06" data-start="177.0" data-duration="48" data-track-index="6">
+      <div class="copy">
+        <p class="kicker">Slide 06 · 20s</p>
+        <h2>Pronunciation Map 與韻律控制策略</h2>
+        <p>讓 TTS 朗讀更自然的技術手段
+
+1. Pronunciation Map（發音替換）
+   GPT → G P T
+   OpenAI → Open A I
+   ChatGPT → Chat G P T
+   API → A P I
+   Free/Plus/Pro → 免費版/Plus 版/Pro 版
+
+2. SSML 韻律標籤（Azure / 商用方案）
+   &lt;prosody rate=&quot;-10%&quot; pitch=&quot;+5%&quot;&gt;
+   &lt;break time=&quot;300ms&quot;/&gt;
+   &lt;phoneme...</p>
+        <audio class="narration-audio" id="audio-slide-06" preload="metadata" src="assets/audio/slide-06.mp3" data-start="177.0" data-duration="48"></audio>
+      </div>
+      <div class="visual">
+        <img src="assets/images/slide-06.png" alt="Pronunciation Map 與韻律控制策略" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid'">
+        <div class="placeholder">Image placeholder<br><span>Pronunciation Map 與韻律控制策略</span></div>
+      </div>
+    </section>
+    <section class="slide clip" id="slide-07" data-start="225.0" data-duration="48" data-track-index="7">
+      <div class="copy">
+        <p class="kicker">Slide 07 · 18s</p>
+        <h2>Snowy Narration Pipeline 短中長期建議</h2>
+        <p>如何升級 Snowy 旁白系統
+
+短期（現在 - 1 個月）
+✓ 保留 Edge-TTS + pronunciation map
+✓ 錄製 A/B 測試樣本
+✓ 評估 ElevenLabs Turbo、Azure Speech
+✓ 建立發音替換規則庫
+
+中期（1-3 個月）
+✓ 若預算允許，切換至 Inworld / ElevenLabs Turbo
+✓ 自動化 pronunciation map 應用
+✓ 整合 WhisperX 強制對齐字幕生成
+✓ 建立 TTS 品質 QA 流程
+
+長期（3-6 個月）
+...</p>
+        <audio class="narration-audio" id="audio-slide-07" preload="metadata" src="assets/audio/slide-07.mp3" data-start="225.0" data-duration="48"></audio>
+      </div>
+      <div class="visual">
+        <img src="assets/images/slide-07.png" alt="Snowy Narration Pipeline 短中長期建議" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid'">
+        <div class="placeholder">Image placeholder<br><span>Snowy Narration Pipeline 短中長期建議</span></div>
+      </div>
+    </section>
+    <section class="slide clip" id="slide-08" data-start="273.0" data-duration="55" data-track-index="8">
+      <div class="copy">
+        <p class="kicker">Slide 08 · 15s</p>
+        <h2>TTS 方案成本與品質的權衡</h2>
+        <p>成本 vs 品質矩陣
+
+高品質 - 高成本
+ElevenLabs / Inworld / OpenAI Realtime
+→ 最自然、情感豐富、語言多
+→ 企業應用、商業影片最佳
+
+中等品質 - 中等成本
+Azure Speech / Google Cloud TTS
+→ SSML 精細控制、可靠
+→ 定製化需求、可控發音
+
+高品質 - 零成本（本機）
+Kokoro / Fish Speech 1.5 / F5-TTS
+→ 免費、無延遲、隱私保護
+→ 開源社區、企業自建方案
+→ 自然度快速進步（2026 已媲...</p>
+        <audio class="narration-audio" id="audio-slide-08" preload="metadata" src="assets/audio/slide-08.mp3" data-start="273.0" data-duration="55"></audio>
+      </div>
+      <div class="visual">
+        <img src="assets/images/slide-08.png" alt="TTS 方案成本與品質的權衡" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid'">
+        <div class="placeholder">Image placeholder<br><span>TTS 方案成本與品質的權衡</span></div>
+      </div>
+    </section>
+    <section class="slide clip" id="slide-09" data-start="328.0" data-duration="47" data-track-index="9">
+      <div class="copy">
+        <p class="kicker">Slide 09 · 12s</p>
+        <h2>WhisperX 強制對齐的價值</h2>
+        <p>為影片旁白自動對齐字幕
+
+WhisperX 的三大能力
+✓ 詞級時間戳：±50ms（vs Whisper ±500ms）
+✓ 說話者分段：多說話者自動標籤
+✓ 批量推理：RTX 4090 達 70× 實時速度
+
+應用到 Snowy
+ 生成 SRT 字幕精準對齐到 TTS 音頻
+ 支持多說話者分段（訪談、對話內容）
+ 自動化字幕生成流程，減少手工編輯
+ 改進字幕與影片視覺內容的同步
+
+成本：零（開源 BSD-2-Clause 許可）
+資源：需要 HuggingFace 令牌接受 pyannote 條款
+
+下一步...</p>
+        <audio class="narration-audio" id="audio-slide-09" preload="metadata" src="assets/audio/slide-09.mp3" data-start="328.0" data-duration="47"></audio>
+      </div>
+      <div class="visual">
+        <img src="assets/images/slide-09.png" alt="WhisperX 強制對齐的價值" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid'">
+        <div class="placeholder">Image placeholder<br><span>WhisperX 強制對齐的價值</span></div>
+      </div>
+    </section>
+    <section class="slide clip" id="slide-10" data-start="375.0" data-duration="53" data-track-index="10">
+      <div class="copy">
+        <p class="kicker">Slide 10 · 15s</p>
+        <h2>Snowy 團隊的決策清單</h2>
+        <p>立即行動項目
+
+【本周】
+□ 評估 Edge-TTS 當前的 3 個聲音（HsiaoYu / HsiaoChen / YunJhe）
+□ 錄製 10-20 秒技術詞混讀的測試樣本
+□ 用 ElevenLabs / Azure / Inworld 試讀
+
+【本月】
+□ 建立 pronunciation map 規則庫（API / GPT / TTS 等高頻詞）
+□ 自動化 .display.txt → .tts.txt 生成
+□ 試驗 WhisperX 在一個完成影片上的效果
+
+【下月】
+□ 評估成本：0 (E...</p>
+        <audio class="narration-audio" id="audio-slide-10" preload="metadata" src="assets/audio/slide-10.mp3" data-start="375.0" data-duration="53"></audio>
+      </div>
+      <div class="visual">
+        <img src="assets/images/slide-10.png" alt="Snowy 團隊的決策清單" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid'">
+        <div class="placeholder">Image placeholder<br><span>Snowy 團隊的決策清單</span></div>
+      </div>
+    </section>
+    <section class="slide clip" id="slide-11" data-start="428.0" data-duration="58" data-track-index="11">
+      <div class="copy">
+        <p class="kicker">Slide 11 · 10s</p>
+        <h2>結論：從快速迭代到長期自動化</h2>
+        <p>三個核心洞察
+
+1️⃣ 最好的 TTS 取決於優先次序
+   時間優先 → Edge-TTS
+   品質優先 → ElevenLabs / Inworld
+   成本優先 → Kokoro / Fish Speech
+
+2️⃣ Pronunciation map + WhisperX 是低掛果實
+   立即提升旁白品質
+   零成本、開源、可自動化
+   建立基礎設施，為未來擴展做準備
+
+3️⃣ 聲音複製須先明確授權框架
+   法律風險明確可控
+   與旁白演員的合約須清楚
+   未來可持續發展
+
+下一步
+執...</p>
+        <audio class="narration-audio" id="audio-slide-11" preload="metadata" src="assets/audio/slide-11.mp3" data-start="428.0" data-duration="58"></audio>
+      </div>
+      <div class="visual">
+        <img src="assets/images/slide-11.png" alt="結論：從快速迭代到長期自動化" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid'">
+        <div class="placeholder">Image placeholder<br><span>結論：從快速迭代到長期自動化</span></div>
+      </div>
+    </section>
+</main><script>
+window.__timelines = window.__timelines || {};
+const tl = gsap.timeline({ paused: true });
+const slides = [
+        ["#slide-01", 0, 12.0], 
+        ["#slide-02", 12.0, 29], 
+        ["#slide-03", 41.0, 46], 
+        ["#slide-04", 87.0, 46], 
+        ["#slide-05", 133.0, 44], 
+        ["#slide-06", 177.0, 48], 
+        ["#slide-07", 225.0, 48], 
+        ["#slide-08", 273.0, 55], 
+        ["#slide-09", 328.0, 47], 
+        ["#slide-10", 375.0, 53], 
+        ["#slide-11", 428.0, 58], 
+];
+gsap.set('.slide', { autoAlpha: 0 });
+gsap.set('#slide-01', { autoAlpha: 1 });
+slides.forEach(([selector, start, duration], index) => {
+  tl.set('.slide', { autoAlpha: 0 }, start);
+  tl.set(selector, { autoAlpha: 1 }, start);
+  tl.fromTo(`${selector} .copy`, { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: 0.65, ease: 'power2.out' }, start + 0.15);
+  tl.fromTo(`${selector} img`, { opacity: 0, scale: 1.025 }, { opacity: 1, scale: 1, duration: 0.8, ease: 'power2.out' }, start + 0.25);
+  tl.to(selector, { autoAlpha: 1, duration: Math.max(0.1, duration - 0.5) }, start + 0.5);
+});
+tl.to({}, { duration: 486.0 }, 0);
+window.__timelines['latest-tts-voice-clone-research'] = tl;
+</script>
+</body></html>

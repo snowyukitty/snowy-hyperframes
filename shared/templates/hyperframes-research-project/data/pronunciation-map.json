@@ -1,0 +1,36 @@
+{
+  "$schema": "../../../schemas/pronunciation-map.schema.json",
+  "version": 1,
+  "strategy": "display-text-and-tts-text-separated",
+  "notes": "Keep visible captions natural for viewers. Use this map only to improve how Edge-TTS pronounces technical terms.",
+  "defaultVoice": "zh-TW-HsiaoChenNeural",
+  "candidateVoices": [
+    "zh-TW-HsiaoChenNeural",
+    "zh-TW-HsiaoYuNeural",
+    "zh-TW-YunJheNeural",
+    "zh-CN-XiaoxiaoNeural",
+    "en-US-EmmaMultilingualNeural"
+  ],
+  "entries": [
+    {
+      "match": "OpenAI",
+      "tts": "Open A I",
+      "reason": "Avoid unnatural single-word reading."
+    },
+    {
+      "match": "ChatGPT",
+      "tts": "Chat G P T",
+      "reason": "Spell the acronym while keeping the product name recognizable."
+    },
+    {
+      "match": "GPT",
+      "tts": "G P T",
+      "reason": "Acronyms are clearer when spoken letter by letter in Mandarin narration."
+    },
+    {
+      "match": "API",
+      "tts": "A P I",
+      "reason": "Acronyms are clearer when spoken letter by letter in Mandarin narration."
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+[
+  {
+    "slideId": "slide-01",
+    "title": "TTS Technology Landscape 2026",
+    "filename": "slide-01-tts-technology-landscape.png",
+    "prompt": "Create a modern, professional infographic showing the landscape of TTS technologies in 2026. Include icons/symbols for commercial TTS (clouds, premium), open-source models (code brackets, local machines), and AI voice synthesis (waveforms, neural networks). Use a color palette of blues, oranges, and silvers. Style: clean, minimalist, tech-forward. Center composition, high resolution suitable for presentation slide.",
+    "status": "pending"
+  },
+  {
+    "slideId": "slide-02",
+    "title": "Edge-TTS Limitations Analysis",
+    "filename": "slide-02-edgetts-limitations.png",
+    "prompt": "Create a clean, split-screen comparison showing Edge-TTS on the left with green checkmarks for strengths (free, local, no API key, multiple Taiwan voices) and red X marks for limitations (no custom SSML, limited prosody control, awkward English/Chinese mixing). Right side should show a waveform diagram representing natural vs. robotic speech patterns. Use professional tech design with clear iconography. Dark tech background, bright icons.",
+    "status": "pending"
+  },
+  {
+    "slideId": "slide-03",
+    "title": "Commercial TTS Comparison Matrix",
+    "filename": "slide-03-commercial-tts-comparison.png",
+    "prompt": "Create a professional comparison chart/matrix showing 3-4 commercial TTS solutions (ElevenLabs, Inworld, OpenAI, Azure Speech). Use columns for: cost per 1M chars, language support, voice cloning, prosody control, latency, and natural quality. Use color-coding for relative performance (green=best, yellow=good, orange=fair). Include small icons for each service. Professional enterprise-style design, clear readable typography.",
+    "status": "pending"
+  },
+  {
+    "slideId": "slide-04",
+    "title": "Open-Source TTS Ecosystem",
+    "filename": "slide-04-opensource-tts-ecosystem.png",
+    "prompt": "Create a visualization of the open-source TTS ecosystem showing 4-5 models as interconnected nodes. Each node should show: model name, parameter count (in a size-proportional manner), supported languages, and license type. Color-code by efficiency (small params=green, large=yellow), and add arrows showing performance metrics (ELO ratings). Style: network diagram, tech-forward, educational. Clean layout with clear node labels.",
+    "status": "pending"
+  },
+  {
+    "slideId": "slide-05",
+    "title": "Voice Cloning Legal Framework",
+    "filename": "slide-05-voice-clone-legal-framework.png",
+    "prompt": "Create a clear flowchart/decision tree showing the legal path for voice cloning. Start with 'Whose voice?' Then branch into: Your voice (green checkmark - legal), Employee/Contractor (orange - needs consent), Public figure (orange - needs contract), Others without consent (red X - illegal). Each branch should show key requirements (written consent, documentation, compensation). Use professional legal design with icons and color coding. Clear hierarchical layout.",
+    "status": "pending"
+  },
+  {
+    "slideId": "slide-06",
+    "title": "TTS Enhancement Techniques",
+    "filename": "slide-06-tts-enhancement-techniques.png",
+    "prompt": "Create a technical infographic showing 4 layers of TTS enhancement: 1) Pronunciation mapping (show before/after examples), 2) SSML prosody tags (XML-style markup examples), 3) WhisperX word-level alignment (waveform with time markers), 4) Text segmentation for natural reading (show good vs bad sentence breaks). Each layer should be visually distinct with color-coding. Use monospace fonts for code/markup examples. Vertical stacked layout.",
+    "status": "pending"
+  },
+  {
+    "slideId": "slide-07",
+    "title": "Snowy Narration Roadmap",
+    "filename": "slide-07-snowy-roadmap.png",
+    "prompt": "Create a professional roadmap/timeline visualization showing three phases: SHORT-TERM (0-1 month), MID-TERM (1-3 months), and LONG-TERM (3-6 months). Each phase should have 4-5 bullet points showing key actions/implementations. Use a horizontal timeline format with color-coding for each phase (green for current, blue for near, purple for future). Include icons for: settings (configuration), chart (testing), cloud (API), and lock (legal). Professional project management style.",
+    "status": "pending"
+  },
+  {
+    "slideId": "slide-08",
+    "title": "TTS Cost-Quality Tradeoff Matrix",
+    "filename": "slide-08-cost-quality-matrix.png",
+    "prompt": "Create a scatter plot/matrix visualization showing TTS solutions positioned by cost (x-axis: free to expensive) and quality (y-axis: low to high). Place solutions appropriately: ElevenLabs (high cost, high quality), Inworld (medium cost, high quality), Azure (medium cost, medium quality), Kokoro (free, medium quality), Fish Speech (free, high quality), Edge-TTS (free, low quality), OpenAI Realtime (very high cost, very high quality). Use different colors/icons for commercial vs open-source. Add annotations with use cases. Professional data visualization style.",
+    "status": "pending"
+  },
+  {
+    "slideId": "slide-09",
+    "title": "WhisperX Alignment Precision",
+    "filename": "slide-09-whisperx-alignment.png",
+    "prompt": "Create a waveform visualization showing WhisperX word-level alignment precision. Show audio waveform at the top, with color-coded words below showing their precise timestamps (±50ms accuracy in green vs ±500ms in standard Whisper shown in gray/faded). Include a sample video frame on the side to show how subtitle timing syncs with speaker mouth movement. Use technical but clear visualization style with frequency spectrum colors.",
+    "status": "pending"
+  },
+  {
+    "slideId": "slide-10",
+    "title": "Action Checklist and Timeline",
+    "filename": "slide-10-action-checklist.png",
+    "prompt": "Create a professional project management checklist/roadmap visualization showing 4 time horizons: THIS WEEK, THIS MONTH, NEXT MONTH, LONG-TERM. Each section should display 3-4 checkbox items with clear descriptions. Use checkboxes (some checked, some unchecked to show progress). Color-code by urgency/timeline (red for immediate, orange for this month, blue for next month, gray for long-term). Include small icons for: testing, automation, budget, and partnerships. Professional project tracker style.",
+    "status": "pending"
+  },
+  {
+    "slideId": "slide-11",
+    "title": "Conclusion and Next Steps",
+    "filename": "slide-11-conclusion-summary.png",
+    "prompt": "Create a clean, modern conclusion slide showing 3 key insights as large numbered circles (1, 2, 3) with accompanying text. Below that, show a forward-pointing arrow or pathway leading to 'Next Steps'. Use a minimalist design with a gradient background (light to medium blue/purple). Include icons for: clock (time), quality/diamond (quality), dollar sign (cost), checklist (action items). Professional presentation closing style.",
+    "status": "pending"
+  }
+]

@@ -1,0 +1,1 @@
+升級 Snowy 旁白系統分短中長三個階段。短期階段，保留 Edge-T T S 和 pronunciation map 的組合，錄製 A/B 測試樣本評估 Eleven Labs Turbo 和 Azure Speech 的品質優勢，建立發音替換規則庫。中期階段，如果預算允許，考慮切換至 Inworld 或 Eleven Labs Turbo，自動化 pronunciation map 的應用流程，整合 WhisperX 強制對齐技術自動生成字幕，建立 T T S 品質的品質保證流程。長期階段，錄製自己或合作旁白演員的聲音，建立有合法授權的 voice profile，整合本機運行的 Kokoro 或 Fish Speech 作為 fallback 方案，自動化 韻律 標記生成。

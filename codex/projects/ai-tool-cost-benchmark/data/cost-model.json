@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "currency": "USD",
+  "formula": "projectCost = allocatedSubscription + aiUsageOverage + searchApi + imageApi + ttsApi + renderCloud + humanQaTime",
+  "allocationRule": "allocatedSubscription = monthlyPlanPrice / usefulProjectsCompletedInMonth",
+  "scenarioAssumptions": [
+    {
+      "id": "small",
+      "name": "小型研究影片",
+      "durationMinutes": "2-3",
+      "slides": "8-10",
+      "sources": "12-25",
+      "images": "3-5",
+      "ttsClips": "8-10",
+      "renderPasses": "1-3"
+    },
+    {
+      "id": "medium",
+      "name": "中型研究報告",
+      "durationMinutes": "5",
+      "slides": "12-18",
+      "sources": "25-50",
+      "images": "8-12",
+      "ttsClips": "12-18",
+      "renderPasses": "3-6"
+    },
+    {
+      "id": "large",
+      "name": "大型長期基準報告",
+      "durationMinutes": "10+",
+      "slides": "25+",
+      "sources": "60+",
+      "images": "15-25",
+      "ttsClips": "25+",
+      "renderPasses": "6+"
+    }
+  ],
+  "workflowScorecard": [
+    {
+      "workflow": "codex",
+      "fixedCostAnchor": "$20 Plus / $100 Pro 5x / $200 Pro 20x from official Codex pricing",
+      "marginalCash": "Low when using built-in image generation, web research, Edge-TTS, and local render",
+      "mediaCompleteness": "High",
+      "automationDepth": "Medium-high",
+      "risk": "Usage limits and model availability are plan-dependent"
+    },
+    {
+      "workflow": "pi-github-copilot",
+      "fixedCostAnchor": "$0 Free/Student eligible, $10 Pro, $39 Pro+, $100 Max from GitHub Copilot pricing",
+      "marginalCash": "Low for completions on paid plans; chat, CLI, agents, Spaces, Spark, and third-party coding agents consume AI credits. Media/search/image still separate",
+      "mediaCompleteness": "Medium-low without extra auth",
+      "automationDepth": "High",
+      "risk": "Provider auth, credit accounting, and missing image generation path"
+    },
+    {
+      "workflow": "claude-code",
+      "fixedCostAnchor": "$20 Pro / $100 Max 5x / $200 Max 20x from Anthropic support docs",
+      "marginalCash": "Low under subscription until limits; can spill into API credits",
+      "mediaCompleteness": "Medium-low without separate image/TTS/search tools",
+      "automationDepth": "High for code and long-context editing",
+      "risk": "Shared subscription limits and accidental API billing if API key is set"
+    }
+  ]
+}

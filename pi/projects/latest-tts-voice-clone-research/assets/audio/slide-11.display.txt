@@ -1,0 +1,21 @@
+三個核心洞察
+
+1️⃣ 最好的 TTS 取決於優先次序
+   時間優先 → Edge-TTS
+   品質優先 → ElevenLabs / Inworld
+   成本優先 → Kokoro / Fish Speech
+
+2️⃣ Pronunciation map + WhisperX 是低掛果實
+   立即提升旁白品質
+   零成本、開源、可自動化
+   建立基礎設施，為未來擴展做準備
+
+3️⃣ 聲音複製須先明確授權框架
+   法律風險明確可控
+   與旁白演員的合約須清楚
+   未來可持續發展
+
+下一步
+執行這份決策清單，開始數據蒐集
+建立 pronunciation map 與 WhisperX 自動化流程
+為 Snowy 的 AI 旁白建立更自然、更可維持的技術棧

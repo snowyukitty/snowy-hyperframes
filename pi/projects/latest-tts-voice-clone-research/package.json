@@ -1,0 +1,15 @@
+{
+  "name": "latest-tts-voice-clone-research",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "check": "node scripts/check-project.js && node scripts/audio-audit.js",
+    "dev": "hyperframes preview . --port 3002",
+    "render": "hyperframes render . --output renders/latest-tts-voice-clone-research-nocut.mp4",
+    "audio:audit": "node scripts/audio-audit.js",
+    "preview": "hyperframes preview . --port 3002",
+    "preview:no-open": "hyperframes preview . --port 3002 --no-open",
+    "serve:static": "node scripts/dev-server.js"
+  },
+  "devDependencies": {}
+}

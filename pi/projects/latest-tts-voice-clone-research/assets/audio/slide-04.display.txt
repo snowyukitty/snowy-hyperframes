@@ -1,0 +1,19 @@
+2026 年頂級開源 TTS
+
+Kokoro-82M（最輕量）
+• 只有 82M 參數，CPU 可運行
+• Apache 2.0，完全開源
+• 38+ 語言，自然發音
+
+Fish Speech 1.5（中英混讀冠軍）
+• ELO 1339，TTS Arena 頂級
+• 支持中文混英文
+• CC-BY-NC 許可（非商用須另議）
+
+F5-TTS（流匹配架構）
+• 零樣本聲音複製（5-15 秒）
+• MIT 推理代碼許可
+• RTX 4090 上 300-500ms 延遲
+
+CosyVoice 2.0 / MeloTTS
+• 多語言，CPU 實時推理

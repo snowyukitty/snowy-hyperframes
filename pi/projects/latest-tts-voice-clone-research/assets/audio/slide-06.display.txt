@@ -1,0 +1,22 @@
+讓 TTS 朗讀更自然的技術手段
+
+1. Pronunciation Map（發音替換）
+   GPT → G P T
+   OpenAI → Open A I
+   ChatGPT → Chat G P T
+   API → A P I
+   Free/Plus/Pro → 免費版/Plus 版/Pro 版
+
+2. SSML 韻律標籤（Azure / 商用方案）
+   <prosody rate="-10%" pitch="+5%">
+   <break time="300ms"/>
+   <phoneme alphabet="ipa" ph="...">詞彙</phoneme>
+
+3. 強制對齐與字幕同步（WhisperX）
+   詞級時間戳 ±50ms 精度
+   自動化 SRT 字幕生成
+   多說話者分段
+
+4. 旁白文本切句策略
+   避免超長句，適合朗讀
+   保留自然停頓和呼吸

@@ -1,0 +1,1 @@
+我的建議是三條 工作流 各司其職。Codex 作為第一條主線，負責高品質研究影片的端到端產出。P I 作為可重跑的工具台，用 Copilot 或其他 provider 降低自動化成本。Claude Code 用在大型程式碼、長上下文和架構審核。每個專案都要記錄訂閱、A P I、圖片、T T S、渲染和人工 QA 的成本，這會成為 Snowy Hyper Frames 的長期資產。

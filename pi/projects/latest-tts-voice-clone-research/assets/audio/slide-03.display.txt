@@ -1,0 +1,14 @@
+2026 年商用 TTS 領導者
+
+ElevenLabs Multilingual v2 (70+ 語言)
+• 中文混英文最自然
+• 成本：$30-120 per 1M chars
+• 支持聲音複製、情感表達
+
+Inworld TTS ($5-10/1M)
+• 盲測勝 ElevenLabs 60%
+• 低延遲、免費聲音複製
+
+OpenAI Realtime-2（對話優先）
+• 實時翻譯、推理邊聽邊做
+• 高成本 ($32/1M input + $64/1M output)

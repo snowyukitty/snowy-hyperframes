@@ -1,0 +1,59 @@
+# Repository publication guard
+#
+# This repository intentionally publishes the current tested demo projects.
+# Future production/client projects are ignored by default. To publish a new
+# demo, explicitly allowlist that project folder here after review.
+codex/projects/*
+!codex/projects/ai-tool-cost-benchmark/
+!codex/projects/ai-tool-cost-benchmark/**
+!codex/projects/ai-2030-three-futures/
+!codex/projects/ai-2030-three-futures/**
+
+codex-pi/projects/*
+!codex-pi/projects/gpt-image-2-quota-research/
+!codex-pi/projects/gpt-image-2-quota-research/**
+
+pi/projects/*
+!pi/projects/latest-tts-voice-clone-research/
+!pi/projects/latest-tts-voice-clone-research/**
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local auth / secrets
+.env
+.env.*
+!.env.example
+**/auth.json
+**/*token*
+**/*secret*
+
+# Pi local cache and generated image cache
+.pi/
+.pi/tmp/
+.pi/cache/
+
+# HyperFrames transient render/cache outputs
+**/renders/work-*/
+**/renders/tmp-*/
+**/capture/
+**/.hyperframes-cache/
+**/.waveform-cache/
+**/.thumbnails/
+
+# Keep final renders intentionally if committed by project decision.
+# To exclude all rendered MP4s, uncomment:
+# **/renders/*.mp4

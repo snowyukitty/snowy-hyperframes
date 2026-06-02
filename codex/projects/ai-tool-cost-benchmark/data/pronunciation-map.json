@@ -1,0 +1,32 @@
+{
+  "$schema": "../../../../shared/schemas/pronunciation-map.schema.json",
+  "version": 1,
+  "strategy": "display-text-and-tts-text-separated",
+  "notes": "Visible subtitles keep official English product names. Edge-TTS receives more pronounceable text.",
+  "defaultVoice": "zh-TW-HsiaoChenNeural",
+  "candidateVoices": [
+    "zh-TW-HsiaoChenNeural",
+    "zh-TW-HsiaoYuNeural",
+    "zh-TW-YunJheNeural",
+    "zh-CN-XiaoxiaoNeural",
+    "en-US-EmmaMultilingualNeural"
+  ],
+  "entries": [
+    { "match": "Codex", "tts": "Codex", "reason": "Keep product name in English." },
+    { "match": "Pi", "tts": "P I", "reason": "Avoid reading Pi as mathematical pi in Mandarin context." },
+    { "match": "GitHub Copilot", "tts": "GitHub Copilot", "reason": "Keep product name recognizable." },
+    { "match": "Claude Code", "tts": "Claude Code", "reason": "Keep product name recognizable." },
+    { "match": "HyperFrames", "tts": "Hyper Frames", "reason": "Separated pronunciation is clearer." },
+    { "match": "Edge-TTS", "tts": "Edge T T S", "reason": "Spell TTS acronym." },
+    { "match": "GPT-Image-2", "tts": "G P T Image 二", "reason": "Improve mixed acronym/model reading." },
+    { "match": "API", "tts": "A P I", "reason": "Spell acronym." },
+    { "match": "TTS", "tts": "T T S", "reason": "Spell acronym." },
+    { "match": "SRT", "tts": "S R T", "reason": "Spell acronym." },
+    { "match": "CLI", "tts": "C L I", "reason": "Spell acronym." },
+    { "match": "Pro+", "tts": "Pro Plus", "reason": "Avoid plus sign being skipped." },
+    { "match": "Max 5x", "tts": "Max 五倍", "reason": "Natural Mandarin reading." },
+    { "match": "Max 20x", "tts": "Max 二十倍", "reason": "Natural Mandarin reading." },
+    { "match": "workflow", "tts": "工作流", "reason": "Natural Mandarin narration." },
+    { "match": "research-to-video", "tts": "研究到影片", "reason": "Natural Mandarin narration." }
+  ]
+}

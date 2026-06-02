@@ -1,0 +1,96 @@
+{
+  "$schema": "../../../../shared/schemas/pronunciation-map.schema.json",
+  "version": 1,
+  "strategy": "display-text-and-tts-text-separated",
+  "notes": "Visible subtitles keep the official/product wording. Edge-TTS receives a pronunciation-oriented text file generated from this map.",
+  "defaultVoice": "zh-TW-HsiaoChenNeural",
+  "candidateVoices": [
+    "zh-TW-HsiaoChenNeural",
+    "zh-TW-HsiaoYuNeural",
+    "zh-TW-YunJheNeural",
+    "zh-CN-XiaoxiaoNeural",
+    "en-US-EmmaMultilingualNeural"
+  ],
+  "entries": [
+    {
+      "match": "GPT-Image-2",
+      "tts": "G P T Image 二",
+      "reason": "Avoid a stiff mixed acronym/model-number reading."
+    },
+    {
+      "match": "gpt-image-2",
+      "tts": "G P T Image 二",
+      "reason": "Normalize lowercase API model spelling for narration."
+    },
+    {
+      "match": "GPT Image 2",
+      "tts": "G P T Image 二",
+      "reason": "Keep the model recognizable while improving Mandarin flow."
+    },
+    {
+      "match": "ChatGPT Images 2.0",
+      "tts": "Chat G P T 圖片二點零",
+      "reason": "Keep the product recognizable while avoiding a long English phrase in Mandarin narration."
+    },
+    {
+      "match": "Images with thinking",
+      "tts": "思考型圖片功能",
+      "reason": "Use a listener-friendly Chinese explanation while keeping the official English term on screen."
+    },
+    {
+      "match": "ChatGPT",
+      "tts": "Chat G P T",
+      "reason": "Spell the acronym while keeping the product name recognizable."
+    },
+    {
+      "match": "OpenAI",
+      "tts": "Open A I",
+      "reason": "Avoid unnatural single-word reading."
+    },
+    {
+      "match": "API",
+      "tts": "A P I",
+      "reason": "Acronyms are clearer when spoken letter by letter in Mandarin narration."
+    },
+    {
+      "match": "Free tier",
+      "tts": "免費層級",
+      "reason": "Keep the API tier concept without making Edge-TTS read tier awkwardly."
+    },
+    {
+      "match": "Free",
+      "tts": "免費版",
+      "reason": "Plan names sound more natural with a Chinese classifier."
+    },
+    {
+      "match": "Plus",
+      "tts": "Plus 版",
+      "reason": "Plan names sound more natural with a classifier."
+    },
+    {
+      "match": "Pro",
+      "tts": "Pro 版",
+      "reason": "Plan names sound more natural with a classifier."
+    },
+    {
+      "match": "Business",
+      "tts": "Business 版",
+      "reason": "Plan names sound more natural with a classifier."
+    },
+    {
+      "match": "Reddit",
+      "tts": "Reddit 社群",
+      "reason": "Make source type clear when spoken."
+    },
+    {
+      "match": "HyperFrames",
+      "tts": "Hyper Frames",
+      "reason": "The separated form is usually clearer in TTS."
+    },
+    {
+      "match": "Edge-TTS",
+      "tts": "Edge T T S",
+      "reason": "Acronyms are clearer when spoken letter by letter in Mandarin narration."
+    }
+  ]
+}

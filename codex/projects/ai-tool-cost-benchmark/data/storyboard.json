@@ -1,0 +1,89 @@
+{
+  "title": "AI 工具做 HyperFrames 研究影片的成本比較",
+  "targetDurationSeconds": 202,
+  "language": "zh-Hant",
+  "voice": {
+    "tool": "edge-tts",
+    "voice": "zh-TW-HsiaoChenNeural",
+    "rate": "+6%",
+    "pitch": "-2Hz",
+    "volume": "+0%",
+    "pronunciationMap": "data/pronunciation-map.json",
+    "displayTextPattern": "assets/audio/slide-XX.display.txt",
+    "ttsTextPattern": "assets/audio/slide-XX.tts.txt"
+  },
+  "slides": [
+    {
+      "id": "slide-01",
+      "title": "成本不是單一月費",
+      "durationTarget": 18,
+      "image": "assets/images/slide-01-workflow-cost-map.png",
+      "subtitle": "比較 Codex、Pi + GitHub Copilot、Claude Code 時，要把訂閱、API、媒體、重跑與維護分開算。",
+      "narration": "這份報告的結論很直接：做 HyperFrames 研究影片，成本不是單一月費，而是一個工作流組合。Codex、Pi 加 GitHub Copilot、Claude Code 的差別，主要在媒體完整度、自動化深度、使用限制和重跑成本。"
+    },
+    {
+      "id": "slide-02",
+      "title": "七層成本模型",
+      "durationTarget": 20,
+      "image": "assets/images/slide-02-cost-stack.png",
+      "subtitle": "研究、推理與編碼、圖片、配音、字幕、渲染、維護，都是不同成本層。",
+      "narration": "我把成本拆成七層：研究搜尋，推理與編碼，圖片生成，配音，字幕，渲染與檢查，以及日後維護。月費只能覆蓋其中一部分；真正決定長期成本的，是哪一層可以穩定重跑，哪一層需要額外 API 或人工補洞。"
+    },
+    {
+      "id": "slide-03",
+      "title": "官方價格錨點",
+      "durationTarget": 21.8,
+      "image": "assets/images/slide-03-cost-stack.png",
+      "subtitle": "Codex、Copilot、Claude Code 都有訂閱入口；API 與 credit 仍要另算。",
+      "narration": "官方價格提供了基準。Codex 有 Free、Go、Plus 和 Pro 層級；GitHub Copilot 從 Free、Pro 到 Max 和組織方案；Claude Code 則隨 Claude Pro 和 Max 提供。這些是固定成本錨點，但圖片 API、web search、Claude API credit 和額外媒體服務，仍然要分開估算。"
+    },
+    {
+      "id": "slide-04",
+      "title": "Codex workflow",
+      "durationTarget": 20.1,
+      "image": "assets/images/slide-04-workflow-cost-map.png",
+      "subtitle": "Codex 對 Snowy 的優勢是把研究、檔案編輯、生圖、TTS、HyperFrames 檢查串成同一個操作回路。",
+      "narration": "Codex workflow 最適合我們目前這類研究影片。它能在同一輪裡查資料、建立檔案、生成圖片、呼叫 Edge-TTS、跑 HyperFrames 檢查。它的現金邊際成本低，但會受到方案用量、內建生圖可用性與工作階段長度影響。"
+    },
+    {
+      "id": "slide-05",
+      "title": "Pi + GitHub Copilot workflow",
+      "durationTarget": 23.5,
+      "image": "assets/images/slide-05-workflow-cost-map.png",
+      "subtitle": "Pi 更像可重用 CLI 工作台；Copilot 成本低，但圖片、搜尋、TTS 仍需外掛或額外授權。",
+      "narration": "Pi 加 GitHub Copilot 的優勢是可重用、可封裝、可接多種 provider。若你有學生或 Copilot 方案，固定成本可能很低。但 Copilot 本身不等於圖片生成、搜尋 API 或 TTS；要做完整影片，還是要把 Tavily、Brave、Edge-TTS、OpenAI Codex 生圖或其他工具接好。"
+    },
+    {
+      "id": "slide-06",
+      "title": "Claude Code workflow",
+      "durationTarget": 21.8,
+      "image": "assets/images/slide-06-decision-matrix.png",
+      "subtitle": "Claude Code 強在長上下文、程式碼理解與重構；媒體生產線通常要另接服務。",
+      "narration": "Claude Code 的長處是長上下文、程式碼理解、重構和大型專案推理。對 HyperFrames 這種前端加資料加自動化的專案，它可以很強；但它不是完整媒體工廠。圖片、搜尋、TTS、字幕校準和渲染，通常還需要外部工具或 API credit。"
+    },
+    {
+      "id": "slide-07",
+      "title": "三種專案規模",
+      "durationTarget": 25,
+      "image": "assets/images/slide-07-cost-stack.png",
+      "subtitle": "小型專案看月費攤提；中型專案看媒體重跑；大型專案看上下文、QA 與可重現性。",
+      "narration": "以 Snowy 的工作來看，小型兩到三分鐘影片，若已有訂閱與 Edge-TTS，本金幾乎是月費攤提。中型五分鐘報告，成本會轉向圖片重生、搜尋次數和字幕時間。大型十幾分鐘或基準研究，最貴的反而是上下文管理、QA、重跑穩定性，以及把結果記錄成可複用流程。"
+    },
+    {
+      "id": "slide-08",
+      "title": "隱性成本與風險",
+      "durationTarget": 20.5,
+      "image": "assets/images/slide-08-decision-matrix.png",
+      "subtitle": "不要只看價格頁：限流、credit、auth、API key、模型變動與媒體一致性都會影響真實成本。",
+      "narration": "隱性成本不能忽略。訂閱工具可能有動態限制；Copilot AI credit 會影響代理和 CLI 功能；Claude Code 若設定 API key，可能轉成 API 計費；圖片模型和 TTS 服務也會變。對長期專案來說，成本控制其實是風險控制。"
+    },
+    {
+      "id": "slide-09",
+      "title": "Snowy 採用策略",
+      "durationTarget": 30.5,
+      "image": "assets/images/slide-09-workflow-cost-map.png",
+      "subtitle": "Codex 做主線出片；Pi 做可重跑工具台；Claude Code 做深層程式碼與長上下文審核。",
+      "narration": "我的建議是三條 workflow 各司其職。Codex 作為第一條主線，負責高品質研究影片的端到端產出。Pi 作為可重跑的工具台，用 Copilot 或其他 provider 降低自動化成本。Claude Code 用在大型程式碼、長上下文和架構審核。每個專案都要記錄訂閱、API、圖片、TTS、渲染和人工 QA 的成本，這會成為 Snowy HyperFrames 的長期資產。"
+    }
+  ]
+}

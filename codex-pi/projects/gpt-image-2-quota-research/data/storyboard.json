@@ -1,0 +1,73 @@
+{
+  "title": "GPT-Image-2 每日生成量：官方、社群與保守推估",
+  "targetDurationSeconds": 122,
+  "language": "zh-Hant",
+  "voice": {
+    "tool": "edge-tts",
+    "voice": "zh-TW-HsiaoChenNeural",
+    "rate": "+8%",
+    "pitch": "-2Hz",
+    "volume": "+0%",
+    "pronunciationMap": "data/pronunciation-map.json",
+    "ttsTextPattern": "assets/audio/slide-XX.tts.txt",
+    "displayTextPattern": "assets/audio/slide-XX.display.txt"
+  },
+  "slides": [
+    {
+      "id": "slide-01",
+      "title": "先說結論",
+      "durationTarget": 16.2,
+      "image": "assets/images/quota-dashboard.png",
+      "subtitle": "官方沒有公開固定每日張數；所有數字都要分成官方、社群與估算。",
+      "narration": "這份調研先說結論：OpenAI 官方沒有公開 Free、Plus、Pro 每日可生成幾張 GPT-Image-2 圖片的固定數字。能確認的是，各方案權限不同，且都會受到動態限流與濫用防護影響。"
+    },
+    {
+      "id": "slide-02",
+      "title": "官方已公開資訊",
+      "durationTarget": 19.2,
+      "image": "assets/images/evidence-layers.png",
+      "subtitle": "Images 2.0 開放所有方案；Free 有限且較慢，Plus 更準確，Pro 更快且受防護限制。",
+      "narration": "官方資料顯示，ChatGPT Images 2.0 已開放給所有方案；Plus、Pro 和 Business 才有 Images with thinking。價格頁只說 Free 是有限且較慢，Plus 有更準確的圖片建立，Pro 則是更快且近似無限，但仍受防護限制。"
+    },
+    {
+      "id": "slide-03",
+      "title": "API 不是訂閱配額",
+      "durationTarget": 16.8,
+      "image": "assets/images/evidence-layers.png",
+      "subtitle": "API 文件有 gpt-image-2 的每分鐘限制；但這不等於 ChatGPT 每日張數。",
+      "narration": "API 文件提供另一個參考：GPT Image 2 是高品質生成與編輯模型，但 API 的 Free tier 不支援 gpt-image-2。付費 API 額度看的是每分鐘圖片請求，不等於 ChatGPT 訂閱每天可用量。"
+    },
+    {
+      "id": "slide-04",
+      "title": "社群回報：只當線索",
+      "durationTarget": 16.2,
+      "image": "assets/images/evidence-layers.png",
+      "subtitle": "社群數字分散，包含 3-10、60-70、200/day 等說法；都不是官方保證。",
+      "narration": "社群回報很分散。有人回報 Free 大約三到十張，有 Plus 使用者曾提到每天六十到七十張，也有人遇到隱藏或誤判限制。因此社群數字只能當壓力測試線索，不能當保證。"
+    },
+    {
+      "id": "slide-05",
+      "title": "推估方法",
+      "durationTarget": 17,
+      "image": "assets/images/quota-dashboard.png",
+      "subtitle": "估算時優先保守，避開連續、大量、程式化或轉售式使用。",
+      "narration": "合理推估要保守處理。Free 適合偶爾測試；Plus 適合每日少量到中量創作；Pro 才適合密集素材工作。但大量連續、程式化、共用帳號或轉售式使用，最容易觸發限制。"
+    },
+    {
+      "id": "slide-06",
+      "title": "安全建議區間",
+      "durationTarget": 18.3,
+      "image": "assets/images/safe-range-gauges.png",
+      "subtitle": "Free：1-3/day；Plus：10-30/day；Pro：50-150/day。以上皆為保守建議。",
+      "narration": "本專案採用安全建議，而不是宣稱最大值。Free 建議每天一到三張；Plus 建議十到三十張；Pro 建議五十到一百五十張。超過這些範圍仍可能可行，但應分批、人工節奏、並保留失敗重試空間。"
+    },
+    {
+      "id": "slide-07",
+      "title": "結論",
+      "durationTarget": 18,
+      "image": "assets/images/safe-range-gauges.png",
+      "subtitle": "把圖片生成當有限資源排程：先草稿，後定稿；先少量，後擴量。",
+      "narration": "最後結論：官方沒有固定每日張數，計畫差異是能力與額度層級，不是公開配額表。做正式專案時，請把圖片生成當成有限資源來排程，先低品質草稿，再少量高品質定稿，才是比較穩定的用法。"
+    }
+  ]
+}

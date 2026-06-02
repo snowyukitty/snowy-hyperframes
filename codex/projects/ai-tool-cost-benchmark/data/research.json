@@ -1,0 +1,105 @@
+{
+  "$schema": "../../../../shared/schemas/research.schema.json",
+  "title": "Codex / Pi + GitHub Copilot / Claude Code 做 HyperFrames 研究影片的成本模型",
+  "lastUpdated": "2026-06-01",
+  "scope": {
+    "workflow": "research -> storyboard -> images -> TTS -> subtitles -> HyperFrames preview/render",
+    "toolsCompared": [
+      "Codex workflow",
+      "Pi with GitHub Copilot provider",
+      "Claude Code"
+    ],
+    "costCategories": [
+      "fixed subscription",
+      "usage credits or API tokens",
+      "search and source gathering",
+      "image generation",
+      "TTS and subtitles",
+      "rendering and QA",
+      "maintenance and reproducibility"
+    ]
+  },
+  "official": [
+    {
+      "topic": "OpenAI Codex pricing",
+      "finding": "OpenAI's Codex pricing page lists Codex Free at $0, Go at $8/month, Plus at $20/month, Pro 5x at $100/month, and Pro 20x at $200/month. It also distinguishes local usage limits and included cloud task environments.",
+      "source": "https://developers.openai.com/codex/pricing",
+      "confidence": "official"
+    },
+    {
+      "topic": "OpenAI API pricing for media/research add-ons",
+      "finding": "OpenAI API pricing lists GPT-Image-2 image tokens at $8/M input tokens and $30/M output tokens, text input at $5/M tokens, and built-in web search at $10 per 1k calls. ChatGPT subscriptions do not cover API usage.",
+      "source": "https://openai.com/api/pricing/",
+      "confidence": "official"
+    },
+    {
+      "topic": "GitHub Copilot plan prices",
+      "finding": "GitHub Copilot pricing lists Free at $0, Pro at $10/month, Pro+ at $39/month, Max at $100/month, Business at $19/user/month, and Enterprise at $39/user/month. Verified students, teachers, and maintainers can get Copilot Pro at no cost.",
+      "source": "https://github.com/features/copilot/plans",
+      "confidence": "official"
+    },
+    {
+      "topic": "GitHub Copilot AI credits",
+      "finding": "GitHub Docs explains that Copilot usage is measured in AI credits, where 1 AI credit equals $0.01 USD. Paid plans include base credits and a flex allotment; Pro has 1,500 total monthly AI credits, Pro+ has 7,000, and Max has 20,000. Chat, Copilot CLI, cloud agent, Spaces, Spark, and third-party coding agents consume AI credits, while code completions and next edit suggestions remain unlimited for paid plans.",
+      "source": "https://docs.github.com/en/copilot/concepts/billing/usage-based-billing-for-individuals",
+      "confidence": "official"
+    },
+    {
+      "topic": "Pi provider/auth model",
+      "finding": "Pi documentation describes subscription providers via /login, including ChatGPT Plus/Pro for Codex, Claude Pro/Max, and GitHub Copilot. OAuth tokens are stored in ~/.pi/agent/auth.json and auto-refresh when expired; Pi also supports API-key providers via env vars or auth file.",
+      "source": "https://pi.dev/docs/latest/providers",
+      "confidence": "official"
+    },
+    {
+      "topic": "Claude plan prices",
+      "finding": "Anthropic support describes Claude Pro at $20/month, Claude Max 5x at $100/month, and Claude Max 20x at $200/month. These plans include access to Claude Code terminal.",
+      "source": "https://support.claude.com/en/articles/11049762-choose-a-claude-plan",
+      "confidence": "official"
+    },
+    {
+      "topic": "Claude Code billing",
+      "finding": "Claude Code support says Pro/Max subscribers can use Claude Code terminal and that usage is shared across Claude desktop, web, mobile, and Claude Code. Users can opt into API-credit usage after subscription limits, and setting an API key environment variable can cause API billing.",
+      "source": "https://support.claude.com/en/articles/11145838-using-claude-code-with-your-pro-or-max-plan",
+      "confidence": "official"
+    },
+    {
+      "topic": "Anthropic API pricing",
+      "finding": "Anthropic API pricing lists Claude Sonnet 4.6 at $3/M input tokens and $15/M output tokens, Claude Opus 4.7 at $5/M input and $25/M output, Claude Haiku 4.5 at $1/M input and $5/M output, web search at $10 per 1k searches, and code execution after free-hours at $0.05/hour.",
+      "source": "https://docs.claude.com/en/docs/about-claude/pricing",
+      "confidence": "official"
+    }
+  ],
+  "communityOrResearch": [
+    {
+      "topic": "Agentic coding adoption",
+      "finding": "A 2026 arXiv study found adoption ratios of 22.20% for Claude Code, 27.47% for Cursor, and 28.66% for Copilot coding agent in a large open-source sample. This is adoption evidence, not a cost guarantee.",
+      "source": "https://arxiv.org/abs/2601.18341",
+      "confidence": "research-preprint"
+    }
+  ],
+  "estimates": [
+    {
+      "topic": "Small HyperFrames research video",
+      "assumption": "2-3 minutes, 8-10 slides, 12-25 sources, 3-5 AI images, 8-10 TTS clips, 1-3 preview passes.",
+      "estimate": "Subscription-backed workflows can have near-zero marginal cash cost if image generation, search, Edge-TTS, and local rendering are inside the existing tool stack. Allocated subscription cost is monthly price divided by useful completed projects.",
+      "confidence": "estimate"
+    },
+    {
+      "topic": "Medium HyperFrames research video",
+      "assumption": "5 minutes, 12-18 slides, 25-50 sources, 8-12 images, multiple TTS and render passes.",
+      "estimate": "The main cost driver becomes agent usage limits and media regeneration, not HyperFrames itself. API-backed image and search calls should be measured per run.",
+      "confidence": "estimate"
+    },
+    {
+      "topic": "Large or reusable benchmark video",
+      "assumption": "10+ minutes, 25+ slides, 60+ sources, 15-25 images, multiple QA passes and reruns.",
+      "estimate": "Claude Code or higher Codex tiers can be justified for long-context/code-heavy iteration, but image/TTS/search costs remain separate unless included in the chosen provider.",
+      "confidence": "estimate"
+    }
+  ],
+  "strategicConclusion": {
+    "codex": "Best default for Snowy when the project needs research synthesis, filesystem edits, built-in image generation, Edge-TTS, and HyperFrames verification in one operator loop.",
+    "piCopilot": "Best as a reusable CLI/provider router and automation harness, especially when GitHub Copilot is already paid or free through student/maintainer benefits. Media generation still needs extra auth or external tools.",
+    "claudeCode": "Best for codebase reasoning, refactors, and long text/code iteration. It is less complete as a standalone research-video factory because images, search, and TTS usually need separate services."
+  }
+}

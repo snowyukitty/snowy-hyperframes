@@ -1,0 +1,18 @@
+{
+  "generator": "Built-in Codex image generation tool, project-bound copies saved in assets/images/",
+  "fallbackNote": "If reproducing inside Pi without openai-codex auth, use these prompts as placeholders or generate through another approved image workflow.",
+  "prompts": [
+    {
+      "asset": "assets/images/quota-dashboard.png",
+      "prompt": "Use case: productivity-visual. Asset type: HyperFrames presentation background, 16:9. Primary request: a polished technology research visual for an AI image-generation quota comparison presentation. Scene/backdrop: modern analytics workspace with layered translucent dashboards, abstract model-routing diagram, subtle image thumbnails, and clean grid lines. Subject: three plan tiers represented as neutral stacked panels without readable text, from small to large capacity. Style/medium: premium editorial 3D illustration mixed with realistic glassmorphism UI, high-end tech research report aesthetic. Composition/framing: wide 16:9 layout, clear negative space on the left and lower third for overlaid Traditional Chinese captions. Lighting/mood: calm, analytical, trustworthy; soft studio lighting. Color palette: deep charcoal background with teal, blue, white, and muted amber accents; avoid purple-dominant gradients. Constraints: no readable text, no logos, no brand marks, no watermark, no people, no animals, no clutter."
+    },
+    {
+      "asset": "assets/images/evidence-layers.png",
+      "prompt": "Use case: productivity-visual. Asset type: HyperFrames presentation background, 16:9. Primary request: a visual metaphor for separating official information, community reports, and reasoned estimates in AI usage-limit research. Scene/backdrop: three transparent evidence layers floating over a dark research desk: a verified document layer, a social-signal layer, and a projection/forecast layer. Subject: clean evidence classification system with checkmarks, dots, and chart shapes only; no readable words. Style/medium: cinematic 3D editorial illustration, restrained professional technology report style. Composition/framing: wide 16:9, center-right focal point, generous left-side negative space for Chinese text overlay. Lighting/mood: precise, calm, investigative. Color palette: charcoal, slate, teal, white, and small amber highlights; avoid purple dominance. Constraints: no readable text, no logos, no brand marks, no watermark, no people, no animals."
+    },
+    {
+      "asset": "assets/images/safe-range-gauges.png",
+      "prompt": "Use case: productivity-visual. Asset type: HyperFrames conclusion background, 16:9. Primary request: a clear visual conclusion for recommended safe daily usage ranges across three subscription tiers for AI image generation. Scene/backdrop: refined control-room style dashboard with three capacity gauges and a safety-zone band, no text labels. Subject: three clean gauge arcs: low, medium, high; each gauge has a green safe band and amber caution threshold, represented visually without numbers or words. Style/medium: sophisticated 3D dashboard illustration, premium technology explainer, suitable for a research presentation. Composition/framing: wide 16:9, balanced center with open upper-left and lower-third space for overlaid titles and subtitles. Lighting/mood: decisive, reliable, calm. Color palette: dark graphite, teal, white, green safety accents, amber caution accents; avoid purple-dominant gradients. Constraints: no readable text, no logos, no brand marks, no watermark, no people, no animals."
+    }
+  ]
+}

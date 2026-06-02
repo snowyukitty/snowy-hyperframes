@@ -1,0 +1,34 @@
+{
+  "generatedBy": "Codex built-in image generation",
+  "generatedAt": "2026-06-01",
+  "style": "polished technology research report backgrounds, no readable text baked into images",
+  "assets": [
+    {
+      "file": "assets/images/workflow-cost-map.png",
+      "slideCopies": [
+        "assets/images/slide-01-workflow-cost-map.png",
+        "assets/images/slide-04-workflow-cost-map.png",
+        "assets/images/slide-05-workflow-cost-map.png",
+        "assets/images/slide-09-workflow-cost-map.png"
+      ],
+      "prompt": "Sophisticated AI workflow cost command center showing three abstract lanes for coding agents, research sources, media generation, and rendering; no readable text; wide 16:9; balanced graphite, teal, amber, white, small magenta accents."
+    },
+    {
+      "file": "assets/images/cost-stack.png",
+      "slideCopies": [
+        "assets/images/slide-02-cost-stack.png",
+        "assets/images/slide-03-cost-stack.png",
+        "assets/images/slide-07-cost-stack.png"
+      ],
+      "prompt": "Layered cost architecture visual for AI video production: subscription layer, usage credits, API tokens, media assets, QA/render; no readable text; wide 16:9; polished 3D infographic style."
+    },
+    {
+      "file": "assets/images/decision-matrix.png",
+      "slideCopies": [
+        "assets/images/slide-06-decision-matrix.png",
+        "assets/images/slide-08-decision-matrix.png"
+      ],
+      "prompt": "Decision matrix for choosing among AI coding agents for research-to-video production; abstract gauges and comparison surface; no readable text; wide 16:9; executive briefing mood."
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://snowy.local/schemas/storyboard.schema.json",
+  "title": "Storyboard Data",
+  "type": "object",
+  "required": ["title", "targetDurationSeconds", "language", "voice", "slides"],
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "targetDurationSeconds": {
+      "type": "number"
+    },
+    "language": {
+      "type": "string"
+    },
+    "voice": {
+      "type": "object"
+    },
+    "slides": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "durationTarget", "image", "subtitle", "narration"]
+      }
+    }
+  },
+  "additionalProperties": true
+}

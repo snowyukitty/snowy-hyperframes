@@ -1,0 +1,19 @@
+如何升級 Snowy 旁白系統
+
+短期（現在 - 1 個月）
+✓ 保留 Edge-TTS + pronunciation map
+✓ 錄製 A/B 測試樣本
+✓ 評估 ElevenLabs Turbo、Azure Speech
+✓ 建立發音替換規則庫
+
+中期（1-3 個月）
+✓ 若預算允許，切換至 Inworld / ElevenLabs Turbo
+✓ 自動化 pronunciation map 應用
+✓ 整合 WhisperX 強制對齐字幕生成
+✓ 建立 TTS 品質 QA 流程
+
+長期（3-6 個月）
+✓ 錄製自己或合作 narrator 的聲音
+✓ 建立合法授權 voice profile
+✓ 整合本機 Kokoro / Fish Speech 作 fallback
+✓ 自動化 prosody 標記生成

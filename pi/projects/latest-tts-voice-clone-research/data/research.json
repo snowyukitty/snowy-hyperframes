@@ -1,0 +1,257 @@
+{
+  "title": "2026 年最新 TTS 與 AI Voice Clone 技術研究",
+  "language": "zh-Hant",
+  "retrievedAt": "2026-06-02",
+  "scope": "截至 2026 年 6 月 2 日，研究最新的 TTS（文字轉語音）、AI voice clone（聲音複製）、AI narration（AI 旁白）、voice conversion（聲音轉換）、multilingual voice（多語言聲音）、prosody control（韻律控制）、forced alignment（強制對齊）技術。目標是提升 Snowy HyperFrames 專案中 AI 旁白的自然度，特別針對繁體中文與英文技術詞混讀的場景。",
+  "coreFinding": "2026 年 TTS 技術已達到商用高質量與開源高效能的分化局面。商用服務（ElevenLabs Multilingual v2、Inworld TTS、OpenAI Realtime TTS）提供最高的音質與表達力，但成本與延遲需考量；開源模型（Kokoro-82M、Fish Speech 1.5、CosyVoice 2.0、F5-TTS）提供免費、可本機部署、無延遲的方案。對於 Snowy workflow，短期應保持 Edge-TTS 搭配 pronunciation map，中期測試商用高自然度方案，長期建立合法授權 voice profile 與強制對齊自動化。",
+  "official": [
+    {
+      "source": "OpenAI",
+      "title": "Advancing voice intelligence with new models in the API (May 7, 2026)",
+      "url": "https://openai.com/index/advancing-voice-intelligence-with-new-models-in-the-api",
+      "key_findings": [
+        "GPT-Realtime-2：新一代實時聲音模型，具備 GPT-5 級別推理能力，可在對話中邊聽邊思考邊執行工具",
+        "定價：$32/1M 音頻輸入 token（$0.40 用於緩存輸入）、$64/1M 音頻輸出 token",
+        "GPT-Realtime-Translate：支持 70+ 輸入語言、13 輸出語言的實時翻譯",
+        "GPT-Realtime-Whisper：$0.017/分鐘的實時轉錄能力",
+        "應用：聲音對聲音對話、實時翻譯、軟體指導、聲音到行動工作流"
+      ],
+      "limitations": "Realtime API 面向實時對話而非預錄旁白；定價相對較高",
+      "credibility": "official"
+    },
+    {
+      "source": "ElevenLabs",
+      "title": "Voice Cloning & Synthesis (2026 update)",
+      "url": "https://elevenlabs.io",
+      "key_findings": [
+        "Multilingual v2：70+ 語言最高品質模型，適合內容創作、有聲書、品質優先的應用",
+        "Turbo v2.5：實時應用最佳，低延遲與品質平衡",
+        "Instant Voice Cloning：1 分鐘音頻樣本即可快速複製",
+        "Professional Voice Cloning：30+ 分鐘高品質音頻用於超逼真複製，捕捉口音與情感範圍",
+        "支持 32+ 語言，含繁體中文、簡體中文",
+        "May 2026 新增 Dubbing v2：原聲講者的情感與表演可轉移到每個語言版本",
+        "商業授權清楚，付費方案自動獲得商業使用權"
+      ],
+      "limitations": "成本約 $30-120 per 1M characters（取決於模型）；需要 API key",
+      "credibility": "official"
+    },
+    {
+      "source": "Microsoft Azure Speech",
+      "title": "SSML Pronunciation & Language Support",
+      "url": "https://learn.microsoft.com/en-us/azure/ai-services/speech-service/speech-synthesis-markup-pronunciation",
+      "key_findings": [
+        "支持 SSML 定製化發音：<phoneme>、<say-as>、自訂詞彙表",
+        "多語言聲音與 <lang xml:lang> 標籤支持口音控制",
+        "Enterprise 級 API 支持 EU Data Residency",
+        "適合需要精確發音控制的需求"
+      ],
+      "limitations": "成本較 Edge-TTS 高；需設置 API 驗證",
+      "credibility": "official"
+    },
+    {
+      "source": "GitHub: rany2/edge-tts",
+      "title": "Edge-TTS Documentation",
+      "url": "https://github.com/rany2/edge-tts",
+      "key_findings": [
+        "Microsoft Edge 線上 TTS 服務的開源包裝，免費、本機、無 API key",
+        "自訂 SSML 已移除，因為 Edge 僅接受 Edge 本身生成的 SSML（單一聲音、韻律塊）",
+        "支持聲音選擇、速率、音調、音量、字幕輸出",
+        "台灣普通話預設聲音：zh-TW-HsiaoChenNeural / HsiaoYuNeural / YunJheNeural",
+        "不應依賴自訂 <phoneme>、<say-as> 或詞彙表標籤"
+      ],
+      "limitations": "不支持自訂 SSML 標籤，無法實現精細韻律控制",
+      "credibility": "official"
+    }
+  ],
+  "communityReports": [
+    {
+      "source": "SiliconFlow - Best Voice Cloning Models for Edge Deployment (2026)",
+      "title": "Open-Source TTS & Voice Cloning Rankings",
+      "url": "https://www.siliconflow.com/articles/en/best-voice-cloning-models-for-edge-deployment",
+      "findings": [
+        "Fish Speech V1.5：ELO 1339，頂級開源，支持中文/英文混讀，300k+小時訓練數據",
+        "CosyVoice 2.0 / IndexTTS-2 被列為 2026 前三開源模型",
+        "多語言訓練數據豐富，適合邊界部署全球應用"
+      ],
+      "credibility": "community"
+    },
+    {
+      "source": "BentoML - Exploring Open-Source TTS Models (2026)",
+      "title": "TTS Model Benchmark & Features",
+      "url": "https://www.bentoml.com/blog/exploring-the-world-of-open-source-text-to-speech-models",
+      "findings": [
+        "Fish Audio S2 Pro：EmergentTTS-Eval 排名第一（81.88% 勝率，超越 ElevenLabs、OpenAI）",
+        "自由形式情感控制：[whisper in small voice]、[pitch up]、[excited and fast] 等自然語言描述",
+        "ChatTTS：100k 小時中英數據，對話導向，但學術用途標記，不清晰商用條款",
+        "MeloTTS：支持中文混英文，CPU 實時推理，MIT 許可免費商用",
+        "Kokoro：82M 參數超輕量，CPU 實時運行，38+ 語言，Apache 2.0 許可"
+      ],
+      "credibility": "community"
+    },
+    {
+      "source": "CodeSOTA / OC Devel - TTS Model Rankings & Comparison (2026)",
+      "title": "Open-source vs Commercial TTS Quality Benchmarks",
+      "url": "https://ocdevel.com/blog/20250720-tts",
+      "findings": [
+        "商用排名：Vocu V3.0 (1603 ELO) > Inworld TTS MAX (1594) > ElevenLabs Flash v2.5 (1548)",
+        "開源排名：Kokoro (1424) > XTTS v2 (1388) > Fish Speech / F5-TTS（待評）",
+        "最佳開源聲音複製：Chatterbox MIT（63.75% 勝過 ElevenLabs，實驗尚新）",
+        "最佳邊際/筆電：Kokoro（82M，CPU 可行）",
+        "Inworld TTS：$5-10/1M characters，入門級企業方案",
+        "Chatterbox / Qwen3-TTS：零成本，本機運行"
+      ],
+      "credibility": "community"
+    },
+    {
+      "source": "F5-TTS GitHub & 2026 Setup Guides",
+      "title": "F5-TTS Flow Matching Architecture & Performance",
+      "url": "https://github.com/swivid/f5-tts",
+      "findings": [
+        "架構：Flow Matching + Diffusion Transformer，無需 duration 模型、phoneme 對齊或傳統 TTS 複雜度",
+        "參數：~200M（远小於 Kokoro 上的開銷），但需 GPU",
+        "訓練數據：100k 小時，MIT 許可於推理代碼，模型 CC-BY-NC 許可",
+        "零樣本聲音複製：5-15 秒參考音頻即可新聲音",
+        "延遲：RTX 4090 上 300-500ms（nfe_step=16），適合互動代理",
+        "無原生串流支持（非自回歸設計固有限制）"
+      ],
+      "credibility": "community"
+    },
+    {
+      "source": "SpeechMatics & Inworld AI - TTS APIs 2026 Benchmarks",
+      "title": "Real-time Voice Agent TTS Performance",
+      "url": "https://inworld.ai/resources/best-voice-ai-tts-apis-for-real-time-voice-agents-2026-benchmarks",
+      "findings": [
+        "Inworld Realtime TTS 1-Max：56.1% 勝 ElevenLabs、60.9% 勝 Cartesia、60.7% 勝 OpenAI Realtime（盲測）",
+        "延遲 P90：130-250ms（取決於模型），低於 ElevenLabs Multilingual v3",
+        "Cartesia Sonic 3：40-90ms 最快延遲，40+ 語言",
+        "Rime / Speechmatics：企業級可部署選項",
+        "支持功能：聲音複製（0 樣本、3 秒樣本、30+ 分鐘專業），多語言，自訂發音"
+      ],
+      "credibility": "community"
+    },
+    {
+      "source": "WhisperX & Montreal Forced Aligner Resources",
+      "title": "Speech-to-Text Alignment & Subtitle Generation",
+      "url": "https://github.com/m-bain/whisperX",
+      "findings": [
+        "WhisperX：Faster-Whisper + wav2vec2 強制對齐 + pyannote 說話者分段",
+        "精度：±50ms（vs 原生 Whisper ±500ms），詞級時間戳適合字幕",
+        "輸出格式：JSON、SRT、VTT、TXT、TSV，支持說話者標籤",
+        "速度：RTX 4090 上可達 70× 實時（批量推理）",
+        "費用：免費開源，但 pyannote 模型需 HuggingFace 令牌接受條款",
+        "應用：影片旁白字幕對齐、多說話者內容"
+      ],
+      "credibility": "community"
+    },
+    {
+      "source": "AudioScripter / Resemble AI - Voice Cloning Legal & Ethics (2026)",
+      "title": "Consent, Licensing, and Compliance Framework",
+      "url": "https://www.audioscripter.com/blog/voice-cloning-legal-ethical-guide",
+      "findings": [
+        "同意：聲音複製的最關鍵法律要求。複製他人聲音須明確書面同意",
+        "公開音頻不自動授予複製權：依賴隱含同意存在法律風險",
+        "州法律：加州民法 3344、紐約民權法 50-51、田納西州 ELVIS Act 要求書面同意",
+        "AI 生成標籤：EU、中國、多個美國州已要求或倡導標籤",
+        "商用授權清楚：ElevenLabs 付費方案自動授予商業使用權，但需擁有或有權使用聲音",
+        "合同最佳實踐：明確使用途徑、期限、地域、補償、可撤銷條款"
+      ],
+      "credibility": "community"
+    }
+  ],
+  "estimates": [
+    {
+      "category": "中文 TTS 自然度評估",
+      "description": "基於 TTS Arena 與用户反饋估算",
+      "estimates": [
+        "商用最佳：ElevenLabs Multilingual v2（繁中、簡中） > Inworld TTS > OpenAI GPT-Realtime-2",
+        "開源最佳：Fish Speech 1.5（中英混讀）≈ CosyVoice 2.0 > MeloTTS（中英混讀）",
+        "輕量實用：Kokoro（中文支持實驗中），Piper（開源邊際最佳）",
+        "Edge-TTS：可用但不自然，適合快速迭代原型"
+      ]
+    },
+    {
+      "category": "Snowy Narration Pipeline 短中長期建議",
+      "description": "基於技術成熟度、成本、法律合規估算",
+      "estimates": [
+        "短期（0-1 個月）：保留 Edge-TTS + pronunciation map 作快速原型；錄製 A/B 測試樣本評估 ElevenLabs Turbo 與 Azure Speech 品質優勢",
+        "中期（1-3 個月）：若預算允許，評估 Inworld TTS（$5-10/1M chars）或 ElevenLabs Turbo；建立 pronunciation map 自動化；測試 WhisperX 強制對齐自動化字幕",
+        "長期（3-6 個月）：建立合法授權 voice profile 或 narrator permission agreement；整合 Kokoro 或 Fish Speech 本機運行作 fallback；自動化 prosody 標記生成（如 SSML 或 prompt）"
+      ]
+    },
+    {
+      "category": "聲音複製法律風險評估",
+      "description": "基於 2026 年各州法律與業界實踐",
+      "estimates": [
+        "自己的聲音：完全合法商用，無須他人同意，但應負責任使用（勿假扮即時人類回應）",
+        "員工/承包商聲音：需明確書面同意，指明使用途徑、期限、地域、補償",
+        "公眾人物聲音：複製需得到明確許可，存在隱私與宣傳權風險",
+        "最佳實踐：Resemble AI 等平台實施同意驗證步驟，ElevenLabs / AudioScripter 強制許可條款"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "title": "Advancing voice intelligence with new models in the API",
+      "url": "https://openai.com/index/advancing-voice-intelligence-with-new-models-in-the-api",
+      "date": "2026-05-07",
+      "type": "official",
+      "credibility": "high"
+    },
+    {
+      "title": "ElevenLabs Review 2026: Voice Cloning & Synthesis",
+      "url": "https://www.coval.ai/blog/elevenlabs-review-2026-voice-cloning-and-synthesis-capabilities-explained",
+      "date": "2026-02-21",
+      "type": "vendor-review",
+      "credibility": "medium"
+    },
+    {
+      "title": "Best Voice Cloning Models For Edge Deployment In 2026",
+      "url": "https://www.siliconflow.com/articles/en/best-voice-cloning-models-for-edge-deployment",
+      "date": "2026",
+      "type": "benchmark",
+      "credibility": "medium"
+    },
+    {
+      "title": "The Best Open-Source Text-to-Speech Models in 2026",
+      "url": "https://www.bentoml.com/blog/exploring-the-world-of-open-source-text-to-speech-models",
+      "date": "2026",
+      "type": "benchmark",
+      "credibility": "high"
+    },
+    {
+      "title": "Best TTS Models 2026: Open-Source vs ElevenLabs Comparison",
+      "url": "https://ocdevel.com/blog/20250720-tts",
+      "date": "2026",
+      "type": "benchmark",
+      "credibility": "high"
+    },
+    {
+      "title": "F5-TTS: A Fairytaler that Fakes Fluent and Faithful Speech with Flow Matching",
+      "url": "https://github.com/swivid/f5-tts",
+      "date": "2024-2026",
+      "type": "open-source",
+      "credibility": "high"
+    },
+    {
+      "title": "WhisperX: Automatic Speech Recognition with Word-level Timestamps",
+      "url": "https://github.com/m-bain/whisperX",
+      "date": "2023-2026",
+      "type": "open-source",
+      "credibility": "high"
+    },
+    {
+      "title": "Voice Cloning: Legal & Ethical Guide for Creators in 2026",
+      "url": "https://www.audioscripter.com/blog/voice-cloning-legal-ethical-guide",
+      "date": "2026",
+      "type": "legal-guide",
+      "credibility": "medium"
+    },
+    {
+      "title": "AI Voice Cloning Laws & Ethics (2026): Consent, Licensing, and a Risk Checklist",
+      "url": "https://magichour.ai/blog/ai-voice-cloning-laws-and-ethics",
+      "date": "2026",
+      "type": "legal-guide",
+      "credibility": "medium"
+    }
+  ]
+}

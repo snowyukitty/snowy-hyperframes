@@ -1,0 +1,183 @@
+{
+  "title": "GPT-Image-2 圖片生成量研究",
+  "language": "zh-Hant",
+  "retrievedAt": "2026-06-01",
+  "scope": "ChatGPT Free、Plus、Pro 使用 ChatGPT Images 2.0 / GPT-Image-2 生成圖片時的可用量與安全使用建議。",
+  "coreFinding": "OpenAI 官方沒有公開 Free、Plus、Pro 每日可生成 GPT-Image-2 圖片的固定數字；官方只公開方案層級、相對額度與濫用防護原則。因此每日張數必須標示為估算或社群回報。",
+  "official": [
+    {
+      "claim": "ChatGPT Images 2.0 開放給所有方案；Images with thinking 開放給 Plus、Pro、Business，Enterprise/Edu 將稍後開放。",
+      "sourceId": "openai_images_faq",
+      "sourceType": "official",
+      "confidence": "high"
+    },
+    {
+      "claim": "ChatGPT 價格頁將 Free 描述為有限且較慢的 image generation；Plus 有更複雜且更準確的 image creation；Pro 有 unlimited and faster image creation，但仍 subject to abuse guardrails。",
+      "sourceId": "openai_pricing",
+      "sourceType": "official",
+      "confidence": "high"
+    },
+    {
+      "claim": "OpenAI Pro tiers 說明 Pro 包含 image creation；Pro $100 為 Plus 的 5x 使用量，Pro $200 為 Plus 的 20x 使用量；同時可能因濫用防護而暫時限制。",
+      "sourceId": "openai_pro_tiers",
+      "sourceType": "official",
+      "confidence": "high"
+    },
+    {
+      "claim": "GPT Image 2 是官方 API 的高品質圖片生成與編輯模型；API Free tier 不支援 gpt-image-2，付費 API tier 以 IPM 等速率限制管理。",
+      "sourceId": "openai_gpt_image_2_model",
+      "sourceType": "official",
+      "confidence": "high"
+    },
+    {
+      "claim": "OpenAI API 圖片生成速率限制依模型與 usage tier 而定，具體值應查帳戶 limits page；這不等於 ChatGPT 訂閱每日可生成圖片數。",
+      "sourceId": "openai_image_rate_limits_help",
+      "sourceType": "official",
+      "confidence": "high"
+    }
+  ],
+  "communityReports": [
+    {
+      "claim": "OpenAI Developer Community 有 Plus 使用者回報舊 DALL-E / image workflow 曾被理解為 40 prompts / 3 hours、約 200 images / day，但也抱怨有未公開月度限制。",
+      "sourceId": "openai_community_monthly_limits",
+      "sourceType": "community",
+      "confidence": "low",
+      "note": "使用者回報，不是官方配額；且來源提到 DALL-E 3，不可直接等同 GPT-Image-2。"
+    },
+    {
+      "claim": "Reddit 使用者回報 Plus 曾每天約 60-70 張，另有 Free 顯示 3 張/24h 但實際可能到 6 張的個別經驗。",
+      "sourceId": "reddit_plus_daily_limit",
+      "sourceType": "community",
+      "confidence": "low",
+      "note": "社群自述且時間早於 Images 2.0，僅作為需求高峰下的參考。"
+    },
+    {
+      "claim": "Reddit 上有 Pro/Basic 使用者討論 Basic 約 5-10/day、Pro 是否更高，但沒有可驗證官方數字。",
+      "sourceId": "reddit_pro_rates",
+      "sourceType": "community",
+      "confidence": "low"
+    },
+    {
+      "claim": "部分 Plus 使用者回報 30 天封鎖或 50/24h 之類訊息，但同串也指出可能是 bug 或誤判限制。",
+      "sourceId": "reddit_plus_bug",
+      "sourceType": "community",
+      "confidence": "low"
+    }
+  ],
+  "estimates": [
+    {
+      "plan": "Free",
+      "officialAvailability": "可用；官方只說有限且較慢。",
+      "estimatedFeasiblePerDay": "3-10",
+      "recommendedSafePerDay": "1-3",
+      "basis": "官方 Free 為 limited/slower；社群回報 3/day、5-10/day 皆存在；需求高峰會動態縮限。",
+      "label": "估算值"
+    },
+    {
+      "plan": "Plus",
+      "officialAvailability": "可用；比 Free 有更複雜且更準確的 image creation。",
+      "estimatedFeasiblePerDay": "10-60",
+      "recommendedSafePerDay": "10-30",
+      "basis": "官方只給相對增量；社群有 60-70/day 或更高舊資料，但也有隱藏限制與 bug 回報。",
+      "label": "估算值"
+    },
+    {
+      "plan": "Pro",
+      "officialAvailability": "官方描述為 unlimited and faster image creation，但受 abuse guardrails 限制；Pro tiers 有 5x 或 20x Plus 使用量。",
+      "estimatedFeasiblePerDay": "50-200+",
+      "recommendedSafePerDay": "50-150",
+      "basis": "官方 Pro 相對 Plus 5x/20x，但沒有圖片每日固定數；建議用人類節奏、分批與低重試率維持穩定。",
+      "label": "估算值"
+    }
+  ],
+  "sources": [
+    {
+      "id": "openai_images_faq",
+      "title": "Images in ChatGPT",
+      "publisher": "OpenAI Help Center",
+      "url": "https://help.openai.com/en/articles/11084440-chatgpt-images-faq",
+      "retrievedAt": "2026-06-01",
+      "notes": "官方可用性、Images with thinking、圖片管理與 GPTs 能否使用新模型。"
+    },
+    {
+      "id": "openai_pricing",
+      "title": "ChatGPT Plans",
+      "publisher": "OpenAI / ChatGPT",
+      "url": "https://chatgpt.com/pricing/",
+      "retrievedAt": "2026-06-01",
+      "notes": "Free/Plus/Pro 的圖片建立能力描述與 unlimited subject to abuse guardrails。"
+    },
+    {
+      "id": "openai_pro_tiers",
+      "title": "About ChatGPT Pro tiers",
+      "publisher": "OpenAI Help Center",
+      "url": "https://help.openai.com/en/articles/9793128-about-chatgpt-pro-plans",
+      "retrievedAt": "2026-06-01",
+      "notes": "Pro $100 / $200 相對 Plus 的 5x / 20x 使用量與防護限制說明。"
+    },
+    {
+      "id": "openai_gpt_image_2_model",
+      "title": "GPT Image 2 Model",
+      "publisher": "OpenAI API Docs",
+      "url": "https://developers.openai.com/api/docs/models/gpt-image-2",
+      "retrievedAt": "2026-06-01",
+      "notes": "模型能力、API endpoints、API Free tier 不支援與付費 tier IPM。"
+    },
+    {
+      "id": "openai_image_rate_limits_help",
+      "title": "What are the rate limits for Image Generation?",
+      "publisher": "OpenAI Help Center",
+      "url": "https://help.openai.com/en/articles/6696591-what-are-the-rate-limits-for-image-generation",
+      "retrievedAt": "2026-06-01",
+      "notes": "API rate limits 依模型與 usage tier；應查帳戶 limits page。"
+    },
+    {
+      "id": "openai_images_2_system_card",
+      "title": "System Card: ChatGPT Images 2.0 and Thinking mode",
+      "publisher": "OpenAI Deployment Safety",
+      "url": "https://deploymentsafety.openai.com/chatgpt-images-2-0/chatgpt-images-2-0.pdf",
+      "retrievedAt": "2026-06-01",
+      "notes": "安全層、輸入/輸出阻擋與 Images 2.0 風險控制。"
+    },
+    {
+      "id": "openai_community_monthly_limits",
+      "title": "Image Generation Monthly Limits",
+      "publisher": "OpenAI Developer Community",
+      "url": "https://community.openai.com/t/image-generation-monthly-limits/1321913",
+      "retrievedAt": "2026-06-01",
+      "notes": "社群回報，非官方配額。"
+    },
+    {
+      "id": "reddit_plus_daily_limit",
+      "title": "What is the daily limit for image generation for Plus users?",
+      "publisher": "Reddit r/OpenAI",
+      "url": "https://www.reddit.com/r/OpenAI/comments/1jqr16w/what_is_the_daily_limit_for_image_generation_for/",
+      "retrievedAt": "2026-06-01",
+      "notes": "社群自述，含 Plus 60-70/day、Free 3-6/day 回報。"
+    },
+    {
+      "id": "reddit_pro_rates",
+      "title": "ChatGPT Pro image creation rates",
+      "publisher": "Reddit r/OpenAI",
+      "url": "https://www.reddit.com/r/OpenAI/comments/1tfte1n/chatgpt_pro_image_creation_rates/",
+      "retrievedAt": "2026-06-01",
+      "notes": "社群討論 Pro/Basic，非官方數字。"
+    },
+    {
+      "id": "reddit_plus_bug",
+      "title": "Plus plan image generation limit bug?",
+      "publisher": "Reddit r/ChatGPT",
+      "url": "https://www.reddit.com/r/ChatGPT/comments/1mdoep4/plus_plan_image_generation_limit_bug/",
+      "retrievedAt": "2026-06-01",
+      "notes": "社群回報長期鎖定、50/24h 訊息與疑似 bug。"
+    },
+    {
+      "id": "edge_tts_github",
+      "title": "edge-tts",
+      "publisher": "GitHub rany2/edge-tts",
+      "url": "https://github.com/rany2/edge-tts",
+      "retrievedAt": "2026-06-01",
+      "notes": "Edge-TTS CLI 與無 API key 的工具來源。"
+    }
+  ]
+}

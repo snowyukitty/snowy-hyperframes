@@ -1,0 +1,30 @@
+{
+  "$schema": "../../../../shared/schemas/pronunciation-map.schema.json",
+  "version": 1,
+  "strategy": "display-text-and-tts-text-separated",
+  "notes": "Visible subtitles keep official English product/source names. Edge-TTS receives smoother Mandarin-friendly readings.",
+  "defaultVoice": "zh-TW-HsiaoChenNeural",
+  "candidateVoices": [
+    "zh-TW-HsiaoChenNeural",
+    "zh-TW-HsiaoYuNeural",
+    "zh-TW-YunJheNeural",
+    "zh-CN-XiaoxiaoNeural",
+    "en-US-EmmaMultilingualNeural"
+  ],
+  "entries": [
+    { "match": "2030", "tts": "二零三零", "reason": "Mandarin year reading." },
+    { "match": "AI", "tts": "A I", "reason": "Spell acronym." },
+    { "match": "SDG", "tts": "S D G", "reason": "Spell acronym." },
+    { "match": "IPCC", "tts": "I P C C", "reason": "Spell acronym." },
+    { "match": "IEA", "tts": "I E A", "reason": "Spell acronym." },
+    { "match": "WEF", "tts": "W E F", "reason": "Spell acronym." },
+    { "match": "WHO", "tts": "W H O", "reason": "Spell acronym." },
+    { "match": "Stanford HAI", "tts": "Stanford H A I", "reason": "Spell institute acronym." },
+    { "match": "HyperFrames", "tts": "Hyper Frames", "reason": "Separated pronunciation is clearer." },
+    { "match": "Edge-TTS", "tts": "Edge T T S", "reason": "Spell TTS acronym." },
+    { "match": "TTS", "tts": "T T S", "reason": "Spell acronym." },
+    { "match": "SRT", "tts": "S R T", "reason": "Spell acronym." },
+    { "match": "research-to-video", "tts": "研究到影片", "reason": "Natural Mandarin narration." },
+    { "match": "baseline", "tts": "一般情境", "reason": "Natural Mandarin narration." }
+  ]
+}

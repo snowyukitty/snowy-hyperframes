@@ -1,0 +1,80 @@
+{
+  "$schema": "../../../../shared/schemas/research.schema.json",
+  "title": "2030 三種未來：硬約束與情境分支",
+  "lastUpdated": "2026-06-02",
+  "framing": "This project treats 2030 as a near-future stress test, not a prophecy. The three versions use the same evidence base but diverge on governance, trust, energy deployment, public-sector capacity, and whether AI raises or concentrates human agency.",
+  "officialOrPrimarySources": [
+    {
+      "topic": "Jobs and skills churn by 2030",
+      "finding": "The World Economic Forum's Future of Jobs Report 2025 projects 170 million new roles and 92 million displaced roles by 2030, a net increase of 78 million jobs, alongside large-scale skill disruption.",
+      "source": "https://www.weforum.org/publications/the-future-of-jobs-report-2025/",
+      "confidence": "official"
+    },
+    {
+      "topic": "Climate mitigation pressure before 2030",
+      "finding": "IPCC AR6 synthesis materials state that pathways limiting warming to 1.5°C with no or limited overshoot require deep emissions cuts by 2030; this project uses that as the climate urgency boundary, not as a guaranteed outcome.",
+      "source": "https://www.ipcc.ch/report/ar6/syr/resources/spm-headline-statements/",
+      "confidence": "official"
+    },
+    {
+      "topic": "Energy transition through 2030",
+      "finding": "IEA renewable energy outlooks track rapid renewable capacity growth toward 2030 while emphasizing grids, permitting, supply chains, and policy as binding constraints.",
+      "source": "https://www.iea.org/reports/renewables-2025",
+      "confidence": "official"
+    },
+    {
+      "topic": "SDG progress",
+      "finding": "The UN Sustainable Development Goals Report 2025 indicates that 2030 progress remains uneven and many targets are off track. This anchors the baseline and pessimistic public-capacity scenarios.",
+      "source": "https://unstats.un.org/sdgs/report/2025/",
+      "confidence": "official"
+    },
+    {
+      "topic": "Population and demographics",
+      "finding": "UN World Population Prospects 2024 provides the demographic boundary: a larger, older, and regionally divergent world by 2030, with different pressures on labor, care, migration, and urban systems.",
+      "source": "https://www.un.org/development/desa/pd/content/World-Population-Prospects-2024",
+      "confidence": "official"
+    },
+    {
+      "topic": "AI acceleration",
+      "finding": "Stanford HAI's AI Index tracks fast AI capability, adoption, investment, and policy growth. This project treats AI as a general-purpose accelerator whose social outcome depends on institutions.",
+      "source": "https://hai.stanford.edu/ai-index",
+      "confidence": "research-institution"
+    },
+    {
+      "topic": "Health workforce pressure",
+      "finding": "WHO has warned of a projected health worker shortfall by 2030, especially in low- and lower-middle-income regions. This informs the care-system pressure in all three scenarios.",
+      "source": "https://www.who.int/health-topics/health-workforce",
+      "confidence": "official"
+    }
+  ],
+  "scenarioDrivers": [
+    "AI capability and access",
+    "energy deployment and grid buildout",
+    "climate adaptation speed",
+    "public trust and governance capacity",
+    "health and education workforce resilience",
+    "labor-market transition and social protection",
+    "information integrity"
+  ],
+  "scenarios": {
+    "optimistic": {
+      "name": "樂觀版：協調成功",
+      "logic": "AI becomes civic infrastructure rather than a private race. Renewables, grids, adaptation, care work, and education scale together. Institutions audit models, protect labor mobility, and use data for public capacity.",
+      "tone": "practical hope, not fantasy",
+      "warning": "Even optimistic 2030 is not solved; it is only less brittle."
+    },
+    "baseline": {
+      "name": "一般版：局部適應",
+      "logic": "Most places adopt AI and clean energy, but institutions move unevenly. Productivity rises in pockets, old infrastructure remains, labor stress persists, and public systems spend much of 2030 doing triage.",
+      "tone": "competent but strained",
+      "warning": "This is the default path if progress continues but coordination remains partial."
+    },
+    "pessimistic": {
+      "name": "悲觀版：碎片化失控",
+      "logic": "AI amplifies inequality and information disorder, climate shocks exceed adaptation capacity, grids and public systems become brittle, and trust collapses into defensive fragmentation.",
+      "tone": "plausible warning, not spectacle",
+      "warning": "This path is not inevitable, but it is reachable through delay, extraction, and institutional decay."
+    }
+  },
+  "creativeThesis": "2030 is not one destination. It is a fork made visible: the same technologies can widen human agency, patch a strained system, or accelerate fragmentation."
+}
