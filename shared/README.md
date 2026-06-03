@@ -45,6 +45,12 @@ No-API-key / local-first TTS 升級路線：
 shared/docs/local-tts-no-api-key-strategy.md
 ```
 
+目前階段性收尾：
+
+```text
+shared/docs/phase-summary-2026-06-03.md
+```
+
 ## Production Notes
 
 完整製作手冊放在：

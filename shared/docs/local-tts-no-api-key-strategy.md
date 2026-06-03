@@ -1,6 +1,6 @@
 # Local / No-API-Key TTS Strategy
 
-更新日期：2026-06-02
+更新日期：2026-06-03
 
 本文件記錄 Snowy HyperFrames 的 no-API-key TTS 升級方向。目標不是把 Edge-TTS 立刻替換掉，而是建立一條不用 paid API key 也能研究、測試、比較和逐步升級的 TTS 品質路線。
 
@@ -242,6 +242,30 @@ Provider metadata 建議包含：
 3. 寫 golden samples。
 4. 先測 Kokoro 和 MeloTTS，因為它們最接近 no-key practical path。
 5. 每段輸出 duration/provider/quality notes。
+
+### 2026-06-03 Status
+
+已建立私有本機 bakeoff project：
+
+```text
+codex/projects/tts-local-bakeoff
+```
+
+它目前被 `.gitignore` 忽略，不進 GitHub。
+
+已完成：
+
+- 8 段 golden samples。
+- Edge-TTS baseline text generation。
+- 8 段 Edge-TTS MP3。
+- Edge-TTS duration report。
+- listening scorecard template。
+
+下次接續點：
+
+1. 聽 Edge-TTS baseline。
+2. 填 listening scorecard。
+3. 再接 Kokoro adapter。
 
 中期：
 

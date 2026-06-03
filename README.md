@@ -129,6 +129,12 @@ No-API-key / local-first TTS 升級路線在：
 shared/docs/local-tts-no-api-key-strategy.md
 ```
 
+目前階段性收尾與下次 wake up 接續點：
+
+```text
+shared/docs/phase-summary-2026-06-03.md
+```
+
 三條 workflow 的實測比較在：
 
 ```text
