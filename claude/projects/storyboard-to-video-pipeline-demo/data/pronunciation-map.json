@@ -1,0 +1,23 @@
+{
+  "$schema": "../../../../shared/schemas/pronunciation-map.schema.json",
+  "version": 1,
+  "strategy": "display-text-and-tts-text-separated",
+  "notes": "Subtitles keep the real file and tool names; Edge-TTS gets Mandarin-friendly readings.",
+  "defaultVoice": "zh-TW-HsiaoChenNeural",
+  "candidateVoices": ["zh-TW-HsiaoChenNeural", "zh-TW-HsiaoYuNeural", "zh-TW-YunJheNeural"],
+  "entries": [
+    { "match": "HyperFrames", "tts": "Hyper Frames", "reason": "Separated pronunciation is clearer." },
+    { "match": "hyperframes check", "tts": "Hyper Frames check", "reason": "CLI name read as two words." },
+    { "match": "Edge-TTS", "tts": "Edge T T S", "reason": "Spell the acronym." },
+    { "match": "TTS", "tts": "T T S", "reason": "Spell the acronym." },
+    { "match": "MP3", "tts": "M P 3", "reason": "Spell the format name." },
+    { "match": "ffprobe", "tts": "F F probe", "reason": "Tool name." },
+    { "match": "index.html", "tts": "index H T M L", "reason": "File name." },
+    { "match": "project.json", "tts": "project JSON", "reason": "File name; JSON reads naturally." },
+    { "match": "hf audit", "tts": "H F audit", "reason": "Toolkit command." },
+    { "match": "storyboard", "tts": "story board", "reason": "Two-word reading is cleaner in mixed narration." },
+    { "match": "preview", "tts": "preview", "reason": "Keep English word; neural voice handles it." },
+    { "match": "render", "tts": "render", "reason": "Keep English word." },
+    { "match": "v2", "tts": "版本二", "reason": "Natural Mandarin reading." }
+  ]
+}

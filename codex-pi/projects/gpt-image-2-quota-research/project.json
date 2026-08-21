@@ -4,11 +4,11 @@
   "title": "GPT-Image-2 每日生成量研究",
   "workflow": "codex-pi",
   "createdAt": "2026-06-01T18:13:51+09:00",
-  "updatedAt": "2026-06-01T20:18:00+09:00",
+  "updatedAt": "2026-08-21T18:24:03.132Z",
   "status": "ready-to-render",
   "format": "hyperframes-presentation",
   "language": "zh-Hant",
-  "durationSeconds": 122,
+  "durationSeconds": 121.7,
   "sourceConfidence": "mixed",
   "tools": [
     "codex",

@@ -73,13 +73,14 @@ docs/runbook.md
 
 ## 3. 標準專案契約
 
-每個正式 HyperFrames 專案建議至少包含：
+每個正式 HyperFrames 專案建議至少包含（`hf new` 會產生；`hyperframes.json` 是 **HyperFrames 自己的** registry/paths 設定，
+Snowy 的時間軸 manifest 是 `data/timeline.json`）：
 
 ```text
 project.json
 package.json
 hyperframes.json
-meta.json
+data/timeline.json
 index.html
 data/
   research.json
@@ -120,6 +121,10 @@ shared/templates/hyperframes-research-project/
 - `checks`: 最近一次 `npm run check` 結果與 render 狀態
 
 ## 4. 推薦製作流程
+
+> **2026-08-22 起**：以下 4.5 / 4.6 / 4.8 的手動步驟已由 `shared/tools/hf.mjs` 實作（`prepare-tts` / `tts` / `measure` / `sync` / `audit`），
+> 請直接跑 `npm run pipeline` 與 `npm run check`；本節保留為原理說明。升級到 HyperFrames 0.8 的實測見
+> `shared/docs/hyperframes-0.8-upgrade-notes.md`（`check` 取代 `validate/inspect`、GSAP 要 vendor、audio slot = MP3 實長、CJK 字型要 `@font-face`）。
 
 ### 4.1 定義範圍
 

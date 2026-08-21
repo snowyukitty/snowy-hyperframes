@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Latest TTS & Voice Cloning Research</title>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<script src="vendor/gsap.min.js"></script>
 <style>
 :root{--bg:#08111f;--panel:#101b2d;--text:#f3f7ff;--muted:#b7c3d8;--accent:#60a5fa;--line:rgba(255,255,255,.13)}
 *{box-sizing:border-box} html{scroll-behavior:smooth} #composition{position:relative;width:100vw;height:100vh;overflow:hidden} body{margin:0;overflow:hidden;font-family:sans-serif;background:radial-gradient(circle at top left,#1d4ed855,transparent 32%),var(--bg);color:var(--text)}
@@ -12,7 +12,7 @@ main{position:relative;width:100%;height:100%} .slide{position:absolute;inset:86
 .narration-audio{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 @media(max-width:900px){header{position:relative;display:block} nav{margin-top:12px} .slide{grid-template-columns:1fr;min-height:auto}}
 </style></head><body>
-<div id="composition" data-composition-id="latest-tts-voice-clone-research" data-start="0" data-width="1920" data-height="1080">
+<div data-duration="486" id="composition" data-composition-id="latest-tts-voice-clone-research" data-start="0" data-width="1920" data-height="1080">
 <header><h1>Latest TTS & AI Voice Cloning Research</h1><nav><a href="#slide-01">01</a><a href="#slide-02">02</a><a href="#slide-03">03</a><a href="#slide-04">04</a><a href="#slide-05">05</a><a href="#slide-06">06</a><a href="#slide-07">07</a><a href="#slide-08">08</a><a href="#slide-09">09</a><a href="#slide-10">10</a><a href="#slide-11">11</a></nav></header>
 <main>
     <section class="slide clip" id="slide-01" data-start="0" data-duration="12.0" data-track-index="1">
@@ -20,7 +20,7 @@ main{position:relative;width:100%;height:100%} .slide{position:absolute;inset:86
         <p class="kicker">Slide 01 · 12s</p>
         <h2>2026 年最新 TTS 與 AI Voice Clone 技術研究</h2>
         <p>我們如何讓 Snowy HyperFrames 的 AI 旁白更自然、更像真人？</p>
-        <audio class="narration-audio" id="audio-slide-01" preload="metadata" src="assets/audio/slide-01.mp3" data-start="0" data-duration="12.0"></audio>
+        <audio class="narration-audio" id="audio-slide-01" preload="metadata" src="assets/audio/slide-01.mp3" data-start="0" data-duration="5.38"></audio>
       </div>
       <div class="visual">
         <img src="assets/images/slide-01.png" alt="2026 年最新 TTS 與 AI Voice Clone 技術研究" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid'">
@@ -36,7 +36,7 @@ main{position:relative;width:100%;height:100%} .slide{position:absolute;inset:86
 • 支持台灣普通話多種聲音
 • 局限：自訂 SSML 已移除，無法精細韻律控制
 • 問題：英文技術詞、產品名在繁中混讀時不自然</p>
-        <audio class="narration-audio" id="audio-slide-02" preload="metadata" src="assets/audio/slide-02.mp3" data-start="12.0" data-duration="29"></audio>
+        <audio class="narration-audio" id="audio-slide-02" preload="metadata" src="assets/audio/slide-02.mp3" data-start="12" data-duration="27.58"></audio>
       </div>
       <div class="visual">
         <img src="assets/images/slide-02.png" alt="現狀：Snowy Narration 的挑戰" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid'">
@@ -61,7 +61,7 @@ Inworld TTS ($5-10/1M)
 OpenAI Realtime-2（對話優先）
 • 實時翻譯、推理邊聽邊做
 • 高成本 ($32/1M input + $64/1M output)</p>
-        <audio class="narration-audio" id="audio-slide-03" preload="metadata" src="assets/audio/slide-03.mp3" data-start="41.0" data-duration="46"></audio>
+        <audio class="narration-audio" id="audio-slide-03" preload="metadata" src="assets/audio/slide-03.mp3" data-start="41" data-duration="44.64"></audio>
       </div>
       <div class="visual">
         <img src="assets/images/slide-03.png" alt="商用高端方案：品質優先" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid'">
@@ -90,7 +90,7 @@ F5-TTS（流匹配架構）
 • RTX 4090 上 300-500ms 延遲
 
 CosyVoice 2.0 / Mel...</p>
-        <audio class="narration-audio" id="audio-slide-04" preload="metadata" src="assets/audio/slide-04.mp3" data-start="87.0" data-duration="46"></audio>
+        <audio class="narration-audio" id="audio-slide-04" preload="metadata" src="assets/audio/slide-04.mp3" data-start="87" data-duration="44.66"></audio>
       </div>
       <div class="visual">
         <img src="assets/images/slide-04.png" alt="開源高效方案：零成本本機" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid'">
@@ -118,7 +118,7 @@ CosyVoice 2.0 / Mel...</p>
 • AI 生成標籤（EU/中國/多州要求）
 • 商用授權清楚（ElevenLabs / 平台檢查）
 • 可撤銷條款（尊重原聲者權利）</p>
-        <audio class="narration-audio" id="audio-slide-05" preload="metadata" src="assets/audio/slide-05.mp3" data-start="133.0" data-duration="44"></audio>
+        <audio class="narration-audio" id="audio-slide-05" preload="metadata" src="assets/audio/slide-05.mp3" data-start="133" data-duration="42.77"></audio>
       </div>
       <div class="visual">
         <img src="assets/images/slide-05.png" alt="聲音複製的法律邊界" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid'">
@@ -142,7 +142,7 @@ CosyVoice 2.0 / Mel...</p>
    &lt;prosody rate=&quot;-10%&quot; pitch=&quot;+5%&quot;&gt;
    &lt;break time=&quot;300ms&quot;/&gt;
    &lt;phoneme...</p>
-        <audio class="narration-audio" id="audio-slide-06" preload="metadata" src="assets/audio/slide-06.mp3" data-start="177.0" data-duration="48"></audio>
+        <audio class="narration-audio" id="audio-slide-06" preload="metadata" src="assets/audio/slide-06.mp3" data-start="177" data-duration="46.9"></audio>
       </div>
       <div class="visual">
         <img src="assets/images/slide-06.png" alt="Pronunciation Map 與韻律控制策略" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid'">
@@ -169,7 +169,7 @@ CosyVoice 2.0 / Mel...</p>
 
 長期（3-6 個月）
 ...</p>
-        <audio class="narration-audio" id="audio-slide-07" preload="metadata" src="assets/audio/slide-07.mp3" data-start="225.0" data-duration="48"></audio>
+        <audio class="narration-audio" id="audio-slide-07" preload="metadata" src="assets/audio/slide-07.mp3" data-start="225" data-duration="46.37"></audio>
       </div>
       <div class="visual">
         <img src="assets/images/slide-07.png" alt="Snowy Narration Pipeline 短中長期建議" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid'">
@@ -197,7 +197,7 @@ Kokoro / Fish Speech 1.5 / F5-TTS
 → 免費、無延遲、隱私保護
 → 開源社區、企業自建方案
 → 自然度快速進步（2026 已媲...</p>
-        <audio class="narration-audio" id="audio-slide-08" preload="metadata" src="assets/audio/slide-08.mp3" data-start="273.0" data-duration="55"></audio>
+        <audio class="narration-audio" id="audio-slide-08" preload="metadata" src="assets/audio/slide-08.mp3" data-start="273" data-duration="53.78"></audio>
       </div>
       <div class="visual">
         <img src="assets/images/slide-08.png" alt="TTS 方案成本與品質的權衡" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid'">
@@ -225,7 +225,7 @@ WhisperX 的三大能力
 資源：需要 HuggingFace 令牌接受 pyannote 條款
 
 下一步...</p>
-        <audio class="narration-audio" id="audio-slide-09" preload="metadata" src="assets/audio/slide-09.mp3" data-start="328.0" data-duration="47"></audio>
+        <audio class="narration-audio" id="audio-slide-09" preload="metadata" src="assets/audio/slide-09.mp3" data-start="328" data-duration="46.01"></audio>
       </div>
       <div class="visual">
         <img src="assets/images/slide-09.png" alt="WhisperX 強制對齐的價值" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid'">
@@ -250,7 +250,7 @@ WhisperX 的三大能力
 
 【下月】
 □ 評估成本：0 (E...</p>
-        <audio class="narration-audio" id="audio-slide-10" preload="metadata" src="assets/audio/slide-10.mp3" data-start="375.0" data-duration="53"></audio>
+        <audio class="narration-audio" id="audio-slide-10" preload="metadata" src="assets/audio/slide-10.mp3" data-start="375" data-duration="51.72"></audio>
       </div>
       <div class="visual">
         <img src="assets/images/slide-10.png" alt="Snowy 團隊的決策清單" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid'">
@@ -280,7 +280,7 @@ WhisperX 的三大能力
 
 下一步
 執...</p>
-        <audio class="narration-audio" id="audio-slide-11" preload="metadata" src="assets/audio/slide-11.mp3" data-start="428.0" data-duration="58"></audio>
+        <audio class="narration-audio" id="audio-slide-11" preload="metadata" src="assets/audio/slide-11.mp3" data-start="428" data-duration="57.05"></audio>
       </div>
       <div class="visual">
         <img src="assets/images/slide-11.png" alt="結論：從快速迭代到長期自動化" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid'">

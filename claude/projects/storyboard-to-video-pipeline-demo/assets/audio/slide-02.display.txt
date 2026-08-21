@@ -1,0 +1,1 @@
+過去每次重新生成旁白，index.html、字幕、manifest 和 project.json 都要分別手動修改。只要某一段 MP3 比頁面長，旁白就會在成片裡被硬生生切斷。

@@ -1,55 +1,48 @@
 # HyperFrames Research Project Template
 
-複製本模板到：
-
-```text
-<workflow>/projects/<project-name>/
-```
-
-然後填寫：
-
-```text
-project.json
-data/research.json
-data/storyboard.json
-data/image-prompts.json
-data/pronunciation-map.json
-docs/references.md
-docs/storyboard.md
-docs/runbook.md
-docs/retrospective.md
-```
-
-## Minimum Deliverables
-
-- `index.html`
-- `package.json`
-- `hyperframes.json`
-- `meta.json`
-- `assets/images/`
-- `assets/audio/`
-- `captions/narration.srt`
-- `data/research.json`
-- `data/storyboard.json`
-- `data/image-prompts.json`
-- `data/pronunciation-map.json`
-- `docs/references.md`
-- `docs/storyboard.md`
-- `docs/runbook.md`
-- `project.json`
-
-## TTS Pronunciation
-
-Use `slide-XX.display.txt` for viewer-facing narration and generated `slide-XX.tts.txt` for Edge-TTS input.
+不要手動複製這個資料夾；在 repo 任何位置執行：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/prepare-tts.ps1
+node shared/tools/hf.mjs new <workflow>/<project-name>     # workflow: codex | codex-pi | pi | claude
 ```
 
-The shared strategy is documented at `shared/docs/tts-pronunciation-strategy.md`.
+`hf new` 會複製模板、填好 `project.json` / `package.json` 的 id、放入 `vendor/gsap.min.js`，
+並提醒你：新專案預設被 `.gitignore` 忽略，公開前要走 `shared/docs/repo-publication-policy.md` 的審核。
 
-## Verification
+## 之後的流程
 
 ```powershell
-npm run check
+cd <workflow>/projects/<project-name>
+#  1. 寫 data/storyboard.json（id / title / chapter / durationTarget / image / subtitle / narration）
+#     與 data/pronunciation-map.json；研究型專案同時填 data/research.json、docs/references.md
+npm run html        #  2. storyboard -> index.html 的 slide/audio 區塊（CSS/JS 在標記外，可自由改）
+npm run pipeline    #  3. prepare-tts -> tts (Edge-TTS) -> measure (ffprobe) -> sync -> audit
+npm run check       #  4. hf audit + npx hyperframes@0.8.6 check（0 error）
+npm run preview     #  5. 人工 gate：節奏、發音、圖文可讀性
+npm run render      #  6. renders/<project>.mp4（不進 git；要分享放 GitHub Releases）
 ```
+
+## 模板裡有什麼
+
+```text
+index.html                 可直接 check/render 的合成骨架：CJK @font-face(local)、full-bleed 背景、
+                           lower-third 字幕、chapter eyebrow、進度標籤、無圖片時的漸層 + 進度環、
+                           以 DOM data-start 驅動的 GSAP 入場動畫（沒有第二份時間陣列會漂移）
+package.json               所有 script 都指向 shared/tools/hf.mjs 與 hyperframes@0.8.6
+hyperframes.json           HyperFrames 自己的設定（registry / paths）；Snowy 的時間軸在 data/timeline.json
+project.json               專案索引（shared/schemas/project.schema.json）
+data/storyboard.json       唯一的意圖來源
+data/pronunciation-map.json 字幕 -> 朗讀稿 替換規則
+data/research.json, data/image-prompts.json
+docs/runbook.md, docs/retrospective.md, docs/references.md
+assets/images/, assets/audio/, captions/, renders/
+```
+
+## 視覺慣例（playbook §4.7）
+
+- 16:9 full-bleed 背景圖（或無圖片的漸層），深色 overlay 保字幕可讀。
+- 文字、數字、來源一律 HTML overlay；不烤進圖片。
+- 每頁用 slide-specific 圖片檔名，避免 duplicate media warning。
+- 裝飾用 SVG shape 而不是文字，`hyperframes check` 的 contrast / occlusion 才不會誤判。
+
+完整手冊：`shared/docs/hyperframes-production-playbook.md`；工具鏈：`node shared/tools/hf.mjs help`。

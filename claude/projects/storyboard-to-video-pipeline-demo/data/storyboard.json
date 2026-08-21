@@ -1,0 +1,72 @@
+{
+  "title": "從分鏡到影片：Snowy HyperFrames 工作流 v2",
+  "targetDurationSeconds": 80,
+  "language": "zh-Hant",
+  "voice": {
+    "tool": "edge-tts",
+    "voice": "zh-TW-HsiaoChenNeural",
+    "rate": "+5%",
+    "pitch": "-3Hz",
+    "volume": "+0%",
+    "pronunciationMap": "data/pronunciation-map.json",
+    "displayTextPattern": "assets/audio/slide-XX.display.txt",
+    "ttsTextPattern": "assets/audio/slide-XX.tts.txt"
+  },
+  "timingPolicy": "audio",
+  "slides": [
+    {
+      "id": "slide-01",
+      "title": "一份分鏡，一個時間真相",
+      "chapter": "intro",
+      "durationTarget": 12,
+      "image": "",
+      "subtitle": "這支影片的每一個時間點，都來自 storyboard 與實際量測的旁白長度。",
+      "narration": "這支影片本身就是一個示範。它的每一個時間點，都不是人手估的，而是來自一份 storyboard，加上實際量測出來的旁白長度。"
+    },
+    {
+      "id": "slide-02",
+      "title": "過去：六個檔案手動同步",
+      "chapter": "problem",
+      "durationTarget": 14,
+      "image": "",
+      "subtitle": "index.html、字幕、manifest、project.json 各有一份時間軸；MP3 比頁面長，旁白就被切掉。",
+      "narration": "過去每次重新生成旁白，index.html、字幕、manifest 和 project.json 都要分別手動修改。只要某一段 MP3 比頁面長，旁白就會在成片裡被硬生生切斷。"
+    },
+    {
+      "id": "slide-03",
+      "title": "現在：一條可重跑的管線",
+      "chapter": "pipeline",
+      "durationTarget": 14,
+      "image": "",
+      "subtitle": "prepare-tts → tts → measure → sync：storyboard 產生朗讀稿，量測 MP3，回寫所有時間軸。",
+      "narration": "現在流程只有一條。storyboard 產生朗讀稿，Edge-TTS 生成 MP3，ffprobe 量出實際長度，然後 sync 把時間軸一次寫回頁面、字幕與 metadata。"
+    },
+    {
+      "id": "slide-04",
+      "title": "Render 之前的兩道門",
+      "chapter": "gate",
+      "durationTarget": 14,
+      "image": "",
+      "subtitle": "hf audit 檢查結構、schema 與音訊截斷風險；hyperframes check 檢查 runtime、版面與對比度。",
+      "narration": "render 之前要先過兩道門。hf audit 檢查專案結構、schema，以及音訊截斷風險；hyperframes check 則檢查 runtime、版面與文字對比度。"
+    },
+    {
+      "id": "slide-05",
+      "title": "人工 preview 仍是最後一關",
+      "chapter": "gate",
+      "durationTarget": 12,
+      "image": "",
+      "subtitle": "節奏、發音、圖文可讀性，要在瀏覽器裡聽過看過，才按下 render。",
+      "narration": "自動檢查不取代人工。節奏、發音和圖文可讀性，仍然要在瀏覽器 preview 裡聽過、看過，才按下 render。"
+    },
+    {
+      "id": "slide-06",
+      "title": "從分鏡到影片",
+      "chapter": "outro",
+      "durationTarget": 10,
+      "image": "",
+      "subtitle": "一條可重跑的管線。Snowy HyperFrames 工作流 v2。",
+      "narration": "從分鏡到影片，一條可重跑的管線。這就是 Snowy HyperFrames 工作流 v2。"
+    }
+  ]
+}

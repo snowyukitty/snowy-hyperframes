@@ -26,7 +26,7 @@
       "type": "string"
     },
     "workflow": {
-      "enum": ["codex-pi", "codex", "pi"]
+      "enum": ["codex-pi", "codex", "pi", "claude"]
     },
     "createdAt": {
       "type": "string",
@@ -86,7 +86,7 @@
       }
     },
     "sourceConfidence": {
-      "enum": ["official-only", "mixed", "estimate-heavy", "unknown"]
+      "enum": ["official-only", "mixed", "estimate-heavy", "unknown", "not-applicable"]
     },
     "paths": {
       "type": "object",

@@ -17,6 +17,11 @@ pi/projects/*
 !pi/projects/latest-tts-voice-clone-research/
 !pi/projects/latest-tts-voice-clone-research/**
 
+claude/projects/*
+!claude/projects/.gitkeep
+!claude/projects/storyboard-to-video-pipeline-demo/
+!claude/projects/storyboard-to-video-pipeline-demo/**
+
 # Dependencies
 node_modules/
 .pnpm-store/
@@ -54,6 +59,8 @@ Thumbs.db
 **/.waveform-cache/
 **/.thumbnails/
 
-# Keep final renders intentionally if committed by project decision.
-# To exclude all rendered MP4s, uncomment:
-# **/renders/*.mp4
+# Renders: the four 2026-06 demo MP4s stay in history; new renders go to GitHub Releases.
+**/renders/*.mp4
+!codex/projects/ai-tool-cost-benchmark/renders/*.mp4
+!codex/projects/ai-2030-three-futures/renders/*.mp4
+!pi/projects/latest-tts-voice-clone-research/renders/*.mp4

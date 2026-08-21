@@ -12,6 +12,7 @@
 | `codex` | `codex/projects/ai-2030-three-futures` | rendered | `renders/ai-2030-three-futures.mp4` |
 | `codex-pi` | `codex-pi/projects/gpt-image-2-quota-research` | ready-to-render / project package complete | project assets, TTS, captions, HyperFrames files |
 | `pi` | `pi/projects/latest-tts-voice-clone-research` | rendered no-cut draft | `renders/latest-tts-voice-clone-research-nocut.mp4` |
+| `claude` | `claude/projects/storyboard-to-video-pipeline-demo` | ready-to-preview（2026-08-22；check 0 error、已 smoke render） | render 不進 git（Releases） |
 
 這些專案是目前的公開 demo / reference set。它們可以連同圖片、MP3、字幕、HTML、metadata 與 MP4 一起提交到 GitHub，用來展示完整工作流與踩坑修復。
 
@@ -88,9 +89,19 @@ npm run preview      # 或 npm run dev
 npm run render
 ```
 
-## 6. 下一步標準化
+## 6. 下一步標準化（2026-08-22 更新）
 
-- 把 audio-driven timeline 生成做成 shared script。
+- ~~把 audio-driven timeline 生成做成 shared script。~~ → `shared/tools/hf.mjs sync`（2026-08-22 完成）。
 - 把 cost ledger schema 放進 `shared/schemas/`。
-- 為 voice A/B test 建立共用腳本。
-- 把 public demo 與 private production project 的 GitHub 邊界固定到 `.gitignore` 和 publication policy。
+- 為 voice A/B test 建立共用腳本 → 先用上游 `npx hyperframes tts`（本機 Kokoro）跑同一組 golden samples。
+- ~~把 public demo 與 private production project 的 GitHub 邊界固定到 `.gitignore` 和 publication policy。~~ → `hf repo-check` + CI（2026-08-22 完成）。
+
+## 7. `claude` Workflow（2026-08-22 新增）
+
+定位：Claude Code 主導，並且只透過 `shared/tools/hf.mjs` 走標準管線，不在專案內重寫檢查 / TTS 腳本。
+
+實測結果（`storyboard-to-video-pipeline-demo`）：
+
+- `hf new → html → pipeline → check → render` 端到端可重跑；6 頁 77.2 s 從 storyboard 到 MP4 約 2 分鐘（含 Edge-TTS 網路）。
+- `hyperframes@0.8.6 check` 的嚴格度（字型 `@font-face`、contrast、text occlusion）抓到了 template 兩個真實缺陷，修正後 template 預設通過。
+- 最適合「同時改 shared/ 工具鏈並用 demo 證明它」以及既有專案的升級 / 審核。

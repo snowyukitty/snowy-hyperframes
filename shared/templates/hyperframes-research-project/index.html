@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>HyperFrames research project</title>
+    <!--
+      Snowy HyperFrames research-video template.
+      - Slide sections and narration <audio> clips between the hf:* markers are GENERATED
+        by `hf html` from data/storyboard.json and re-timed by `hf sync`. Edit the storyboard,
+        not the generated regions. Everything outside the markers (CSS, timeline JS) is yours.
+      - Timing truth: data/storyboard.json + data/audio-durations.json -> data/timeline.json.
+      - GSAP starts are read from each slide's data-start, so there is no second timing array to drift.
+    -->
+    <script src="vendor/gsap.min.js"></script>
+    <style>
+      /* OS-bundled CJK fonts: the local() declarations satisfy `hyperframes lint`
+         (font_family_without_font_face) without shipping font files. For a fully
+         deterministic render across machines, vendor a .woff2 and point src at it. */
+      @font-face { font-family: "Noto Sans TC"; src: local("Noto Sans TC"), local("NotoSansTC-Regular"); }
+      @font-face { font-family: "PingFang TC"; src: local("PingFang TC"); }
+      @font-face { font-family: "Microsoft JhengHei"; src: local("Microsoft JhengHei"), local("微軟正黑體"); }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body {
+        width: 1920px; height: 1080px; overflow: hidden;
+        background: #07090b; color: #f8f6ef;
+        font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+      }
+      #root { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: #07090b; }
+      .slide { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: hidden; --i: 0; }
+      .bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      /* image-free slides: a lit gradient field whose hue drifts per slide (--i is set by hf html) */
+      .bg-generated {
+        background:
+          radial-gradient(1300px 760px at 76% 30%, rgba(148, 240, 231, 0.42), transparent 62%),
+          radial-gradient(980px 640px at 16% 84%, rgba(255, 213, 139, 0.30), transparent 62%),
+          radial-gradient(700px 700px at 55% 60%, rgba(120, 150, 255, 0.18), transparent 70%),
+          linear-gradient(135deg, #121b22 0%, #07090b 100%);
+        filter: hue-rotate(calc(var(--i) * 19deg));
+      }
+      .bg-generated::after {
+        content: ""; position: absolute; inset: 0;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+        background-size: 96px 96px;
+        mask-image: radial-gradient(1100px 700px at 70% 45%, #000 20%, transparent 75%);
+        -webkit-mask-image: radial-gradient(1100px 700px at 70% 45%, #000 20%, transparent 75%);
+      }
+      .shade {
+        position: absolute; inset: 0;
+        background:
+          linear-gradient(90deg, rgba(4, 7, 10, 0.92) 0%, rgba(4, 7, 10, 0.72) 45%, rgba(4, 7, 10, 0.30) 100%),
+          linear-gradient(0deg, rgba(4, 6, 8, 0.94) 0%, rgba(4, 6, 8, 0.40) 38%, rgba(4, 6, 8, 0.18) 100%);
+      }
+      .slide.no-image .shade {
+        background:
+          linear-gradient(90deg, rgba(4, 7, 10, 0.78) 0%, rgba(4, 7, 10, 0.42) 48%, rgba(4, 7, 10, 0.10) 100%),
+          linear-gradient(0deg, rgba(4, 6, 8, 0.88) 0%, rgba(4, 6, 8, 0.30) 40%, rgba(4, 6, 8, 0.06) 100%);
+      }
+      /* image-free slides: a quiet progress ring (pure SVG shapes, no text — keeps contrast/occlusion checks clean) */
+      .deco {
+        position: absolute; z-index: 1; right: 150px; top: 250px; width: 440px; height: 440px;
+        opacity: 0.55; pointer-events: none;
+      }
+      .deco .track { fill: none; stroke: rgba(248, 246, 239, 0.10); stroke-width: 1.6; }
+      .deco .arc { fill: none; stroke: rgba(148, 240, 231, 0.55); stroke-width: 1.6; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 50% 50%; }
+      .deco .dot { fill: rgba(255, 213, 139, 0.7); }
+      .content { position: relative; z-index: 2; width: 1320px; padding: 92px 0 0 96px; }
+      .eyebrow {
+        display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px;
+        border: 1px solid rgba(255, 255, 255, 0.18); border-radius: 999px;
+        background: rgba(7, 13, 16, 0.74); color: #94f0e7;
+        font-size: 24px; line-height: 1; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em;
+      }
+      h1 { max-width: 1240px; margin-top: 26px; color: #fffdf6; font-size: 76px; line-height: 1.08; font-weight: 900; }
+      .caption {
+        position: absolute; z-index: 3; left: 96px; right: 96px; bottom: 96px;
+        padding: 26px 34px; border-radius: 10px;
+        background: rgba(5, 10, 13, 0.78); border: 1px solid rgba(255, 255, 255, 0.14);
+        color: #f3f1e9; font-size: 36px; line-height: 1.45; font-weight: 600;
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.32);
+      }
+      .caption:empty { display: none; }
+      .progress {
+        position: absolute; z-index: 3; top: 96px; right: 96px;
+        color: rgba(248, 246, 239, 0.72); font-size: 26px; font-weight: 700; letter-spacing: 0.06em;
+        font-variant-numeric: tabular-nums;
+      }
+      .narration-audio { position: absolute; width: 0; height: 0; opacity: 0; pointer-events: none; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="10" data-width="1920" data-height="1080">
+      <!-- hf:audio:start -->
+      <!-- hf:audio:end -->
+
+      <!-- hf:slides:start -->
+      <!-- hf:slides:end -->
+    </div>
+
+    <script>
+      // Per-slide entrance motion. Positions come from the DOM (data-start), so `hf sync`
+      // only has to rewrite attributes and this script never drifts from the timeline.
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      const addIfFound = (selector, vars, position) => {
+        const targets = document.querySelectorAll(selector);
+        if (targets.length > 0) tl.from(targets, vars, position);
+      };
+      document.querySelectorAll("#root > .slide").forEach((slide) => {
+        const start = Number(slide.dataset.start || 0);
+        const s = `#${slide.id}`;
+        addIfFound(`${s} .bg`, { scale: 1.055, opacity: 0.84, duration: 1.35, ease: "power2.out" }, start);
+        addIfFound(`${s} .eyebrow`, { opacity: 0, y: 16, duration: 0.52, ease: "power2.out" }, start + 0.2);
+        addIfFound(`${s} h1`, { opacity: 0, y: 34, duration: 0.78, ease: "power2.out" }, start + 0.36);
+        addIfFound(`${s} .progress`, { opacity: 0, y: 12, duration: 0.5, ease: "power2.out" }, start + 0.6);
+        addIfFound(`${s} .caption`, { opacity: 0, y: 30, duration: 0.66, ease: "power2.out" }, start + 0.9);
+      });
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

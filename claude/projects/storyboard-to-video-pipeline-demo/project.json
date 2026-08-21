@@ -1,0 +1,48 @@
+{
+  "$schema": "../../../shared/schemas/project.schema.json",
+  "id": "storyboard-to-video-pipeline-demo",
+  "title": "從分鏡到影片：Snowy HyperFrames 工作流 v2",
+  "workflow": "claude",
+  "createdAt": "2026-08-21T18:15:00.000Z",
+  "updatedAt": "2026-08-21T18:31:13.777Z",
+  "status": "ready-to-preview",
+  "format": "hyperframes-demo",
+  "language": "zh-Hant",
+  "durationSeconds": 77.2,
+  "sourceConfidence": "not-applicable",
+  "tools": [
+    "claude-code",
+    "shared/tools/hf.mjs",
+    "hyperframes@0.8.6",
+    "edge-tts",
+    "ffprobe"
+  ],
+  "auth": {
+    "required": [],
+    "notes": "No credentials. Edge-TTS needs network but no API key; HyperFrames check/render run locally."
+  },
+  "imageGeneration": {
+    "mode": "none",
+    "provider": "html-only",
+    "notes": "Deliberately no bitmap images: backgrounds are CSS gradients from the shared template, so the demo proves the storyboard -> TTS -> sync -> check -> render pipeline without any image-generation auth."
+  },
+  "paths": {
+    "entry": "index.html",
+    "research": "data/research.json",
+    "storyboard": "data/storyboard.json",
+    "references": "docs/references.md",
+    "renderOutput": "renders/storyboard-to-video-pipeline-demo.mp4"
+  },
+  "timing": {
+    "policy": "audio",
+    "padSeconds": 0.6,
+    "source": "data/timeline.json",
+    "measured": "data/audio-durations.json"
+  },
+  "checks": {
+    "hfAudit": "pass",
+    "hyperframesCheck": "pass (0.8.6: lint 0/0, runtime 0/0, layout 0, motion 0, contrast 18/18)",
+    "render": "smoke render pass (77.2s, 6.9 MB, unreviewed)",
+    "humanPreview": "pending"
+  }
+}

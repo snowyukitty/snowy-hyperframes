@@ -1,0 +1,1 @@
+render 之前要先過兩道門。H F audit 檢查專案結構、schema，以及音訊截斷風險；Hyper Frames check 則檢查 runtime、版面與文字對比度。

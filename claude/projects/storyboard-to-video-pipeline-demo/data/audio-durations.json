@@ -1,0 +1,13 @@
+{
+  "generatedAt": "2026-08-21T18:27:17.915Z",
+  "tool": "ffprobe",
+  "durations": {
+    "slide-01": 11.472,
+    "slide-02": 14.448,
+    "slide-03": 13.344,
+    "slide-04": 11.952,
+    "slide-05": 9.84,
+    "slide-06": 7.512
+  },
+  "total": 68.568
+}

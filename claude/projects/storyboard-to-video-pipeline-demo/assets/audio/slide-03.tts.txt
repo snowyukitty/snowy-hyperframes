@@ -1,0 +1,1 @@
+現在流程只有一條。story board 產生朗讀稿，Edge T T S 生成 M P 3，F F probe 量出實際長度，然後 sync 把時間軸一次寫回頁面、字幕與 metadata。

@@ -4,11 +4,11 @@
   "title": "AI 工具做 HyperFrames 研究影片的成本比較",
   "workflow": "codex",
   "createdAt": "2026-06-01T21:00:00+09:00",
-  "updatedAt": "2026-06-01T22:02:00+09:00",
+  "updatedAt": "2026-08-21T18:24:02.215Z",
   "status": "ready-to-render",
   "format": "hyperframes-presentation",
   "language": "zh-Hant",
-  "durationSeconds": 202,
+  "durationSeconds": 201.2,
   "sourceConfidence": "mixed",
   "tools": [
     "codex",

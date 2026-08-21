@@ -13,20 +13,30 @@ codex/projects/ai-tool-cost-benchmark/
 codex/projects/ai-2030-three-futures/
 codex-pi/projects/gpt-image-2-quota-research/
 pi/projects/latest-tts-voice-clone-research/
+claude/projects/storyboard-to-video-pipeline-demo/   （2026-08-22 審核：自述內容、無外部主張、無 bitmap、無 secret；MP4 不進 git）
 ```
 
 共用內容也可以提交：
 
 ```text
+shared/tools/
+shared/vendor/
 shared/docs/
 shared/schemas/
 shared/templates/
 README.md
+AGENTS.md
+CLAUDE.md
 codex/README.md
 codex-pi/README.md
 pi/README.md
+claude/README.md
 docs-github-update.md
+.github/workflows/
 ```
+
+**Renders（2026-08-22 起）**：新的 MP4 不進 git（`.gitignore` 的 `**/renders/*.mp4`）；要分享成片放 GitHub Releases。
+四支 2026-06 的 demo MP4 保留在歷史中。
 
 ## 2. 不應提交的內容
 
@@ -47,7 +57,8 @@ docs-github-update.md
 - `codex/projects/*` 預設忽略。
 - `codex-pi/projects/*` 預設忽略。
 - `pi/projects/*` 預設忽略。
-- 只有目前四個 demo project 被明確 allowlist。
+- `claude/projects/*` 預設忽略。
+- 只有目前五個 demo project 被明確 allowlist；`node shared/tools/hf.mjs repo-check` 會驗證 tracked 檔案都在 allowlist 內。
 
 未來若要公開新的教育 demo，先完成以下 review，再把該 project 加入 `.gitignore` allowlist：
 
@@ -75,6 +86,8 @@ docs-github-update.md
 ## 5. Pre-Push Checklist
 
 ```powershell
+node shared/tools/hf.mjs repo-check     # allowlist / secret 路徑 / >95 MB / tracked 專案必備檔（CI 也跑）
+node shared/tools/hf.mjs audit --all    # 每個專案 0 error
 git status --short
 git ls-files | Select-String -Pattern "\.pi/|auth\.json|\.env|token|secret|\.thumbnails"
 ```

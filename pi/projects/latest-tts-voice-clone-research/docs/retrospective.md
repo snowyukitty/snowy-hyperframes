@@ -538,3 +538,13 @@ Validation:
 Lesson:
 
 For HyperFrames projects, `dev` should mean HyperFrames Studio preview, not a generic local web server. Static serving is useful only as a fallback to inspect raw HTML.
+
+---
+
+## 2026-08-22 Maintenance Update
+
+- `hyperframes.json`（Snowy slide manifest）移到 `data/manifest.json`；`hyperframes.json` 現在是上游格式（registry/paths），避免與 HyperFrames ≥0.7 的設定檔同名衝突。`scripts/check-project.js` / `check-mvp.js` 已跟著改。
+- `data/storyboard.json` 補上 shared schema 的 canonical 欄位（`image` 指向實際存在的 `assets/images/slide-NN.png`、`durationTarget`、`narration`、`subtitle`），歷史欄位保留。
+- `data/pronunciation-map.json` 轉成 shared schema 形狀（`rules[]` → `entries[]`，`matchType: regex`），規則不變。
+- `package.json` 升級 `hyperframes@0.8.6`；`check` = `hf audit` + `hyperframes check`；`vendor/gsap.min.js` 取代 CDN；audio slot 以 `hf fit-audio` 對齊 MP3 實長（slide 視窗不變）。
+- 實測：`npx hyperframes@0.8.6 check` → lint 0/0、runtime 0/0、contrast 75/75 WCAG AA，Check passed。

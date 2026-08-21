@@ -1,282 +1,340 @@
 {
-  "description": "Pronunciation map for Snowy HyperFrames TTS projects. Maps English technical terms, product names, and acronyms to phonetic spellings for natural-sounding Mandarin/Cantonese narration.",
+  "$schema": "../../../../shared/schemas/pronunciation-map.schema.json",
+  "version": 1,
+  "strategy": "display-text-and-tts-text-separated",
+  "notes": "Pronunciation map for Snowy HyperFrames TTS projects. Maps English technical terms, product names, and acronyms to phonetic spellings for natural-sounding Mandarin/Cantonese narration.",
+  "defaultVoice": "zh-TW-HsiaoChenNeural",
   "language": "zh-Hant",
-  "voice": "zh-TW-HsiaoChenNeural",
-  "rules": [
+  "entries": [
     {
-      "pattern": "\\bAPI\\b",
-      "replacement": "A P I",
-      "reason": "Acronym should be spelled out for clarity"
+      "match": "\\bAPI\\b",
+      "tts": "A P I",
+      "reason": "Acronym should be spelled out for clarity",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bGPT\\b",
-      "replacement": "G P T",
-      "reason": "Acronym should be spelled out"
+      "match": "\\bGPT\\b",
+      "tts": "G P T",
+      "reason": "Acronym should be spelled out",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bTTS\\b",
-      "replacement": "T T S",
-      "reason": "Acronym pronunciation"
+      "match": "\\bTTS\\b",
+      "tts": "T T S",
+      "reason": "Acronym pronunciation",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bAI\\b",
-      "replacement": "A I",
-      "reason": "Acronym pronunciation"
+      "match": "\\bAI\\b",
+      "tts": "A I",
+      "reason": "Acronym pronunciation",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bSSML\\b",
-      "replacement": "S S M L",
-      "reason": "Acronym pronunciation"
+      "match": "\\bSSML\\b",
+      "tts": "S S M L",
+      "reason": "Acronym pronunciation",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bVAD\\b",
-      "replacement": "V A D",
-      "reason": "Voice Activity Detection acronym"
+      "match": "\\bVAD\\b",
+      "tts": "V A D",
+      "reason": "Voice Activity Detection acronym",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bRTX\\b",
-      "replacement": "R T X",
-      "reason": "GPU model acronym"
+      "match": "\\bRTX\\b",
+      "tts": "R T X",
+      "reason": "GPU model acronym",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bGPU\\b",
-      "replacement": "G P U",
-      "reason": "Graphics Processing Unit acronym"
+      "match": "\\bGPU\\b",
+      "tts": "G P U",
+      "reason": "Graphics Processing Unit acronym",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bCPU\\b",
-      "replacement": "C P U",
-      "reason": "Central Processing Unit acronym"
+      "match": "\\bCPU\\b",
+      "tts": "C P U",
+      "reason": "Central Processing Unit acronym",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bRAM\\b",
-      "replacement": "R A M",
-      "reason": "Memory acronym"
+      "match": "\\bRAM\\b",
+      "tts": "R A M",
+      "reason": "Memory acronym",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bVRAM\\b",
-      "replacement": "V R A M",
-      "reason": "Video RAM acronym"
+      "match": "\\bVRAM\\b",
+      "tts": "V R A M",
+      "reason": "Video RAM acronym",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bELO\\b",
-      "replacement": "E L O",
-      "reason": "Rating system acronym"
+      "match": "\\bELO\\b",
+      "tts": "E L O",
+      "reason": "Rating system acronym",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bMOS\\b",
-      "replacement": "M O S",
-      "reason": "Mean Opinion Score acronym"
+      "match": "\\bMOS\\b",
+      "tts": "M O S",
+      "reason": "Mean Opinion Score acronym",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bOpenAI\\b",
-      "replacement": "Open A I",
-      "reason": "Company name with acronym"
+      "match": "\\bOpenAI\\b",
+      "tts": "Open A I",
+      "reason": "Company name with acronym",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bChatGPT\\b",
-      "replacement": "Chat G P T",
-      "reason": "Product name pronunciation"
+      "match": "\\bChatGPT\\b",
+      "tts": "Chat G P T",
+      "reason": "Product name pronunciation",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bGPT-Audio\\b",
-      "replacement": "G P T Audio",
-      "reason": "Product model name"
+      "match": "\\bGPT-Audio\\b",
+      "tts": "G P T Audio",
+      "reason": "Product model name",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bGPT-Realtime\\b",
-      "replacement": "G P T Realtime",
-      "reason": "Product model name"
+      "match": "\\bGPT-Realtime\\b",
+      "tts": "G P T Realtime",
+      "reason": "Product model name",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bGPT-Image\\b",
-      "replacement": "G P T Image",
-      "reason": "Product model name"
+      "match": "\\bGPT-Image\\b",
+      "tts": "G P T Image",
+      "reason": "Product model name",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bCodex\\b",
-      "replacement": "Codex",
-      "reason": "Product name, keep as-is"
+      "match": "\\bCodex\\b",
+      "tts": "Codex",
+      "reason": "Product name, keep as-is",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bElevenLabs\\b",
-      "replacement": "Eleven Labs",
-      "reason": "Company name spacing"
+      "match": "\\bElevenLabs\\b",
+      "tts": "Eleven Labs",
+      "reason": "Company name spacing",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bWaveform\\b",
-      "replacement": "波形",
-      "reason": "Technical term translation option"
+      "match": "\\bWaveform\\b",
+      "tts": "波形",
+      "reason": "Technical term translation option",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bMicrosoft Azure\\b",
-      "replacement": "Microsoft Azure",
-      "reason": "Company/product name, keep as-is"
+      "match": "\\bMicrosoft Azure\\b",
+      "tts": "Microsoft Azure",
+      "reason": "Company/product name, keep as-is",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bAzure Speech\\b",
-      "replacement": "Azure Speech",
-      "reason": "Service name, keep as-is"
+      "match": "\\bAzure Speech\\b",
+      "tts": "Azure Speech",
+      "reason": "Service name, keep as-is",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bGoogle Cloud\\b",
-      "replacement": "Google Cloud",
-      "reason": "Service name"
+      "match": "\\bGoogle Cloud\\b",
+      "tts": "Google Cloud",
+      "reason": "Service name",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bAmazon Polly\\b",
-      "replacement": "Amazon Polly",
-      "reason": "Service name"
+      "match": "\\bAmazon Polly\\b",
+      "tts": "Amazon Polly",
+      "reason": "Service name",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bWhisperX\\b",
-      "replacement": "WhisperX",
-      "reason": "Tool name, keep as-is"
+      "match": "\\bWhisperX\\b",
+      "tts": "WhisperX",
+      "reason": "Tool name, keep as-is",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bKokoro\\b",
-      "replacement": "Kokoro",
-      "reason": "Model name"
+      "match": "\\bKokoro\\b",
+      "tts": "Kokoro",
+      "reason": "Model name",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bFish Speech\\b",
-      "replacement": "Fish Speech",
-      "reason": "Model name"
+      "match": "\\bFish Speech\\b",
+      "tts": "Fish Speech",
+      "reason": "Model name",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bCosyVoice\\b",
-      "replacement": "CosyVoice",
-      "reason": "Model name"
+      "match": "\\bCosyVoice\\b",
+      "tts": "CosyVoice",
+      "reason": "Model name",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bMeloTTS\\b",
-      "replacement": "MeloTTS",
-      "reason": "Model name"
+      "match": "\\bMeloTTS\\b",
+      "tts": "MeloTTS",
+      "reason": "Model name",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bF5-TTS\\b",
-      "replacement": "F 5 T T S",
-      "reason": "Model name with dash"
+      "match": "\\bF5-TTS\\b",
+      "tts": "F 5 T T S",
+      "reason": "Model name with dash",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bEdge-TTS\\b",
-      "replacement": "Edge T T S",
-      "reason": "Tool name pronunciation"
+      "match": "\\bEdge-TTS\\b",
+      "tts": "Edge T T S",
+      "reason": "Tool name pronunciation",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bInworld\\b",
-      "replacement": "Inworld",
-      "reason": "Company name"
+      "match": "\\bInworld\\b",
+      "tts": "Inworld",
+      "reason": "Company name",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bResemble AI\\b",
-      "replacement": "Resemble A I",
-      "reason": "Company name"
+      "match": "\\bResemble AI\\b",
+      "tts": "Resemble A I",
+      "reason": "Company name",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bPlayHT\\b",
-      "replacement": "Play H T",
-      "reason": "Company name"
+      "match": "\\bPlayHT\\b",
+      "tts": "Play H T",
+      "reason": "Company name",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bXTTS\\b",
-      "replacement": "X T T S",
-      "reason": "Model acronym"
+      "match": "\\bXTTS\\b",
+      "tts": "X T T S",
+      "reason": "Model acronym",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bHuggingFace\\b",
-      "replacement": "Hugging Face",
-      "reason": "Platform name"
+      "match": "\\bHuggingFace\\b",
+      "tts": "Hugging Face",
+      "reason": "Platform name",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bMIT\\b",
-      "replacement": "M I T",
-      "reason": "License/institute acronym"
+      "match": "\\bMIT\\b",
+      "tts": "M I T",
+      "reason": "License/institute acronym",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bCC-BY-NC\\b",
-      "replacement": "C C 非商業",
-      "reason": "License abbreviation"
+      "match": "\\bCC-BY-NC\\b",
+      "tts": "C C 非商業",
+      "reason": "License abbreviation",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bApache 2.0\\b",
-      "replacement": "Apache 2.0",
-      "reason": "License name"
+      "match": "\\bApache 2.0\\b",
+      "tts": "Apache 2.0",
+      "reason": "License name",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bBSD\\b",
-      "replacement": "B S D",
-      "reason": "License acronym"
+      "match": "\\bBSD\\b",
+      "tts": "B S D",
+      "reason": "License acronym",
+      "matchType": "regex"
     },
     {
-      "pattern": "Free/Plus/Pro",
-      "replacement": "免費版 / Plus 版 / Pro 版",
-      "reason": "Plan names in Chinese context"
+      "match": "Free/Plus/Pro",
+      "tts": "免費版 / Plus 版 / Pro 版",
+      "reason": "Plan names in Chinese context",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bfree\\b",
-      "replacement": "免費",
-      "reason": "Pricing tier"
+      "match": "\\bfree\\b",
+      "tts": "免費",
+      "reason": "Pricing tier",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bPro\\b",
-      "replacement": "Pro 版",
-      "reason": "Plan name with context"
+      "match": "\\bPro\\b",
+      "tts": "Pro 版",
+      "reason": "Plan name with context",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\benterprise\\b",
-      "replacement": "企業版",
-      "reason": "Plan tier translation"
+      "match": "\\benterprise\\b",
+      "tts": "企業版",
+      "reason": "Plan tier translation",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\breal-time\\b",
-      "replacement": "實時",
-      "reason": "Common tech term translation"
+      "match": "\\breal-time\\b",
+      "tts": "實時",
+      "reason": "Common tech term translation",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\blatency\\b",
-      "replacement": "延遲",
-      "reason": "Technical term translation"
+      "match": "\\blatency\\b",
+      "tts": "延遲",
+      "reason": "Technical term translation",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bprosody\\b",
-      "replacement": "韻律",
-      "reason": "TTS feature translation"
+      "match": "\\bprosody\\b",
+      "tts": "韻律",
+      "reason": "TTS feature translation",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bpitch\\b",
-      "replacement": "音調",
-      "reason": "Audio parameter translation"
+      "match": "\\bpitch\\b",
+      "tts": "音調",
+      "reason": "Audio parameter translation",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\brate\\b",
-      "replacement": "語速",
-      "reason": "Speech rate translation"
+      "match": "\\brate\\b",
+      "tts": "語速",
+      "reason": "Speech rate translation",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bvoice cloning\\b",
-      "replacement": "聲音複製",
-      "reason": "Feature translation"
+      "match": "\\bvoice cloning\\b",
+      "tts": "聲音複製",
+      "reason": "Feature translation",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bnarration\\b",
-      "replacement": "旁白",
-      "reason": "Content type translation"
+      "match": "\\bnarration\\b",
+      "tts": "旁白",
+      "reason": "Content type translation",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bdubbing\\b",
-      "replacement": "配音",
-      "reason": "Audio production term"
+      "match": "\\bdubbing\\b",
+      "tts": "配音",
+      "reason": "Audio production term",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bsubtitles\\b",
-      "replacement": "字幕",
-      "reason": "Content type"
+      "match": "\\bsubtitles\\b",
+      "tts": "字幕",
+      "reason": "Content type",
+      "matchType": "regex"
     },
     {
-      "pattern": "\\bforced alignment\\b",
-      "replacement": "強制對齐",
-      "reason": "Technical process translation"
+      "match": "\\bforced alignment\\b",
+      "tts": "強制對齐",
+      "reason": "Technical process translation",
+      "matchType": "regex"
     }
   ],
   "examples": [

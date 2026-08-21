@@ -4,11 +4,11 @@
   "title": "2030 三種未來：樂觀、一般、悲觀",
   "workflow": "codex",
   "createdAt": "2026-06-02T00:00:00+09:00",
-  "updatedAt": "2026-06-02T01:20:00+09:00",
+  "updatedAt": "2026-08-21T18:24:02.790Z",
   "status": "rendered",
   "format": "hyperframes-presentation",
   "language": "zh-Hant",
-  "durationSeconds": 308,
+  "durationSeconds": 307.6,
   "sourceConfidence": "mixed",
   "tools": [
     "codex",

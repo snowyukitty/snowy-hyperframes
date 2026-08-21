@@ -3,11 +3,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "npx --yes hyperframes@0.6.64 preview",
-    "check": "npx --yes hyperframes@0.6.64 lint && npx --yes hyperframes@0.6.64 validate && npx --yes hyperframes@0.6.64 inspect",
+    "dev": "npx --yes hyperframes@0.8.6 preview",
+    "check": "node ../../../shared/tools/hf.mjs audit && npx --yes hyperframes@0.8.6 check",
     "tts:prepare": "powershell -ExecutionPolicy Bypass -File scripts/prepare-tts.ps1",
     "tts": "npm run tts:prepare && powershell -ExecutionPolicy Bypass -File scripts/generate-tts.ps1",
-    "render": "npx --yes hyperframes@0.6.64 render . --output renders/gpt-image-2-quota-research.mp4",
-    "publish": "npx --yes hyperframes@0.6.64 publish"
+    "render": "npx --yes hyperframes@0.8.6 render . --output renders/gpt-image-2-quota-research.mp4",
+    "publish": "npx --yes hyperframes@0.8.6 publish",
+    "lint": "npx --yes hyperframes@0.8.6 lint",
+    "audit": "node ../../../shared/tools/hf.mjs audit",
+    "fit-audio": "node ../../../shared/tools/hf.mjs fit-audio",
+    "vendor": "node ../../../shared/tools/hf.mjs vendor",
+    "doctor": "npx --yes hyperframes@0.8.6 doctor",
+    "preview": "npx --yes hyperframes@0.8.6 preview"
   }
 }
