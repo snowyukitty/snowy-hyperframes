@@ -23,6 +23,9 @@
  *   review [--artifact]     build the human preview gate: one self-contained HTML with a frame + the real
  *                           narration per slide, per-slide verdicts, and a paste-ready approval summary
  *   audit [--all] [--json]  structural + schema + timing + audio-cut-risk checks (CI-safe, no browser)
+ *   bakeoff [--only id] [--force] [--no-kit]
+ *                           TTS provider comparison: same golden samples through every engine,
+ *                           an objective battery (length, rate, pauses, LUFS, RTF) and a BLIND A/B kit
  *   repo-check              publication guard: allowlist, secrets, >95 MB files (run from repo root)
  *   pipeline                prepare-tts -> tts -> measure -> sync -> audit
  *
@@ -933,6 +936,10 @@ function auditProject(projectRoot, repo) {
   const I = (code, msg) => findings.push({ level: "info", code, msg });
   const P = (p) => path.join(projectRoot, p);
 
+  // A project without a storyboard but with data/bakeoff.json is an audio-research
+  // project (no composition, no timeline) — judge it by its own contract.
+  if (!exists(P("data/storyboard.json")) && exists(P("data/bakeoff.json"))) return auditBakeoff(projectRoot, repo, findings, { E, W, I, P });
+
   // files
   for (const f of ["project.json", "index.html", "data/storyboard.json", "package.json"]) if (!exists(P(f))) E("missing-file", `${f} missing`);
   for (const f of ["data/pronunciation-map.json", "docs/references.md", "docs/runbook.md", "docs/retrospective.md", "captions/narration.srt", "README.md"]) if (!exists(P(f))) W("missing-file", `${f} missing`);
@@ -1089,6 +1096,46 @@ function auditProject(projectRoot, repo) {
   if (project.status === "rendered" && renderOut && !exists(P(renderOut))) I("render", `status=rendered but ${renderOut} not present locally (fine if renders live in Releases)`);
   return findings;
 }
+
+// Audit contract for an audio-research (bakeoff) project: every sample must exist for
+// every provider, carry its provider record, and be represented in measurements.json.
+function auditBakeoff(projectRoot, repo, findings, { E, W, I, P }) {
+  for (const f of ["project.json", "README.md", "docs/retrospective.md", "docs/references.md"]) if (!exists(P(f))) W("missing-file", `${f} missing`);
+  let cfg;
+  try {
+    cfg = readJson(P("data/bakeoff.json"));
+  } catch (e) {
+    E("invalid-json", `data/bakeoff.json: ${e.message}`);
+    return findings;
+  }
+  const providers = cfg.providers || [];
+  const samples = cfg.samples || [];
+  if (!providers.length) E("bakeoff", "no providers declared");
+  if (!samples.length) E("bakeoff", "no samples declared");
+  const ids = samples.map((s) => s.id);
+  if (new Set(ids).size !== ids.length) E("bakeoff", "duplicate sample ids");
+  const measured = exists(P("data/measurements.json")) ? readJson(P("data/measurements.json")).results || [] : [];
+  const seen = new Set(measured.map((r) => `${r.sample}|${r.provider}`));
+  for (const s of samples) {
+    if (!(s.text || "").trim()) E("bakeoff", `${s.id}: empty text`);
+    for (const pr of providers) {
+      const base = `assets/audio/${s.id}.${pr.id}`;
+      const audio = [".mp3", ".wav"].map((e) => `${base}${e}`).find((f) => exists(P(f)));
+      if (!audio) W("bakeoff", `${s.id} · ${pr.id}: no audio yet (run hf bakeoff)`);
+      else if (!exists(P(`${base}.provider.json`))) W("bakeoff", `${s.id} · ${pr.id}: missing provider record`);
+      if (audio && !seen.has(`${s.id}|${pr.id}`)) W("bakeoff", `${s.id} · ${pr.id}: audio exists but is not in data/measurements.json (re-run hf bakeoff)`);
+    }
+  }
+  // an evaluation whose scorecard is still empty must not be published as if it had a result
+  const card = P("docs/listening-scorecard.md");
+  if (exists(card)) {
+    const text = readText(card);
+    const undecided = /待人工聽測|pending human/i.test(text);
+    if (undecided) I("bakeoff", "listening scorecard is still open — no naturalness conclusion may be published yet");
+  }
+  return findings;
+}
+
 function listProjects(repo) {
   const out = [];
   for (const wf of WORKFLOWS) {
@@ -1641,6 +1688,404 @@ function cmdReview(projectRoot = findProjectRoot()) {
   log(`  open it, run 連續播放 (cinema), tick the three gates per slide, then press 複製審核結論.`);
 }
 
+// --- the blind A/B listening kit (same self-contained pattern as the review kit) ---
+const BAKEOFF_CSS = `
+.samples { display: flex; flex-direction: column; gap: 22px; }
+.sample { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px; }
+.sample.judged { border-color: rgba(127,224,168,.45); }
+.sample h2 { font-size: 20px; }
+.purpose { color: var(--ink-dim); font-size: 13px; margin-top: 4px; }
+.script {
+  margin-top: 14px; padding: 14px 16px; border-radius: 8px; background: var(--panel-2);
+  border-left: 3px solid var(--warm); font-size: 15px; line-height: 1.62;
+}
+.takes { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 16px; }
+.take { border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; background: var(--panel-2); }
+.take .tag {
+  display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px;
+  border-radius: 8px; background: var(--accent); color: #06231f; font-weight: 900; font-size: 14px;
+}
+.take .who { margin-left: 9px; font-size: 13px; font-weight: 700; color: var(--ink-dim); }
+.take.revealed .who { color: var(--accent); }
+.metrics-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.metrics-row .chip { font-size: 11.5px; padding: 3px 8px; }
+.hidden-until-reveal { visibility: hidden; }
+.verdict { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; align-items: center; }
+.pick { border-radius: 999px; padding: 7px 15px; font-size: 13px; }
+.pick.on { background: var(--accent); color: #06231f; border-color: var(--accent); }
+.tallies { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 18px; }
+.tallybox { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; }
+.tallybox .n { font-size: 34px; font-weight: 900; color: var(--warm); font-variant-numeric: tabular-nums; }
+`;
+
+function bakeoffHtml(cfg, results, projectRoot, opts = {}) {
+  const byKey = {};
+  for (const r of results) byKey[`${r.sample}|${r.provider}`] = r;
+  // deterministic per-sample order so the test is blind but rebuilds are stable
+  const orderFor = (id, n) => {
+    let h = 0;
+    for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+    const idx = [...Array(n).keys()];
+    for (let i = idx.length - 1; i > 0; i--) {
+      h = (h * 1103515245 + 12345) >>> 0;
+      const j = h % (i + 1);
+      [idx[i], idx[j]] = [idx[j], idx[i]];
+    }
+    return idx;
+  };
+  const samples = cfg.samples.map((s) => ({
+    id: s.id,
+    title: s.title || s.id,
+    purpose: s.purpose || "",
+    text: s.text,
+    order: orderFor(s.id, cfg.providers.length),
+    takes: cfg.providers.map((p) => {
+      const r = byKey[`${s.id}|${p.id}`];
+      const file = r ? path.join(projectRoot, r.file) : null;
+      return {
+        provider: p.id,
+        label: p.label || p.id,
+        audio: file && exists(file) ? dataUri(file, file.endsWith(".wav") ? "audio/wav" : "audio/mpeg") : null,
+        m: r || null,
+      };
+    }),
+  }));
+  const meta = {
+    id: cfg.id || path.basename(projectRoot),
+    title: cfg.title || "TTS bakeoff",
+    language: cfg.language || "",
+    generatedAt: nowIso().slice(0, 19).replace("T", " ") + "Z",
+    providers: cfg.providers.map((p) => ({ id: p.id, label: p.label || p.id, voice: p.voice, engine: p.engine, notes: p.notes || "" })),
+  };
+  const data = JSON.stringify({ meta, samples }).replace(/</g, "\\u003c");
+  const head = `<title>${esc(meta.title)}</title>\n<style>${REVIEW_CSS}${BAKEOFF_CSS}</style>`;
+  const body = `
+<header class="top">
+  <div class="top-in">
+    <h1>${esc(meta.title)}</h1>
+    <div class="chips">
+      <span class="chip accent">${samples.length} 段</span>
+      <span class="chip">${meta.providers.length} 個引擎</span>
+      <span class="chip" id="tally">0 / ${samples.length} 已評</span>
+    </div>
+    <span class="spacer"></span>
+    <button id="reveal">揭曉引擎</button>
+    <button id="copy" class="primary">複製評測結論</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <p class="lede">
+    <b>盲測</b>：每段稿子由所有引擎各念一次，標籤只有 A / B，順序由 sample id 決定（每段不同）。
+    先聽完再選，選完全部之後再按「揭曉引擎」——客觀數據也一併藏到揭曉之後，避免看到秒數就先入為主。
+    八段稿子各針對一個弱點：純中文、中英混讀、數字日期、長句切分、柔和語氣、強調轉折、模型名稱、長稿穩定性。
+  </p>
+  <div class="samples" id="list"></div>
+  <div class="tallies" id="tallies"></div>
+  <footer>
+    由 <code>hf bakeoff</code> 產生於 ${esc(meta.generatedAt)} · 客觀數據在 <code>data/measurements.json</code> ·
+    結論寫回 <code>shared/docs/local-tts-no-api-key-strategy.md</code>。
+  </footer>
+</div>
+
+<script>
+var D = ${data};
+var KEY = "hf-bakeoff:" + D.meta.id;
+var state = {};
+try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { state = {}; }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+function st(id) { if (!state[id]) state[id] = { pick: null, note: "" }; return state[id]; }
+var revealed = false;
+var LETTERS = "ABCD";
+function fmt(n, d) { return n == null ? "—" : Number(n).toFixed(d == null ? 2 : d); }
+
+function metricChips(m) {
+  if (!m) return "";
+  var rows = [
+    ["長度", fmt(m.durationSeconds) + "s"],
+    ["語速", fmt(m.rate) + " 拍/秒"],
+    ["發聲語速", fmt(m.articulationRate)],
+    ["內部停頓", String(m.internalPauses)],
+    ["靜音比", fmt(m.silenceRatio)],
+    ["響度", m.lufs == null ? "—" : fmt(m.lufs, 1) + " LUFS"],
+    ["峰值", m.truePeakDb == null ? "—" : fmt(m.truePeakDb, 1) + " dB"]
+  ];
+  if (m.realTimeFactor != null) rows.push(["生成 RTF", fmt(m.realTimeFactor)]);
+  return rows.map(function (r) { return '<span class="chip">' + r[0] + " " + r[1] + "</span>"; }).join("");
+}
+function render() {
+  var list = document.getElementById("list");
+  list.innerHTML = "";
+  D.samples.forEach(function (s) {
+    var el = document.createElement("article");
+    el.className = "sample" + (st(s.id).pick ? " judged" : "");
+    el.id = "s-" + s.id;
+    var takes = s.order.map(function (ti, pos) {
+      var t = s.takes[ti];
+      return '<div class="take' + (revealed ? " revealed" : "") + '">' +
+        '<div><span class="tag">' + LETTERS[pos] + '</span><span class="who">' +
+          (revealed ? t.label : "？？？") + "</span></div>" +
+        (t.audio ? '<audio controls preload="none" src="' + t.audio + '" style="margin-top:10px"></audio>'
+                 : '<div class="purpose" style="margin-top:10px">（沒有音檔）</div>') +
+        '<div class="metrics-row' + (revealed ? "" : " hidden-until-reveal") + '">' + metricChips(t.m) + "</div>" +
+      "</div>";
+    }).join("");
+    var picks = s.order.map(function (ti, pos) {
+      var on = st(s.id).pick === LETTERS[pos];
+      return '<button class="pick' + (on ? " on" : "") + '" data-s="' + s.id + '" data-p="' + LETTERS[pos] + '">' + LETTERS[pos] + " 較好</button>";
+    }).join("") + '<button class="pick' + (st(s.id).pick === "tie" ? " on" : "") + '" data-s="' + s.id + '" data-p="tie">平手</button>';
+    el.innerHTML =
+      "<h2>" + s.title + "</h2>" +
+      (s.purpose ? '<div class="purpose">' + s.purpose + "</div>" : "") +
+      '<div class="script">' + s.text + "</div>" +
+      '<div class="takes">' + takes + "</div>" +
+      '<div class="verdict">' + picks + "</div>" +
+      '<textarea class="note" data-s="' + s.id + '" placeholder="哪裡不自然？（會出現在結論裡）" style="margin-top:10px">' + (st(s.id).note || "") + "</textarea>";
+    list.appendChild(el);
+  });
+  tally();
+}
+function tally() {
+  var done = D.samples.filter(function (s) { return st(s.id).pick; }).length;
+  var t = document.getElementById("tally");
+  t.textContent = done + " / " + D.samples.length + " 已評";
+  t.className = "chip " + (done === D.samples.length ? "ok" : done ? "warn" : "");
+  var box = document.getElementById("tallies");
+  if (!revealed) { box.innerHTML = ""; return; }
+  var wins = {}, ties = 0;
+  D.meta.providers.forEach(function (p) { wins[p.id] = 0; });
+  D.samples.forEach(function (s) {
+    var pick = st(s.id).pick;
+    if (!pick) return;
+    if (pick === "tie") { ties++; return; }
+    var pos = LETTERS.indexOf(pick);
+    var t = s.takes[s.order[pos]];
+    if (t) wins[t.provider] = (wins[t.provider] || 0) + 1;
+  });
+  box.innerHTML = D.meta.providers.map(function (p) {
+    return '<div class="tallybox"><div class="chip accent">' + p.label + '</div><div class="n">' + wins[p.id] + "</div>" +
+      '<div class="purpose">段勝出 · ' + (p.voice || "") + "</div></div>";
+  }).join("") + '<div class="tallybox"><div class="chip">平手</div><div class="n">' + ties + '</div><div class="purpose">段</div></div>';
+}
+document.addEventListener("click", function (e) {
+  var b = e.target.closest ? e.target.closest(".pick") : null;
+  if (!b) return;
+  var s = st(b.dataset.s);
+  s.pick = s.pick === b.dataset.p ? null : b.dataset.p;
+  save(); render();
+});
+document.addEventListener("input", function (e) {
+  if (!e.target.classList || !e.target.classList.contains("note")) return;
+  st(e.target.dataset.s).note = e.target.value; save();
+});
+document.getElementById("reveal").addEventListener("click", function () {
+  revealed = !revealed;
+  this.textContent = revealed ? "隱藏引擎" : "揭曉引擎";
+  render();
+});
+document.getElementById("copy").addEventListener("click", function () {
+  var lines = ["## TTS bakeoff — " + D.meta.title, "", "- 產生：" + D.meta.generatedAt, "- 引擎："];
+  D.meta.providers.forEach(function (p) { lines.push("  - \`" + p.id + "\` " + p.label + (p.notes ? " — " + p.notes : "")); });
+  lines.push("", "| 段落 | 針對 | 勝出 | 備註 |", "| --- | --- | --- | --- |");
+  var wins = {}; var ties = 0;
+  D.samples.forEach(function (s) {
+    var v = st(s.id), who = "未評";
+    if (v.pick === "tie") { who = "平手"; ties++; }
+    else if (v.pick) {
+      var t = s.takes[s.order[LETTERS.indexOf(v.pick)]];
+      who = t ? t.label : v.pick;
+      if (t) wins[t.provider] = (wins[t.provider] || 0) + 1;
+    }
+    lines.push("| " + s.id + " " + s.title + " | " + (s.purpose || "") + " | " + who + " | " + (v.note || "") + " |");
+  });
+  lines.push("", "總計：" + D.meta.providers.map(function (p) { return p.label + " " + (wins[p.id] || 0) + " 勝"; }).join("、") + "、平手 " + ties + " 段。");
+  lines.push("", "客觀數據見 \`data/measurements.json\`（長度、語速、停頓、LUFS、RTF）。");
+  var text = lines.join("\\n");
+  var done = function () { var b = document.getElementById("copy"); b.textContent = "已複製 ✓"; setTimeout(function () { b.textContent = "複製評測結論"; }, 1800); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () { window.prompt("複製這段：", text); });
+  else window.prompt("複製這段：", text);
+});
+render();
+</script>`;
+  if (opts.artifact) return `${head}\n${body}\n`;
+  return `<!DOCTYPE html>\n<html lang="zh-Hant">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n${head}\n</head>\n<body>\n${body}\n</body>\n</html>\n`;
+}
+
+// ---------------------------------------------------------------------------
+// COMMAND: bakeoff  — compare TTS providers on one fixed set of golden samples
+// ---------------------------------------------------------------------------
+// The 2026-06 phase summary asked for this and it never happened, because the
+// work was "listen to 16 clips and form an opinion" with no harness. This builds
+// the harness: same text through every provider, objective measurements from
+// ffmpeg, and a BLIND A/B listening kit so the subjective half is a 10-minute
+// task with a defensible result instead of a vibe.
+//
+// data/bakeoff.json  { title, language, providers[], samples[] }
+//   provider: { id, label, engine: "edge-tts"|"hyperframes-kokoro", voice, ... }
+//   sample:   { id, title, purpose, text }
+//
+// hf bakeoff [--only id] [--force] [--no-kit]
+//   -> assets/audio/<sample>.<provider>.(mp3|wav)  + .provider.json
+//   -> data/measurements.json      objective battery
+//   -> bakeoff/index.html          blind A/B listening kit (git-ignored)
+
+function bakeoffConfig(projectRoot) {
+  const p = path.join(projectRoot, "data", "bakeoff.json");
+  if (!exists(p)) die(`missing ${rel(projectRoot, p)} — a bakeoff project needs data/bakeoff.json`);
+  const cfg = readJson(p);
+  if (!Array.isArray(cfg.providers) || !cfg.providers.length) die("data/bakeoff.json: providers[] is empty");
+  if (!Array.isArray(cfg.samples) || !cfg.samples.length) die("data/bakeoff.json: samples[] is empty");
+  return cfg;
+}
+
+// --- objective battery ------------------------------------------------------
+function loudness(file) {
+  // EBU R128 integrated loudness + true peak; ffmpeg prints the summary on stderr
+  const r = run("ffmpeg", ["-hide_banner", "-nostats", "-i", file, "-af", "ebur128=peak=true", "-f", "null", "-"]);
+  const text = r.stderr || "";
+  const grab = (label) => {
+    const m = new RegExp(`${label}:\\s*(-?[0-9.]+)`).exec(text.slice(text.lastIndexOf("Summary")));
+    return m ? Number(m[1]) : null;
+  };
+  return { lufs: grab("I"), lra: grab("LRA"), truePeakDb: grab("Peak") };
+}
+function silences(file, thresholdDb = -35, minPause = 0.18) {
+  const r = run("ffmpeg", ["-hide_banner", "-nostats", "-i", file, "-af", `silencedetect=noise=${thresholdDb}dB:d=${minPause}`, "-f", "null", "-"]);
+  const text = r.stderr || "";
+  const out = [];
+  const re = /silence_start:\s*(-?[0-9.]+)[\s\S]*?silence_end:\s*([0-9.]+)/g;
+  let m;
+  while ((m = re.exec(text))) out.push({ start: Math.max(0, Number(m[1])), end: Number(m[2]) });
+  return out;
+}
+function measureClip(file, text) {
+  const dur = ffprobeDuration(file);
+  const pauses = silences(file);
+  const total = pauses.reduce((a, p) => a + (p.end - p.start), 0);
+  const lead = pauses.length && pauses[0].start < 0.05 ? pauses[0].end - pauses[0].start : 0;
+  const tail = pauses.length && pauses[pauses.length - 1].end >= dur - 0.05 ? pauses[pauses.length - 1].end - pauses[pauses.length - 1].start : 0;
+  const w = weightOf(text);
+  const speaking = Math.max(0.01, dur - total);
+  const l = loudness(file);
+  return {
+    durationSeconds: round2(dur),
+    spokenWeight: round2(w),
+    // beats per second over the whole clip vs over voiced time only
+    rate: round2(w / dur),
+    articulationRate: round2(w / speaking),
+    silenceSeconds: round2(total),
+    silenceRatio: round2(total / dur),
+    leadSilence: round2(lead),
+    tailSilence: round2(tail),
+    // pauses that are neither the lead-in nor the tail: the ones a listener reads as phrasing
+    internalPauses: pauses.filter((p) => p.start > 0.05 && p.end < dur - 0.05).length,
+    ...l,
+  };
+}
+
+// --- synthesis --------------------------------------------------------------
+function synthEdge(projectRoot, repo, prov, sample, outBase) {
+  const audioDir = path.dirname(outBase);
+  const txt = `${outBase}.txt`;
+  writeText(txt, sample.text.trim() + "\n");
+  const mp3 = `${outBase}.mp3`;
+  const py = resolvePythonEdge();
+  const helper = path.join(repo, "shared", "tools", "edge_tts_words.py");
+  if (py && exists(helper)) {
+    const r = run(
+      py,
+      [helper, "--text-file", txt, "--voice", prov.voice, `--rate=${prov.rate || "+0%"}`, `--pitch=${prov.pitch || "+0Hz"}`, `--volume=${prov.volume || "+0%"}`, "--out-audio", mp3, "--out-words", `${outBase}.words.json`],
+      { env: { ...process.env, PYTHONIOENCODING: "utf-8" } }
+    );
+    if (r.ok && exists(mp3)) return { file: mp3, ok: true };
+    return { ok: false, why: (r.stderr || r.stdout || "").trim().split("\n").slice(-2).join(" ") };
+  }
+  const edge = resolveEdgeTts();
+  if (!edge) return { ok: false, why: "edge-tts not installed" };
+  const r = run(edge.cmd, [...edge.pre, "--voice", prov.voice, `--rate=${prov.rate || "+0%"}`, `--pitch=${prov.pitch || "+0Hz"}`, "--file", txt, "--write-media", mp3]);
+  return r.ok && exists(mp3) ? { file: mp3, ok: true } : { ok: false, why: (r.stderr || "").trim().slice(-160) };
+}
+function synthKokoro(projectRoot, repo, prov, sample, outBase) {
+  const txt = `${outBase}.txt`;
+  writeText(txt, sample.text.trim() + "\n");
+  const wav = `${outBase}.wav`;
+  const args = ["--yes", `hyperframes@${hfPin(projectRoot)}`, "tts", `"${txt}"`, "--voice", prov.voice, "--lang", prov.lang || "zh", "--speed", String(prov.speed || 1), "-o", `"${wav}"`, "--json"];
+  const r = runNpx(args, { cwd: projectRoot, timeout: 600000 });
+  if (!exists(wav)) return { ok: false, why: (r.stdout || r.stderr || "").trim().split("\n").slice(-2).join(" ") };
+  // a compact mp3 next to the wav keeps the listening kit small
+  const mp3 = `${outBase}.mp3`;
+  run("ffmpeg", ["-y", "-loglevel", "error", "-i", wav, "-codec:a", "libmp3lame", "-b:a", "96k", mp3]);
+  return { file: exists(mp3) ? mp3 : wav, ok: true };
+}
+
+function cmdBakeoff(projectRoot = findProjectRoot()) {
+  const repo = repoRootOrDie(projectRoot);
+  const cfg = bakeoffConfig(projectRoot);
+  const audioDir = path.join(projectRoot, "assets", "audio");
+  fs.mkdirSync(audioDir, { recursive: true });
+  const only = FLAGS.only ? String(FLAGS.only).split(",") : null;
+  const results = [];
+  let made = 0,
+    reused = 0,
+    failed = 0;
+
+  for (const sample of cfg.samples) {
+    if (only && !only.includes(sample.id)) continue;
+    for (const prov of cfg.providers) {
+      const outBase = path.join(audioDir, `${sample.id}.${prov.id}`);
+      const existing = [".mp3", ".wav"].map((e) => `${outBase}${e}`).find(exists);
+      let file = existing;
+      let elapsed = null;
+      if (!existing || FLAGS.force) {
+        const t0 = process.hrtime.bigint();
+        const r = prov.engine === "hyperframes-kokoro" ? synthKokoro(projectRoot, repo, prov, sample, outBase) : synthEdge(projectRoot, repo, prov, sample, outBase);
+        elapsed = Number(process.hrtime.bigint() - t0) / 1e9;
+        if (!r.ok) {
+          failed++;
+          warn(`  ✖ ${sample.id} · ${prov.id}: ${r.why}`);
+          continue;
+        }
+        file = r.file;
+        made++;
+      } else reused++;
+      const m = measureClip(file, sample.text);
+      if (elapsed != null) {
+        m.synthSeconds = round2(elapsed);
+        m.realTimeFactor = round2(elapsed / Math.max(0.01, m.durationSeconds));
+      }
+      writeJson(`${outBase}.provider.json`, {
+        provider: prov.id,
+        label: prov.label,
+        engine: prov.engine,
+        voice: prov.voice,
+        params: { rate: prov.rate, pitch: prov.pitch, speed: prov.speed, lang: prov.lang },
+        requiresApiKey: false,
+        sample: sample.id,
+        inputText: sample.text,
+        outputAudio: rel(projectRoot, file),
+        measurements: m,
+      });
+      results.push({ sample: sample.id, provider: prov.id, file: rel(projectRoot, file), ...m });
+      log(`  ${sample.id} · ${prov.id}: ${fmt(m.durationSeconds)}s  rate ${fmt(m.rate)}  pauses ${m.internalPauses}  ${m.lufs != null ? fmt(m.lufs) + " LUFS" : ""}`);
+    }
+  }
+  writeJson(path.join(projectRoot, "data", "measurements.json"), {
+    generatedAt: nowIso(),
+    generator: "shared/tools/hf.mjs bakeoff",
+    note: "Objective battery only. Naturalness is decided by the blind listening kit, not by these numbers.",
+    providers: cfg.providers.map((p) => ({ id: p.id, label: p.label, engine: p.engine, voice: p.voice })),
+    results,
+  });
+  log(`bakeoff: ${made} generated, ${reused} reused, ${failed} failed → data/measurements.json`);
+  if (!FLAGS["no-kit"]) {
+    const out = path.join(projectRoot, "bakeoff", "index.html");
+    writeText(out, bakeoffHtml(cfg, results, projectRoot, { artifact: !!FLAGS.artifact }));
+    if (FLAGS.artifact) writeText(path.join(projectRoot, "bakeoff", "bakeoff.artifact.html"), bakeoffHtml(cfg, results, projectRoot, { artifact: true }));
+    log(`  listening kit: ${out}  (${(fs.statSync(out).size / 1048576).toFixed(1)} MB, blind A/B)`);
+  }
+  if (failed) process.exit(1);
+}
+
 // ---------------------------------------------------------------------------
 // COMMAND: pipeline
 // ---------------------------------------------------------------------------
@@ -1666,6 +2111,7 @@ const commands = {
   measure: () => cmdMeasure(),
   sync: () => cmdSync(),
   captions: () => cmdCaptions(),
+  bakeoff: () => cmdBakeoff(),
   "fit-audio": () => cmdFitAudio(),
   review: () => cmdReview(),
   vendor: () => cmdVendor(),

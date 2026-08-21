@@ -26,7 +26,12 @@
       "type": "string"
     },
     "workflow": {
-      "enum": ["codex-pi", "codex", "pi", "claude"]
+      "enum": [
+        "codex-pi",
+        "codex",
+        "pi",
+        "claude"
+      ]
     },
     "createdAt": {
       "type": "string",
@@ -37,10 +42,21 @@
       "format": "date-time"
     },
     "status": {
-      "enum": ["draft", "ready-to-preview", "ready-to-render", "rendered", "archived"]
+      "enum": [
+        "draft",
+        "ready-to-preview",
+        "ready-to-render",
+        "rendered",
+        "archived"
+      ]
     },
     "format": {
-      "enum": ["hyperframes-presentation", "hyperframes-video", "hyperframes-demo"]
+      "enum": [
+        "hyperframes-presentation",
+        "hyperframes-video",
+        "hyperframes-demo",
+        "audio-research"
+      ]
     },
     "language": {
       "type": "string"
@@ -57,7 +73,10 @@
     },
     "auth": {
       "type": "object",
-      "required": ["required", "notes"],
+      "required": [
+        "required",
+        "notes"
+      ],
       "properties": {
         "required": {
           "type": "array",
@@ -72,7 +91,11 @@
     },
     "imageGeneration": {
       "type": "object",
-      "required": ["mode", "provider", "notes"],
+      "required": [
+        "mode",
+        "provider",
+        "notes"
+      ],
       "properties": {
         "mode": {
           "type": "string"
@@ -86,11 +109,23 @@
       }
     },
     "sourceConfidence": {
-      "enum": ["official-only", "mixed", "estimate-heavy", "unknown", "not-applicable"]
+      "enum": [
+        "official-only",
+        "mixed",
+        "estimate-heavy",
+        "unknown",
+        "not-applicable"
+      ]
     },
     "paths": {
       "type": "object",
-      "required": ["entry", "research", "storyboard", "references", "renderOutput"],
+      "required": [
+        "entry",
+        "research",
+        "storyboard",
+        "references",
+        "renderOutput"
+      ],
       "properties": {
         "entry": {
           "type": "string"

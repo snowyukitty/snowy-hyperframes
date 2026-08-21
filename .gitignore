@@ -55,6 +55,7 @@ Thumbs.db
 
 # Generated review kits and snapshot frames (rebuild with `hf review`)
 **/review/
+**/bakeoff/
 **/snapshots/
 **/.hf-review-tmp/
 

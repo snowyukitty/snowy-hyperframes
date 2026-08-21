@@ -205,6 +205,39 @@ Provider metadata 建議包含：
 }
 ```
 
+## 3.5 實測結果（2026-08-22）：Edge-TTS vs Kokoro-82M
+
+harness：`claude/projects/tts-bakeoff-2026-08`（`hf bakeoff`）。同一組八段稿子，兩個引擎各念一次，
+共 16 段音檔；客觀數據由 ffmpeg 量測，完整結果在該專案的 `data/measurements.json`。
+
+**客觀（已完成）**
+
+| 指標 | Edge-TTS `zh-TW-HsiaoChenNeural` `+5%/-3Hz` | Kokoro-82M `zf_xiaobei` `speed 1.0` |
+| --- | ---: | ---: |
+| 平均語速（拍/秒，CJK 字=1、拉丁字元=0.5） | **4.42**（sd 0.43） | 3.63（sd 0.32） |
+| 平均發聲語速（扣除靜音） | 5.58 | 3.92 |
+| 靜音佔比（`silencedetect -35dB/0.18s`） | **21%** | 7% |
+| 整合響度 | −19.1 LUFS（sd **0.20**） | −20.7 LUFS（sd 0.36） |
+| 生成 RTF（越小越快） | 0.35（含網路往返） | 0.65（本機推理） |
+| 八段總長 | 101.5s | 122.2s |
+
+可以直接說的事實：
+
+- Kokoro 唸同樣的稿子**慢了 20%**（122.2s vs 101.5s），而且**停頓少很多**（靜音佔比 7% vs 21%）。
+  也就是說 Edge-TTS 在標點處留下的換氣，Kokoro 大多沒有留。
+- 差距最大的是 **sample-07（模型名與授權縮寫）**：Edge 11.21s / 語速 3.97，Kokoro 15.08s / 語速 **2.95**——
+  Kokoro 處理 `Apache 2.0`、`CC-BY-NC`、`F5-TTS` 這類拉丁縮寫時明顯變慢。
+- Edge-TTS 的響度一致性較好（sd 0.20 vs 0.36），對「整支影片音量穩定」有利。
+- 兩者都不需要 API key；Kokoro 首次需下載約 311 MB 模型（`pip install kokoro-onnx soundfile`），之後可離線。
+
+**主觀（待人工聽測）**
+
+自然度**尚未有結論**，也不應該從上面的數字推斷：語速慢不等於自然，停頓少也不必然難聽。
+盲測聽測包已經產好（`npm run bakeoff` → `bakeoff/index.html`，A/B 標籤與客觀數據都藏到揭曉之後），
+聽完後把結論填進 `claude/projects/tts-bakeoff-2026-08/docs/listening-scorecard.md`，再回頭更新本節。
+
+在那之前，**Tier 0（Edge-TTS）維持為預設**，Kokoro 的定位是「已驗證可用的離線備援」。
+
 ## 4. Golden Samples
 
 建立固定測試稿，任何 provider 都跑同一組：

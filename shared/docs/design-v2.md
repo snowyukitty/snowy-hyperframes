@@ -182,7 +182,27 @@ the evidence that captions must come from the display script rather than the bou
 
 </details>
 
-### D. No-API-key TTS bakeoff, reusing upstream Kokoro (closes the 2026-06 open item)
+### D. No-API-key TTS bakeoff ✅ HARNESS BUILT 2026-08-22 · listening test pending
+
+**Shipped:** `hf bakeoff` + `claude/projects/tts-bakeoff-2026-08` (private until it has a result).
+8 golden samples × 2 engines = 16 clips, each measured (length, rate, articulation rate, pause count,
+silence ratio, LUFS, true peak, RTF) into `data/measurements.json`, plus a **blind** A/B listening kit
+(`bakeoff/index.html`, `--artifact` to publish) where engine labels *and* the objective numbers stay
+hidden until the listener presses 揭曉.
+
+Objective findings are already in `shared/docs/local-tts-no-api-key-strategy.md` §3.5: Kokoro is 20%
+slower on the same script (122.2s vs 101.5s), leaves far less silence (7% vs 21% — it mostly does not
+breathe at punctuation), is quieter and less consistent in loudness (−20.7 LUFS sd 0.36 vs −19.1 sd 0.20),
+and slows to 2.95 beats/s on latin acronyms (sample-07) against Edge's 3.97. Kokoro needs
+`pip install kokoro-onnx soundfile` and a one-time ~311 MB model; after that it is fully offline.
+
+**Still open (needs a human, ~10 min):** the naturalness verdict. Nothing about "which sounds better"
+may be written until the blind test is done — measurements can rank consistency and cost, never taste.
+Then: fill `docs/listening-scorecard.md`, update strategy §3.5, decide whether `hf tts` gains
+`--provider kokoro` (the code already exists inside `hf bakeoff`), and decide whether the project
+becomes public.
+
+<details><summary>Original sketch (superseded)</summary>
 
 - If `codex/projects/tts-local-bakeoff` is found on another machine, bring it back (it is git-ignored). Otherwise recreate the
   8 golden samples from `shared/docs/local-tts-no-api-key-strategy.md` §4 as `data/storyboard.json` slides in a **private**
@@ -193,6 +213,8 @@ the evidence that captions must come from the display script rather than the bou
 - Scorecard: `docs/listening-scorecard.md` (5 axes × 8 samples × 2–3 voices). Measure durations with `hf measure`.
 - **Acceptance:** strategy doc gets a dated "實測結果" section with the table and a recommendation
   (keep Edge-TTS default / switch / per-project choice); nothing private leaks into public docs (no audio paths with personal data).
+
+</details>
 
 ### E. BGM bed + voiceover carve (optional polish, only after B)
 
