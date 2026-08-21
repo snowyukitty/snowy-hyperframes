@@ -1,7 +1,7 @@
 # Phase Summary — 2026-08-22 (二)：內容層、人工 gate、TTS 實測、第一支研究影片
 
 接續 `phase-summary-2026-08-22.md`（工作流 v2 的工具鏈）。這一輪按 `design-v2.md` 的工作項執行，
-完成 **B、B2、C、D（harness）、F**；**A、E、G** 仍待辦。
+完成 **B、B2、C、D（harness）、E（不需帳號的那一半）、F**；**A、D 的聽測、E 的帳號那半、G** 仍待辦。
 
 ## 1. 完成了什麼
 
@@ -51,6 +51,17 @@ storyboard 的 `slides[].blocks` → `lead` / `metrics` / `cards` / `list` / `qu
 
 `hyperframes@0.8.6 check` 0 findings（contrast 58/58 AA），smoke render 3m30.5s / 13.6 MB。
 
+### E（一半）— 音樂床
+
+storyboard 宣告 `music: { file, volume }` → `hf html` 生成跨全片的 `bgm` 音軌，`hf sync` 跟著同步，
+`hf audit` 檢查存在、長度（太短會被 `clip_media_fit` 靜靜截掉）、音量範圍，以及**床在成片裡的落點**
+（床本身響度 + 20·log10(volume)）。最後這項是踩出來的：第一個驗證用的床合成成 −52 LUFS，
+乘上 0.14 之後就是靜音，功能看起來壞掉但其實管線正常。
+
+實測（210 秒成片）：床 −20 LUFS × volume 0.14 → 成片中 −37.7 LUFS，旁白 −15.8 LUFS，相差 **22 dB**。
+沒有替任何已發布專案加上音樂——選曲是人的決定，而且要確認使用權。
+需要帳號的那一半（`/media-use` 取樂曲、`/hyperframes-audio` 動態 ducking）**沒有做**，要先問過 Snowy。
+
 ## 2. 驗證紀錄
 
 | 檢查 | 結果 |
@@ -67,7 +78,9 @@ storyboard 的 `slides[].blocks` → `lead` / `metrics` / `cards` / `list` / `qu
    `storyboard-to-video-pipeline-demo` 與 `measurable-vs-audible-tts`。通過後改 status、成片放 Releases。
 2. **盲測聽測（design-v2 D 的後半）**：`tts-bakeoff-2026-08` 的聽測包也已是 Artifact。
    聽完填 `docs/listening-scorecard.md` → 更新 strategy §3.5 → 決定 `hf tts --provider kokoro` 要不要做。
-3. **E（BGM bed + voiceover carve）**：需要 `heygen` CLI 登入，屬於帳號動作，**要先問過 Snowy**。
+3. **E 的剩下一半**：取得實際樂曲（`/media-use` 需要 `heygen` CLI 登入，屬於帳號動作，**要先問過 Snowy**）
+   與動態 ducking（`/hyperframes-audio`）。管線本身已經可用，把檔案放進 `assets/audio/` 並在 storyboard
+   宣告 `music` 即可。
 4. **G（Atlas registry）**：另一個 repo，另開 scope；現在有 4 條 workflow、8 個 tracked 專案。
 5. 可選：`chart` block（接上游 registry 的 `data-chart`）、`hf tts --provider kokoro`、英文 README。
 
