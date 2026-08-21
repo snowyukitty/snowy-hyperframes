@@ -52,6 +52,12 @@ No-API-key / local-first TTS 升級路線：
 shared/docs/local-tts-no-api-key-strategy.md
 ```
 
+目前里程碑的設計文件（工作項 A–G 與驗收標準）：
+
+```text
+shared/docs/design-v2.md
+```
+
 目前階段性收尾：
 
 ```text
