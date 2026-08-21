@@ -30,13 +30,16 @@ jobs:
       - name: Structural / schema / timing audit of every tracked project
         run: node shared/tools/hf.mjs audit --all
 
-      - name: HyperFrames lint (static, no browser) for every tracked project
+      - name: HyperFrames lint (static, no browser) for every composition project
         run: |
           set -e
           for p in */projects/*/; do
-            if [ -f "$p/project.json" ]; then
+            # audio-research projects (e.g. a TTS bakeoff) have no composition to lint
+            if [ -f "$p/project.json" ] && [ -f "$p/index.html" ]; then
               echo "::group::hyperframes lint $p"
               (cd "$p" && npx --yes hyperframes@0.8.6 lint)
               echo "::endgroup::"
+            else
+              echo "skip (no composition): $p"
             fi
           done
