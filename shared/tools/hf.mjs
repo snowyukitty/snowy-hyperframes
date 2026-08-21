@@ -967,6 +967,12 @@ function auditProject(projectRoot, repo) {
   }
 
   const project = readJson(P("project.json"));
+  // A placeholder left in project.json silently reaches every generated artefact
+  // (a review kit published with the title "Replace with project title" is how this
+  // check was earned). Catch it here, before anything downstream embeds it.
+  for (const [k, v] of Object.entries(project)) {
+    if (typeof v === "string" && /replace[- ]with/i.test(v)) E("placeholder", `project.json.${k} is still the template placeholder: ${JSON.stringify(v)}`);
+  }
   const sb = loadStoryboard(projectRoot);
   if (!sb.slides.length) E("storyboard", "storyboard has no slides");
   const ids = sb.slides.map((s) => s.id);
@@ -1108,6 +1114,7 @@ function auditBakeoff(projectRoot, repo, findings, { E, W, I, P }) {
     E("invalid-json", `data/bakeoff.json: ${e.message}`);
     return findings;
   }
+  if (/replace[- ]with/i.test(JSON.stringify(cfg.title || ""))) E("placeholder", "data/bakeoff.json title is still the template placeholder");
   const providers = cfg.providers || [];
   const samples = cfg.samples || [];
   if (!providers.length) E("bakeoff", "no providers declared");

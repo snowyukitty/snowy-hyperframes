@@ -120,7 +120,10 @@ flow after `h1`, which left the lower half of a 1920×1080 frame empty):
 - entrance motion: `.blocks > *` staggered 0.12s at `start + 0.72`.
 
 Audit codes: `block-type` (error, unknown type) · `block-shape` · `block-density` · plus `stale-html`,
-which fires when the generated region no longer matches the storyboard.
+which fires when the generated region no longer matches the storyboard, and `placeholder`, which fires
+when a template string like "Replace with project title" is still in `project.json` — that one was earned
+by publishing a review kit titled *Replace with project title*, because the kit had been built before the
+metadata was filled in. Anything a generator embeds must be audited before it can be published.
 
 **Verified:** `claude/projects/block-vocabulary-reference` (one page per block type) — `hf audit` 0 findings,
 `hyperframes@0.8.6 check` lint 0/0, runtime 0/0, layout 0 issues / 9 samples, motion 0/0, **contrast 53/53 AA**.
