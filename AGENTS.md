@@ -97,7 +97,12 @@ cannot account for. Live reference (one page per block type):
 
 - Project folder names are kebab-case: `<topic>-<format>-<purpose>`.
 - Narration files: `assets/audio/slide-NN.display.txt` (viewer text, generated from the
-  storyboard), `slide-NN.tts.txt` (after `data/pronunciation-map.json`), `slide-NN.mp3`.
+  storyboard), `slide-NN.tts.txt` (after `data/pronunciation-map.json`), `slide-NN.mp3`,
+  `slide-NN.words.json` (the engine's word timings, captured during synthesis).
+- Captions: `captions/narration.srt` is one cue per slide; `captions/narration.word.srt` is
+  word-timed (`hf captions`). Cue **text** always comes from the display script, never from
+  the TTS token stream — the tokens carry no punctuation and spell what is *heard*
+  (`版本二`), not what should be *read* (`v2`).
 - Default voice `zh-TW-HsiaoChenNeural`, rate `+5%`, pitch `-3Hz` (see playbook §4.5).
 - Generated regions in `index.html` sit between `<!-- hf:audio:start/end -->` and
   `<!-- hf:slides:start/end -->`; edit the storyboard, not those regions. Everything

@@ -141,7 +141,34 @@ narration script, and start / slide / narration / **margin** chips colour-coded 
 render machine). Kits live in `review/` and are git-ignored. Windows note: `npx.cmd` needs `shell:true`
 (Node ≥ 20 EINVAL) — `runNpx()` handles it.
 
-### C. Word-level captions (`hf captions`)
+### C. Word-level captions ✅ BUILT 2026-08-22
+
+**Shipped**, but not the way the sketch below planned it. Neither of the sketch's two sources was right:
+the `edge-tts` CLI collapses `--write-subtitles` to one cue per sentence, and re-deriving timings with
+`hyperframes transcribe` would cost a model download and risk mis-transcribing the zh-Hant it just spoke.
+
+What is built instead splits the job between the two sources that are each authoritative for half of it:
+
+- **the clock** comes from the engine: `shared/tools/edge_tts_words.py` synthesizes with
+  `boundary="WordBoundary"` (the 7.x default is `SentenceBoundary`, which is why the CLI loses this) and
+  writes `assets/audio/<slide>.words.json` next to the MP3 **in the same pass** — `hf tts` prefers this
+  helper and falls back to the CLI (announcing that word timings are unavailable);
+- **the text** comes from `slide-NN.display.txt`: the boundary stream carries no punctuation and splits
+  `storyboard` into two tokens, so cues cut from it read *worse* than the paragraph they replace. Cues are
+  cut from the display script at punctuation (`--max-chars`, default 18, never cutting through an
+  identifier like `project.json`) and placed on the clock by matching spoken weight against the token
+  stream (CJK glyph = 1 beat, latin char = 0.5).
+
+`hf captions [--mode word|slide|both] [--max-chars 18]` → `captions/narration.word.srt`; `hf sync`
+refreshes it whenever word data exists. `hf audit` checks cue count, containment in the composition, and
+overlap.
+
+**Verified** on the pipeline demo: 29 cues, 7-26 chars (median 15). Alignment measured by comparing each
+cue's characters against the tokens actually spoken inside its window: **mean overlap 0.970**. The one
+outlier — caption `工作流 v2。` against spoken `版本二` — is the pronunciation map working as designed, and is
+the evidence that captions must come from the display script rather than the boundary stream.
+
+<details><summary>Original sketch (superseded)</summary>
 
 **Spec.** New command `hf captions [--mode slide|word] [--max-chars 18]`.
 - `slide` (today's behaviour) stays default inside `sync`.
@@ -152,6 +179,8 @@ render machine). Kits live in `review/` and are git-ignored. Windows note: `npx.
   `captions/narration.word.srt` (keep `narration.srt` as the slide-level file).
 - Optional on-screen kinetic captions: **not** in scope here (upstream `/embedded-captions` exists; evaluate later).
 - **Acceptance:** cue count > slide count, every cue inside its slide window (add this check to `hf audit` for the word file), SRT loads in VLC over the render without drift > 200 ms at slide boundaries.
+
+</details>
 
 ### D. No-API-key TTS bakeoff, reusing upstream Kokoro (closes the 2026-06 open item)
 

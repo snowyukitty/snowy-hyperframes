@@ -15,6 +15,8 @@
  *   sync [--policy audio|storyboard] [--pad 0.6] [--dry-run]
  *                           measured audio -> data/timeline.json, index.html timing attrs,
  *                           captions/narration.srt, project.json durationSeconds, legacy manifests
+ *   captions [--mode word|slide|both] [--max-chars 18]
+ *                           word-level captions from the TTS engine's own WordBoundary timings
  *   fit-audio               keep slide windows, set each narration clip's data-duration to its MP3 length
  *                           (HyperFrames >=0.8 clip_media_fit) and fix the root data-duration — for legacy demos
  *   vendor                  copy shared/vendor/gsap.min.js into ./vendor and point index.html at it (no CDN at render)
@@ -52,7 +54,9 @@ function parseArgs(argv) {
       } else {
         const key = a.slice(2);
         const next = argv[i + 1];
-        if (next !== undefined && !next.startsWith("--") && ["project", "only", "policy", "pad", "workflow", "name", "voice", "rate", "pitch"].includes(key)) {
+        // booleans are the closed set; every other flag takes the next token as its value
+        const BOOLEANS = ["force", "dry-run", "json", "all", "quiet", "artifact", "no-snapshot", "no-words", "subtitles", "help"];
+        if (next !== undefined && !next.startsWith("--") && !BOOLEANS.includes(key)) {
           args.flags[key] = next;
           i++;
         } else {
@@ -226,6 +230,12 @@ function resolveEdgeTts() {
   }
   return null;
 }
+// Preferred path: our own helper, which keeps the engine's WordBoundary stream alongside
+// the audio (the CLI throws those timings away). Falls back to the CLI when unavailable.
+function resolvePythonEdge() {
+  for (const py of ["python", "python3", "py"]) if (run(py, ["-c", "import edge_tts"]).ok) return py;
+  return null;
+}
 
 // ---------------------------------------------------------------------------
 // index.html patching (attribute-level, id-addressed; safe for legacy demos)
@@ -308,6 +318,147 @@ function buildSrt(timeline, textById) {
 }
 function countSrtCues(text) {
   return text.split(/\r?\n\r?\n/).filter((b) => /^\d+\s*\r?\n\d\d:\d\d:\d\d,\d{3} --> /.test(b.trim())).length;
+}
+function parseSrtCues(text) {
+  const cues = [];
+  for (const block of text.split(/\r?\n\r?\n/)) {
+    const m = /(\d\d):(\d\d):(\d\d),(\d{3}) --> (\d\d):(\d\d):(\d\d),(\d{3})/.exec(block);
+    if (!m) continue;
+    const at = (h, mi, s, ms) => Number(h) * 3600 + Number(mi) * 60 + Number(s) + Number(ms) / 1000;
+    cues.push({ start: at(m[1], m[2], m[3], m[4]), end: at(m[5], m[6], m[7], m[8]) });
+  }
+  return cues;
+}
+
+// --- word-level captions ---------------------------------------------------
+// The TTS engine already knows when every word is spoken (hf tts keeps its
+// WordBoundary stream in assets/audio/<slide>.words.json). Packing those into
+// short cues beats re-deriving timings with ASR: it is exact, free, offline, and
+// it cannot mis-transcribe the zh-Hant it just spoke.
+// Two sources, each used for what it is actually good at:
+//   * the DISPLAY script gives the text — correctly spelled, punctuated, and free of the
+//     pronunciation map's spoken-only spellings ("T T S" is heard, "TTS" is read);
+//   * the engine's WORD BOUNDARIES give the clock.
+// The boundary stream carries no punctuation and happily splits "storyboard" into two
+// tokens, so cutting cues from it directly produces captions that read worse than the
+// paragraph they replace. Instead we cut the cues from the display text at punctuation,
+// and place them on the clock by matching spoken weight against the token stream.
+const CUE_HARD_BREAK = /[。！？!?…]/;
+const CUE_SOFT_BREAK = /[，、；：,;:]/;
+const isSkippable = (ch) => /[\s。！？!?…，、；：,;:「」『』（）()《》〈〉—·．.]/.test(ch);
+// spoken weight: a CJK glyph is one beat, a latin letter or digit about half of one
+const weightOf = (str) => [...String(str)].reduce((a, ch) => a + (isSkippable(ch) ? 0 : /[A-Za-z0-9]/.test(ch) ? 0.5 : 1), 0);
+
+function splitDisplayCues(text, maxChars) {
+  const chars = [...String(text).replace(/\s+/g, " ").trim()];
+  const cues = [];
+  let cur = "";
+  const flush = () => {
+    if (cur.trim()) cues.push(cur.trim());
+    cur = "";
+  };
+  for (let i = 0; i < chars.length; i++) {
+    cur += chars[i];
+    const len = [...cur].length;
+    const next = chars[i + 1] || "";
+    // keep trailing punctuation with the cue it closes
+    if (CUE_HARD_BREAK.test(chars[i]) && !CUE_HARD_BREAK.test(next)) flush();
+    else if (CUE_SOFT_BREAK.test(chars[i]) && len >= Math.ceil(maxChars * 0.55)) flush();
+    // never cut through an identifier like index.html or project.json
+    else if (len >= maxChars && !/[A-Za-z0-9._-]/.test(next)) flush();
+    else if (len >= Math.ceil(maxChars * 1.6)) flush();
+  }
+  flush();
+  return cues;
+}
+// time at a fraction of the clip's total spoken weight, interpolated inside the token it lands in
+function timeAtRatio(words, ratio, totals) {
+  if (!words.length) return 0;
+  const target = Math.max(0, Math.min(1, ratio)) * totals.total;
+  let acc = 0;
+  for (let i = 0; i < words.length; i++) {
+    const w = words[i];
+    const ww = totals.each[i];
+    if (acc + ww >= target || i === words.length - 1) {
+      const f = ww > 0 ? Math.max(0, Math.min(1, (target - acc) / ww)) : 0;
+      return w.t + f * w.d;
+    }
+    acc += ww;
+  }
+  return words[words.length - 1].t + words[words.length - 1].d;
+}
+function buildWordCues(displayText, words, maxChars, offset, limit) {
+  const usable = (words || []).filter((w) => String(w.w || "").trim());
+  if (!usable.length) return [];
+  const totals = { each: usable.map((w) => weightOf(w.w) || 0.5), total: 0 };
+  totals.total = totals.each.reduce((a, b) => a + b, 0) || 1;
+  const speechStart = usable[0].t;
+  const speechEnd = usable[usable.length - 1].t + usable[usable.length - 1].d;
+
+  const texts = displayText && displayText.trim() ? splitDisplayCues(displayText, maxChars) : usable.map((w) => w.w);
+  const weights = texts.map((t) => Math.max(weightOf(t), 0.2));
+  const sum = weights.reduce((a, b) => a + b, 0) || 1;
+
+  const cues = [];
+  let acc = 0;
+  for (let i = 0; i < texts.length; i++) {
+    const r0 = acc / sum;
+    acc += weights[i];
+    const r1 = acc / sum;
+    let start = i === 0 ? speechStart : timeAtRatio(usable, r0, totals);
+    let end = i === texts.length - 1 ? speechEnd : timeAtRatio(usable, r1, totals);
+    if (end <= start) end = start + 0.35;
+    cues.push({ start: offset + start, end: Math.min(offset + end, limit), text: texts[i] });
+  }
+  for (let i = 0; i < cues.length - 1; i++) cues[i].end = Math.min(cues[i].end, cues[i + 1].start);
+  return cues.filter((c) => c.end > c.start && c.text.trim());
+}
+function renderSrt(cues) {
+  return cues.map((c, i) => `${i + 1}\n${srtTime(c.start)} --> ${srtTime(c.end)}\n${c.text.trim()}\n`).join("\n") + "\n";
+}
+function wordCuesFor(projectRoot, timeline) {
+  const maxChars = Number(FLAGS["max-chars"] || 18);
+  const out = [];
+  let missing = 0;
+  for (const t of timeline) {
+    const p = path.join(projectRoot, "assets", "audio", `${t.id}.words.json`);
+    if (!exists(p)) {
+      missing++;
+      continue;
+    }
+    const words = readJson(p).words || [];
+    const display = path.join(projectRoot, "assets", "audio", `${t.id}.display.txt`);
+    out.push(...buildWordCues(exists(display) ? readText(display) : "", words, maxChars, t.start, t.start + t.duration));
+  }
+  return { cues: out, missing, maxChars };
+}
+function writeWordCaptions(projectRoot, timeline, { quiet = false } = {}) {
+  const { cues, missing, maxChars } = wordCuesFor(projectRoot, timeline);
+  const target = path.join(projectRoot, "captions", "narration.word.srt");
+  if (!cues.length) {
+    if (!quiet) warn(`  no word timings found (run hf tts --force to capture them); ${target} not written`);
+    return null;
+  }
+  writeText(target, renderSrt(cues));
+  if (!quiet) log(`  captions/narration.word.srt: ${cues.length} cues (<=${maxChars} chars)${missing ? `, ${missing} slide(s) without word data` : ""}`);
+  return cues.length;
+}
+function cmdCaptions(projectRoot = findProjectRoot()) {
+  const sb = loadStoryboard(projectRoot);
+  const tlPath = path.join(projectRoot, "data", "timeline.json");
+  const timeline = exists(tlPath) ? readJson(tlPath).slides : provisionalTimeline(projectRoot, sb);
+  const mode = String(FLAGS.mode || "word");
+  if (!["word", "slide", "both"].includes(mode)) die("--mode must be word|slide|both");
+  if (mode === "slide" || mode === "both") {
+    const textById = {};
+    for (const s of sb.slides) {
+      const display = path.join(projectRoot, "assets", "audio", `${s.id}.display.txt`);
+      textById[s.id] = exists(display) ? readText(display) : s.narration || s.subtitle || "";
+    }
+    writeText(path.join(projectRoot, "captions", "narration.srt"), buildSrt(timeline, textById));
+    log(`  captions/narration.srt: ${timeline.length} cues (one per slide)`);
+  }
+  if (mode === "word" || mode === "both") writeWordCaptions(projectRoot, timeline);
 }
 
 // ---------------------------------------------------------------------------
@@ -578,12 +729,16 @@ function cmdTts(projectRoot = findProjectRoot()) {
   const pitch = FLAGS.pitch || v.pitch || "+0Hz";
   const volume = v.volume || "+0%";
   const edge = resolveEdgeTts();
-  if (!edge) die("edge-tts not found. Install:  pip install --user edge-tts   (or: python -m pip install edge-tts)");
+  const py = FLAGS["no-words"] ? null : resolvePythonEdge();
+  const helper = path.join(repoRootOrDie(projectRoot), "shared", "tools", "edge_tts_words.py");
+  const useHelper = py && exists(helper);
+  if (!edge && !useHelper) die("edge-tts not found. Install:  pip install --user edge-tts   (or: python -m pip install edge-tts)");
   const audioDir = path.join(projectRoot, "assets", "audio");
   const only = FLAGS.only ? String(FLAGS.only).split(",") : null;
   let made = 0,
     skipped = 0,
-    failed = 0;
+    failed = 0,
+    noWords = 0;
   for (const s of sb.slides) {
     if (only && !only.includes(s.id)) continue;
     const ttsPath = path.join(audioDir, `${s.id}.tts.txt`);
@@ -593,22 +748,30 @@ function cmdTts(projectRoot = findProjectRoot()) {
       failed++;
       continue;
     }
+    const wordsPath = path.join(audioDir, `${s.id}.words.json`);
     if (!FLAGS.force && exists(mp3) && fs.statSync(mp3).mtimeMs >= fs.statSync(ttsPath).mtimeMs) {
       skipped++;
+      if (useHelper && !exists(wordsPath)) noWords++;
       continue;
     }
-    const args = [...edge.pre, "--voice", voice, `--rate=${rate}`, `--pitch=${pitch}`, `--volume=${volume}`, "--file", ttsPath, "--write-media", mp3];
-    if (FLAGS.subtitles) args.push("--write-subtitles", path.join(audioDir, `${s.id}.edge.vtt`));
-    const r = run(edge.cmd, args);
+    const r = useHelper
+      ? run(
+          py,
+          [helper, "--text-file", ttsPath, "--voice", voice, `--rate=${rate}`, `--pitch=${pitch}`, `--volume=${volume}`, "--out-audio", mp3, "--out-words", wordsPath],
+          { env: { ...process.env, PYTHONIOENCODING: "utf-8" } }
+        )
+      : run(edge.cmd, [...edge.pre, "--voice", voice, `--rate=${rate}`, `--pitch=${pitch}`, `--volume=${volume}`, "--file", ttsPath, "--write-media", mp3]);
     if (!r.ok || !exists(mp3)) {
       failed++;
       warn(`  ${s.id}: edge-tts failed\n${(r.stderr || r.stdout || String(r.error)).trim()}`);
       continue;
     }
     made++;
-    log(`  ${s.id}: ${fmt(ffprobeDuration(mp3))}s`);
+    const words = exists(wordsPath) ? readJson(wordsPath).words.length : 0;
+    log(`  ${s.id}: ${fmt(ffprobeDuration(mp3))}s${words ? `  (${words} word timings)` : ""}`);
   }
-  log(`tts: voice=${voice} rate=${rate} pitch=${pitch} — generated ${made}, up-to-date ${skipped}, failed ${failed}`);
+  log(`tts: voice=${voice} rate=${rate} pitch=${pitch}${useHelper ? " via edge_tts_words.py" : " via edge-tts CLI (no word timings)"} — generated ${made}, up-to-date ${skipped}, failed ${failed}`);
+  if (noWords) warn(`  ${noWords} clip(s) predate word timings; re-run with --force to get word-level captions for them.`);
   if (failed) process.exit(1);
 }
 
@@ -727,6 +890,7 @@ function cmdSync(projectRoot = findProjectRoot()) {
   }
   writeText(path.join(projectRoot, "captions", "narration.srt"), buildSrt(timeline, textById));
   log(`  captions/narration.srt: ${timeline.length} cues`);
+  writeWordCaptions(projectRoot, timeline, { quiet: true }) && log(`  captions/narration.word.srt: refreshed from word timings`);
 
   // 4. project.json
   const pjPath = path.join(projectRoot, "project.json");
@@ -894,6 +1058,19 @@ function auditProject(projectRoot, repo) {
   if (exists(P("captions/narration.srt"))) {
     const cues = countSrtCues(readText(P("captions/narration.srt")));
     if (cues !== sb.slides.length) W("captions", `narration.srt has ${cues} cues for ${sb.slides.length} slides`);
+  }
+  if (exists(P("captions/narration.word.srt")) && exists(P("data/timeline.json"))) {
+    const tl = readJson(P("data/timeline.json")).slides || [];
+    const end = tl.length ? tl[tl.length - 1].start + tl[tl.length - 1].duration : 0;
+    const cues = parseSrtCues(readText(P("captions/narration.word.srt")));
+    if (cues.length < tl.length) W("captions", `narration.word.srt has only ${cues.length} cues for ${tl.length} slides — word timings look stale (hf captions)`);
+    let out = 0, overlap = 0;
+    for (let i = 0; i < cues.length; i++) {
+      if (cues[i].start < -0.001 || cues[i].end > end + 0.05) out++;
+      if (i && cues[i].start < cues[i - 1].end - 0.001) overlap++;
+    }
+    if (out) E("captions", `narration.word.srt: ${out} cue(s) fall outside the composition (0-${fmt(end)}s)`);
+    if (overlap) W("captions", `narration.word.srt: ${overlap} overlapping cue(s)`);
   }
 
   // hyperframes.json collision + deprecated CLI usage
@@ -1488,6 +1665,7 @@ const commands = {
   tts: () => cmdTts(),
   measure: () => cmdMeasure(),
   sync: () => cmdSync(),
+  captions: () => cmdCaptions(),
   "fit-audio": () => cmdFitAudio(),
   review: () => cmdReview(),
   vendor: () => cmdVendor(),

@@ -17,6 +17,8 @@
     "preview": "npx --yes hyperframes@0.8.6 preview",
     "snapshot": "npx --yes hyperframes@0.8.6 snapshot",
     "render": "npx --yes hyperframes@0.8.6 render . --output renders/storyboard-to-video-pipeline-demo.mp4",
-    "doctor": "npx --yes hyperframes@0.8.6 doctor"
+    "doctor": "npx --yes hyperframes@0.8.6 doctor",
+    "review": "node ../../../shared/tools/hf.mjs review",
+    "captions": "node ../../../shared/tools/hf.mjs captions"
   }
 }
