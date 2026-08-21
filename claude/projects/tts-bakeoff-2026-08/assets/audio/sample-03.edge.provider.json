@@ -1,0 +1,28 @@
+{
+  "provider": "edge",
+  "label": "Edge-TTS · zh-TW-HsiaoChenNeural",
+  "engine": "edge-tts",
+  "voice": "zh-TW-HsiaoChenNeural",
+  "params": {
+    "rate": "+5%",
+    "pitch": "-3Hz"
+  },
+  "requiresApiKey": false,
+  "sample": "sample-03",
+  "inputText": "二零二六年八月二十二日的測試裡，八段稿子共花了三分四十七秒，平均每百萬字元的成本大約是三十美元。",
+  "outputAudio": "assets/audio/sample-03.edge.mp3",
+  "measurements": {
+    "durationSeconds": 9.74,
+    "spokenWeight": 45,
+    "rate": 4.62,
+    "articulationRate": 5.49,
+    "silenceSeconds": 1.55,
+    "silenceRatio": 0.16,
+    "leadSilence": 0.2,
+    "tailSilence": 0.75,
+    "internalPauses": 2,
+    "lufs": -18.9,
+    "lra": 1.8,
+    "truePeakDb": -4.5
+  }
+}

@@ -24,6 +24,15 @@ claude/projects/*
 !claude/projects/block-vocabulary-reference/
 !claude/projects/block-vocabulary-reference/**
 
+# tts-bakeoff-2026-08: method, samples and measurements are published; the 16 generated
+# clips are not (they rebuild from data/bakeoff.json with `npm run bakeoff`).
+!claude/projects/tts-bakeoff-2026-08/
+!claude/projects/tts-bakeoff-2026-08/**
+claude/projects/tts-bakeoff-2026-08/assets/audio/*.mp3
+claude/projects/tts-bakeoff-2026-08/assets/audio/*.wav
+claude/projects/tts-bakeoff-2026-08/assets/audio/*.txt
+claude/projects/tts-bakeoff-2026-08/assets/audio/*.words.json
+
 # Dependencies
 node_modules/
 .pnpm-store/

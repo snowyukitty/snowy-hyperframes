@@ -1,0 +1,28 @@
+{
+  "provider": "edge",
+  "label": "Edge-TTS · zh-TW-HsiaoChenNeural",
+  "engine": "edge-tts",
+  "voice": "zh-TW-HsiaoChenNeural",
+  "params": {
+    "rate": "+5%",
+    "pitch": "-3Hz"
+  },
+  "requiresApiKey": false,
+  "sample": "sample-04",
+  "inputText": "如果旁白的長度是由實際量測出來的音檔決定，而不是由分鏡表上預估的秒數決定，那麼影片就不會出現旁白被硬生生切斷的情況，這也是這套流程最重要的一條規則。",
+  "outputAudio": "assets/audio/sample-04.edge.mp3",
+  "measurements": {
+    "durationSeconds": 14.16,
+    "spokenWeight": 70,
+    "rate": 4.94,
+    "articulationRate": 5.73,
+    "silenceSeconds": 1.94,
+    "silenceRatio": 0.14,
+    "leadSilence": 0.23,
+    "tailSilence": 0.84,
+    "internalPauses": 3,
+    "lufs": -19.2,
+    "lra": 1.4,
+    "truePeakDb": -3.5
+  }
+}

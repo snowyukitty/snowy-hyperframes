@@ -1,0 +1,28 @@
+{
+  "provider": "edge",
+  "label": "Edge-TTS · zh-TW-HsiaoChenNeural",
+  "engine": "edge-tts",
+  "voice": "zh-TW-HsiaoChenNeural",
+  "params": {
+    "rate": "+5%",
+    "pitch": "-3Hz"
+  },
+  "requiresApiKey": false,
+  "sample": "sample-08",
+  "inputText": "把研究做成影片，難的從來不是把字念出來，而是讓一段五分鐘的內容，從第一頁到最後一頁都維持同一個語速、同一個音色、同一種語氣。旁白一旦忽快忽慢，觀眾就會開始注意到旁白本身，而不是內容。這正是我們固定用同一組稿子測試每一個引擎的原因：只有在完全相同的輸入下，音色漂移、句尾拖長、換氣位置不自然這些問題才會被看見。",
+  "outputAudio": "assets/audio/sample-08.edge.mp3",
+  "measurements": {
+    "durationSeconds": 30.89,
+    "spokenWeight": 140,
+    "rate": 4.53,
+    "articulationRate": 5.6,
+    "silenceSeconds": 5.9,
+    "silenceRatio": 0.19,
+    "leadSilence": 0.19,
+    "tailSilence": 0.84,
+    "internalPauses": 13,
+    "lufs": -19.1,
+    "lra": 1.8,
+    "truePeakDb": -4.1
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "provider": "kokoro",
+  "label": "Kokoro-82M · zf_xiaobei",
+  "engine": "hyperframes-kokoro",
+  "voice": "zf_xiaobei",
+  "params": {
+    "speed": 1,
+    "lang": "zh"
+  },
+  "requiresApiKey": false,
+  "sample": "sample-06",
+  "inputText": "自動檢查可以擋掉錯誤，但它擋不掉無聊。真正決定一支研究影片好不好看的，仍然是人。",
+  "outputAudio": "assets/audio/sample-06.kokoro.mp3",
+  "measurements": {
+    "durationSeconds": 9.32,
+    "spokenWeight": 36,
+    "rate": 3.86,
+    "articulationRate": 4,
+    "silenceSeconds": 0.32,
+    "silenceRatio": 0.03,
+    "leadSilence": 0,
+    "tailSilence": 0,
+    "internalPauses": 1,
+    "lufs": -20.5,
+    "lra": 1.3,
+    "truePeakDb": -2.9
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "provider": "kokoro",
+  "label": "Kokoro-82M · zf_xiaobei",
+  "engine": "hyperframes-kokoro",
+  "voice": "zf_xiaobei",
+  "params": {
+    "speed": 1,
+    "lang": "zh"
+  },
+  "requiresApiKey": false,
+  "sample": "sample-05",
+  "inputText": "先別急著渲染。把瀏覽器打開，聽一次旁白，看一次字幕，確認節奏舒服了，再按下最後那個按鈕。",
+  "outputAudio": "assets/audio/sample-05.kokoro.mp3",
+  "measurements": {
+    "durationSeconds": 10.77,
+    "spokenWeight": 38,
+    "rate": 3.53,
+    "articulationRate": 3.77,
+    "silenceSeconds": 0.69,
+    "silenceRatio": 0.06,
+    "leadSilence": 0,
+    "tailSilence": 0,
+    "internalPauses": 3,
+    "lufs": -20.7,
+    "lra": 2.3,
+    "truePeakDb": -4.6
+  }
+}

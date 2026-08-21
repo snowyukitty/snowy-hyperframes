@@ -1,0 +1,28 @@
+{
+  "provider": "kokoro",
+  "label": "Kokoro-82M · zf_xiaobei",
+  "engine": "hyperframes-kokoro",
+  "voice": "zf_xiaobei",
+  "params": {
+    "speed": 1,
+    "lang": "zh"
+  },
+  "requiresApiKey": false,
+  "sample": "sample-08",
+  "inputText": "把研究做成影片，難的從來不是把字念出來，而是讓一段五分鐘的內容，從第一頁到最後一頁都維持同一個語速、同一個音色、同一種語氣。旁白一旦忽快忽慢，觀眾就會開始注意到旁白本身，而不是內容。這正是我們固定用同一組稿子測試每一個引擎的原因：只有在完全相同的輸入下，音色漂移、句尾拖長、換氣位置不自然這些問題才會被看見。",
+  "outputAudio": "assets/audio/sample-08.kokoro.mp3",
+  "measurements": {
+    "durationSeconds": 35.02,
+    "spokenWeight": 140,
+    "rate": 4,
+    "articulationRate": 4.38,
+    "silenceSeconds": 3.07,
+    "silenceRatio": 0.09,
+    "leadSilence": 0,
+    "tailSilence": 0,
+    "internalPauses": 10,
+    "lufs": -21.2,
+    "lra": 3.9,
+    "truePeakDb": -2.5
+  }
+}

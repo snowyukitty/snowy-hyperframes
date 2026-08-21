@@ -1,0 +1,28 @@
+{
+  "provider": "kokoro",
+  "label": "Kokoro-82M · zf_xiaobei",
+  "engine": "hyperframes-kokoro",
+  "voice": "zf_xiaobei",
+  "params": {
+    "speed": 1,
+    "lang": "zh"
+  },
+  "requiresApiKey": false,
+  "sample": "sample-03",
+  "inputText": "二零二六年八月二十二日的測試裡，八段稿子共花了三分四十七秒，平均每百萬字元的成本大約是三十美元。",
+  "outputAudio": "assets/audio/sample-03.kokoro.mp3",
+  "measurements": {
+    "durationSeconds": 11.75,
+    "spokenWeight": 45,
+    "rate": 3.83,
+    "articulationRate": 4.21,
+    "silenceSeconds": 1.07,
+    "silenceRatio": 0.09,
+    "leadSilence": 0,
+    "tailSilence": 0,
+    "internalPauses": 4,
+    "lufs": -20.5,
+    "lra": 2.4,
+    "truePeakDb": -4.2
+  }
+}

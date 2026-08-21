@@ -1,0 +1,28 @@
+{
+  "provider": "edge",
+  "label": "Edge-TTS · zh-TW-HsiaoChenNeural",
+  "engine": "edge-tts",
+  "voice": "zh-TW-HsiaoChenNeural",
+  "params": {
+    "rate": "+5%",
+    "pitch": "-3Hz"
+  },
+  "requiresApiKey": false,
+  "sample": "sample-02",
+  "inputText": "我們比較了 Edge-TTS、Kokoro 與 ElevenLabs 三種方案，並且把 HyperFrames 的旁白流程接了上去。",
+  "outputAudio": "assets/audio/sample-02.edge.mp3",
+  "measurements": {
+    "durationSeconds": 7.87,
+    "spokenWeight": 40,
+    "rate": 5.08,
+    "articulationRate": 6.37,
+    "silenceSeconds": 1.59,
+    "silenceRatio": 0.2,
+    "leadSilence": 0.2,
+    "tailSilence": 0.85,
+    "internalPauses": 2,
+    "lufs": -19.1,
+    "lra": 1.3,
+    "truePeakDb": -4.4
+  }
+}

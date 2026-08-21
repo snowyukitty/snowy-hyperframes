@@ -1,0 +1,77 @@
+{
+  "id": "tts-bakeoff-2026-08",
+  "title": "No-API-key TTS bakeoff — Edge-TTS vs Kokoro（2026-08）",
+  "language": "zh-Hant",
+  "note": "shared/docs/local-tts-no-api-key-strategy.md §4 的八段 golden samples；每段針對一個已知弱點。",
+  "providers": [
+    {
+      "id": "edge",
+      "label": "Edge-TTS · zh-TW-HsiaoChenNeural",
+      "engine": "edge-tts",
+      "voice": "zh-TW-HsiaoChenNeural",
+      "rate": "+5%",
+      "pitch": "-3Hz",
+      "volume": "+0%",
+      "notes": "目前的預設；線上服務，免 API key，非離線"
+    },
+    {
+      "id": "kokoro",
+      "label": "Kokoro-82M · zf_xiaobei",
+      "engine": "hyperframes-kokoro",
+      "voice": "zf_xiaobei",
+      "lang": "zh",
+      "speed": 1.0,
+      "notes": "本機推理（npx hyperframes tts），Apache-2.0 權重，首次需下載約 311 MB 模型"
+    }
+  ],
+  "samples": [
+    {
+      "id": "sample-01",
+      "title": "純繁中研究旁白",
+      "purpose": "基準：單語自然度",
+      "text": "這份研究的重點，不是把每一種技術都列出來，而是找出在有限預算下，哪一條路最值得先走。"
+    },
+    {
+      "id": "sample-02",
+      "title": "中英混讀產品名",
+      "purpose": "中英切換是否自然",
+      "text": "我們比較了 Edge-TTS、Kokoro 與 ElevenLabs 三種方案，並且把 HyperFrames 的旁白流程接了上去。"
+    },
+    {
+      "id": "sample-03",
+      "title": "數字、日期、價格",
+      "purpose": "數字與單位讀法",
+      "text": "二零二六年八月二十二日的測試裡，八段稿子共花了三分四十七秒，平均每百萬字元的成本大約是三十美元。"
+    },
+    {
+      "id": "sample-04",
+      "title": "長句切分",
+      "purpose": "長句是否會失去換氣",
+      "text": "如果旁白的長度是由實際量測出來的音檔決定，而不是由分鏡表上預估的秒數決定，那麼影片就不會出現旁白被硬生生切斷的情況，這也是這套流程最重要的一條規則。"
+    },
+    {
+      "id": "sample-05",
+      "title": "柔和解說語氣",
+      "purpose": "語氣是否過於機械",
+      "text": "先別急著渲染。把瀏覽器打開，聽一次旁白，看一次字幕，確認節奏舒服了，再按下最後那個按鈕。"
+    },
+    {
+      "id": "sample-06",
+      "title": "強調與轉折",
+      "purpose": "重音與停頓",
+      "text": "自動檢查可以擋掉錯誤，但它擋不掉無聊。真正決定一支研究影片好不好看的，仍然是人。"
+    },
+    {
+      "id": "sample-07",
+      "title": "模型名與授權條款",
+      "purpose": "專有名詞與縮寫",
+      "text": "Kokoro-82M 的權重採用 Apache 2.0，F5-TTS 的推理程式是 MIT，但它的預訓練模型是 CC-BY-NC，不適合商用。"
+    },
+    {
+      "id": "sample-08",
+      "title": "長稿穩定性",
+      "purpose": "長時間音質是否漂移",
+      "text": "把研究做成影片，難的從來不是把字念出來，而是讓一段五分鐘的內容，從第一頁到最後一頁都維持同一個語速、同一個音色、同一種語氣。旁白一旦忽快忽慢，觀眾就會開始注意到旁白本身，而不是內容。這正是我們固定用同一組稿子測試每一個引擎的原因：只有在完全相同的輸入下，音色漂移、句尾拖長、換氣位置不自然這些問題才會被看見。"
+    }
+  ]
+}

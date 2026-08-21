@@ -1,0 +1,28 @@
+{
+  "provider": "kokoro",
+  "label": "Kokoro-82M · zf_xiaobei",
+  "engine": "hyperframes-kokoro",
+  "voice": "zf_xiaobei",
+  "params": {
+    "speed": 1,
+    "lang": "zh"
+  },
+  "requiresApiKey": false,
+  "sample": "sample-07",
+  "inputText": "Kokoro-82M 的權重採用 Apache 2.0，F5-TTS 的推理程式是 MIT，但它的預訓練模型是 CC-BY-NC，不適合商用。",
+  "outputAudio": "assets/audio/sample-07.kokoro.mp3",
+  "measurements": {
+    "durationSeconds": 15.08,
+    "spokenWeight": 44.5,
+    "rate": 2.95,
+    "articulationRate": 3.21,
+    "silenceSeconds": 1.23,
+    "silenceRatio": 0.08,
+    "leadSilence": 0,
+    "tailSilence": 0,
+    "internalPauses": 4,
+    "lufs": -21,
+    "lra": 3.6,
+    "truePeakDb": -4.2
+  }
+}

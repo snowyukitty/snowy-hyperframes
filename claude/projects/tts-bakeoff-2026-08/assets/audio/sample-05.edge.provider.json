@@ -1,0 +1,28 @@
+{
+  "provider": "edge",
+  "label": "Edge-TTS · zh-TW-HsiaoChenNeural",
+  "engine": "edge-tts",
+  "voice": "zh-TW-HsiaoChenNeural",
+  "params": {
+    "rate": "+5%",
+    "pitch": "-3Hz"
+  },
+  "requiresApiKey": false,
+  "sample": "sample-05",
+  "inputText": "先別急著渲染。把瀏覽器打開，聽一次旁白，看一次字幕，確認節奏舒服了，再按下最後那個按鈕。",
+  "outputAudio": "assets/audio/sample-05.edge.mp3",
+  "measurements": {
+    "durationSeconds": 9.96,
+    "spokenWeight": 38,
+    "rate": 3.82,
+    "articulationRate": 5.47,
+    "silenceSeconds": 3.01,
+    "silenceRatio": 0.3,
+    "leadSilence": 0.2,
+    "tailSilence": 0.84,
+    "internalPauses": 5,
+    "lufs": -18.9,
+    "lra": 2,
+    "truePeakDb": -4
+  }
+}

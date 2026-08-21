@@ -1,0 +1,10 @@
+{
+  "name": "tts-bakeoff-2026-08",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "bakeoff": "node ../../../shared/tools/hf.mjs bakeoff",
+    "audit": "node ../../../shared/tools/hf.mjs audit",
+    "hf": "node ../../../shared/tools/hf.mjs"
+  }
+}

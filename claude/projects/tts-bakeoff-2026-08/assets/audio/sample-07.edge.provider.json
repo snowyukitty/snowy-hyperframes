@@ -1,0 +1,28 @@
+{
+  "provider": "edge",
+  "label": "Edge-TTS · zh-TW-HsiaoChenNeural",
+  "engine": "edge-tts",
+  "voice": "zh-TW-HsiaoChenNeural",
+  "params": {
+    "rate": "+5%",
+    "pitch": "-3Hz"
+  },
+  "requiresApiKey": false,
+  "sample": "sample-07",
+  "inputText": "Kokoro-82M 的權重採用 Apache 2.0，F5-TTS 的推理程式是 MIT，但它的預訓練模型是 CC-BY-NC，不適合商用。",
+  "outputAudio": "assets/audio/sample-07.edge.mp3",
+  "measurements": {
+    "durationSeconds": 11.21,
+    "spokenWeight": 44.5,
+    "rate": 3.97,
+    "articulationRate": 4.92,
+    "silenceSeconds": 2.17,
+    "silenceRatio": 0.19,
+    "leadSilence": 0.18,
+    "tailSilence": 0.8,
+    "internalPauses": 5,
+    "lufs": -19.5,
+    "lra": 1.6,
+    "truePeakDb": -4.8
+  }
+}

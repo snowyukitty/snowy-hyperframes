@@ -1,0 +1,28 @@
+{
+  "provider": "edge",
+  "label": "Edge-TTS · zh-TW-HsiaoChenNeural",
+  "engine": "edge-tts",
+  "voice": "zh-TW-HsiaoChenNeural",
+  "params": {
+    "rate": "+5%",
+    "pitch": "-3Hz"
+  },
+  "requiresApiKey": false,
+  "sample": "sample-01",
+  "inputText": "這份研究的重點，不是把每一種技術都列出來，而是找出在有限預算下，哪一條路最值得先走。",
+  "outputAudio": "assets/audio/sample-01.edge.mp3",
+  "measurements": {
+    "durationSeconds": 8.69,
+    "spokenWeight": 38,
+    "rate": 4.37,
+    "articulationRate": 5.6,
+    "silenceSeconds": 1.91,
+    "silenceRatio": 0.22,
+    "leadSilence": 0.2,
+    "tailSilence": 0.84,
+    "internalPauses": 3,
+    "lufs": -18.9,
+    "lra": 1.6,
+    "truePeakDb": -4.7
+  }
+}

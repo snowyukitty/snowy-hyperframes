@@ -1,0 +1,28 @@
+{
+  "provider": "kokoro",
+  "label": "Kokoro-82M · zf_xiaobei",
+  "engine": "hyperframes-kokoro",
+  "voice": "zf_xiaobei",
+  "params": {
+    "speed": 1,
+    "lang": "zh"
+  },
+  "requiresApiKey": false,
+  "sample": "sample-04",
+  "inputText": "如果旁白的長度是由實際量測出來的音檔決定，而不是由分鏡表上預估的秒數決定，那麼影片就不會出現旁白被硬生生切斷的情況，這也是這套流程最重要的一條規則。",
+  "outputAudio": "assets/audio/sample-04.kokoro.mp3",
+  "measurements": {
+    "durationSeconds": 18.03,
+    "spokenWeight": 70,
+    "rate": 3.88,
+    "articulationRate": 4.21,
+    "silenceSeconds": 1.39,
+    "silenceRatio": 0.08,
+    "leadSilence": 0,
+    "tailSilence": 0,
+    "internalPauses": 4,
+    "lufs": -21.3,
+    "lra": 1.9,
+    "truePeakDb": -2.9
+  }
+}

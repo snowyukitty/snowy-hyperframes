@@ -1,0 +1,28 @@
+{
+  "provider": "kokoro",
+  "label": "Kokoro-82M · zf_xiaobei",
+  "engine": "hyperframes-kokoro",
+  "voice": "zf_xiaobei",
+  "params": {
+    "speed": 1,
+    "lang": "zh"
+  },
+  "requiresApiKey": false,
+  "sample": "sample-01",
+  "inputText": "這份研究的重點，不是把每一種技術都列出來，而是找出在有限預算下，哪一條路最值得先走。",
+  "outputAudio": "assets/audio/sample-01.kokoro.mp3",
+  "measurements": {
+    "durationSeconds": 10.88,
+    "spokenWeight": 38,
+    "rate": 3.49,
+    "articulationRate": 3.79,
+    "silenceSeconds": 0.86,
+    "silenceRatio": 0.08,
+    "leadSilence": 0,
+    "tailSilence": 0,
+    "internalPauses": 3,
+    "lufs": -20.2,
+    "lra": 2.9,
+    "truePeakDb": -3.5
+  }
+}

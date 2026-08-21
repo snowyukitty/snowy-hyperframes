@@ -1,0 +1,28 @@
+{
+  "provider": "kokoro",
+  "label": "Kokoro-82M · zf_xiaobei",
+  "engine": "hyperframes-kokoro",
+  "voice": "zf_xiaobei",
+  "params": {
+    "speed": 1,
+    "lang": "zh"
+  },
+  "requiresApiKey": false,
+  "sample": "sample-02",
+  "inputText": "我們比較了 Edge-TTS、Kokoro 與 ElevenLabs 三種方案，並且把 HyperFrames 的旁白流程接了上去。",
+  "outputAudio": "assets/audio/sample-02.kokoro.mp3",
+  "measurements": {
+    "durationSeconds": 11.31,
+    "spokenWeight": 40,
+    "rate": 3.54,
+    "articulationRate": 3.78,
+    "silenceSeconds": 0.73,
+    "silenceRatio": 0.06,
+    "leadSilence": 0,
+    "tailSilence": 0,
+    "internalPauses": 3,
+    "lufs": -20.5,
+    "lra": 1.3,
+    "truePeakDb": -4.1
+  }
+}

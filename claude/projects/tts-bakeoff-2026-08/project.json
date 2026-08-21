@@ -1,0 +1,36 @@
+{
+  "$schema": "../../../schemas/project.schema.json",
+  "id": "tts-bakeoff-2026-08",
+  "title": "No-API-key TTS bakeoff — Edge-TTS vs Kokoro（2026-08）",
+  "workflow": "claude",
+  "createdAt": "2026-08-21T19:20:46.897Z",
+  "updatedAt": "2026-08-21T19:20:46.897Z",
+  "status": "draft",
+  "format": "audio-research",
+  "language": "zh-Hant",
+  "durationSeconds": 60,
+  "sourceConfidence": "official-only",
+  "tools": [
+    "claude-code",
+    "shared/tools/hf.mjs",
+    "edge-tts",
+    "hyperframes@0.8.6 tts (Kokoro-82M)",
+    "ffmpeg"
+  ],
+  "auth": {
+    "required": [],
+    "notes": "No credentials. Edge-TTS needs network; Kokoro runs locally after a one-time model download."
+  },
+  "imageGeneration": {
+    "mode": "none",
+    "provider": "n/a",
+    "notes": "Audio research project; no video is produced."
+  },
+  "paths": {
+    "entry": "data/bakeoff.json",
+    "research": "data/measurements.json",
+    "storyboard": "data/bakeoff.json",
+    "references": "docs/references.md",
+    "renderOutput": "n/a (audio research project)"
+  }
+}
