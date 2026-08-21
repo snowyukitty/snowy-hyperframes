@@ -73,6 +73,8 @@ AGENTS.md、CLAUDE.md、`claude/README.md`、`hyperframes-0.8-upgrade-notes.md`�
 
 ## 4. 下一個里程碑：「研究型 zh-Hant 解說影片，一條指令可重跑」
 
+> 完整規格（每一項的 scope / spec / 檔案 / 驗收）在 **`shared/docs/design-v2.md`** §2，工作項 A–G；本節是摘要。
+
 建議順序（每一步都有可驗收產物）：
 
 1. **人工 gate**：在瀏覽器 preview `storyboard-to-video-pipeline-demo`，聽旁白、看節奏；OK 就把 status 改 `rendered`，

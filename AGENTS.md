@@ -5,6 +5,9 @@ this repository. The workspace-level `AGENTS.md` one directory up (if present) o
 this file; the project-level `project.json` / `docs/runbook.md` inside a specific
 project is more specific than this file for that project only.
 
+**Design of record for the current milestone:** `shared/docs/design-v2.md` (architecture, truth-vs-generated
+contract, spec'd work items A–G with acceptance criteria). Read it before starting any work item.
+
 ## What this repository is
 
 A public, research-grade record of **AI-assisted research-to-video production** on

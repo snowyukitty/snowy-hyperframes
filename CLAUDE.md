@@ -12,4 +12,5 @@ node shared/tools/hf.mjs audit --all   # every project, CI-equivalent, no browse
 node shared/tools/hf.mjs repo-check    # publication guard
 ```
 
-Latest phase summary and next steps: `shared/docs/phase-summary-2026-08-22.md`.
+Design of record (what to build next, with acceptance criteria): `shared/docs/design-v2.md`.
+Latest phase summary: `shared/docs/phase-summary-2026-08-22.md`.
