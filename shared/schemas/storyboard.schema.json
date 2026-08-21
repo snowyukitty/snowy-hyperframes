@@ -3,7 +3,13 @@
   "$id": "https://snowy.local/schemas/storyboard.schema.json",
   "title": "Storyboard Data",
   "type": "object",
-  "required": ["title", "targetDurationSeconds", "language", "voice", "slides"],
+  "required": [
+    "title",
+    "targetDurationSeconds",
+    "language",
+    "voice",
+    "slides"
+  ],
   "properties": {
     "title": {
       "type": "string"
@@ -21,9 +27,76 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "title", "durationTarget", "image", "subtitle", "narration"]
+        "required": [
+          "id",
+          "title",
+          "durationTarget",
+          "image",
+          "subtitle",
+          "narration"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "chapter": {
+            "type": "string"
+          },
+          "durationTarget": {
+            "type": "number",
+            "minimum": 1
+          },
+          "image": {
+            "type": "string"
+          },
+          "subtitle": {
+            "type": "string"
+          },
+          "narration": {
+            "type": "string"
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "enum": [
+                    "lead",
+                    "metrics",
+                    "cards",
+                    "list",
+                    "quote",
+                    "source"
+                  ]
+                },
+                "text": {
+                  "type": "string"
+                },
+                "source": {
+                  "type": "string"
+                },
+                "ordered": {
+                  "type": "boolean"
+                },
+                "items": {
+                  "type": "array"
+                }
+              },
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": true
       }
     }
   },
-  "additionalProperties": true
+  "additionalProperties": true,
+  "description": "Storyboard is the single source of intent: slides carry narration (spoken), subtitle (lower-third), and an optional blocks[] information layer rendered by `hf html`. Timing results live in data/timeline.json."
 }

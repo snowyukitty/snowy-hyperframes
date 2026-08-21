@@ -21,6 +21,8 @@ claude/projects/*
 !claude/projects/.gitkeep
 !claude/projects/storyboard-to-video-pipeline-demo/
 !claude/projects/storyboard-to-video-pipeline-demo/**
+!claude/projects/block-vocabulary-reference/
+!claude/projects/block-vocabulary-reference/**
 
 # Dependencies
 node_modules/
@@ -50,6 +52,11 @@ Thumbs.db
 .pi/
 .pi/tmp/
 .pi/cache/
+
+# Generated review kits and snapshot frames (rebuild with `hf review`)
+**/review/
+**/snapshots/
+**/.hf-review-tmp/
 
 # HyperFrames transient render/cache outputs
 **/renders/work-*/

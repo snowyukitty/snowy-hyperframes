@@ -18,9 +18,24 @@ cd <workflow>/projects/<project-name>
 npm run html        #  2. storyboard -> index.html 的 slide/audio 區塊（CSS/JS 在標記外，可自由改）
 npm run pipeline    #  3. prepare-tts -> tts (Edge-TTS) -> measure (ffprobe) -> sync -> audit
 npm run check       #  4. hf audit + npx hyperframes@0.8.6 check（0 error）
-npm run preview     #  5. 人工 gate：節奏、發音、圖文可讀性
+npm run review      #  5. 人工 gate：產生 review/index.html（畫格 + 真實旁白 + 餘裕 + 逐項勾選）
 npm run render      #  6. renders/<project>.mp4（不進 git；要分享放 GitHub Releases）
 ```
+
+## 資訊層：blocks
+
+一頁的數字、清單、引述寫在 storyboard 的 `slides[].blocks`，由 `hf html` 生成 HTML：
+
+| type | 內容 | 每頁建議 |
+| --- | --- | --- |
+| `lead` | 一句話導語 | 1 |
+| `metrics` | `items[{label, value, note}]` | 2–4 |
+| `cards` | `items[{title, text}]` | 2–3 |
+| `list` | `items[string]`（`ordered: true` 可編號） | 2–5 |
+| `quote` | `text` + `source` | 1 |
+| `source` | 頁尾來源註記 | 1 |
+
+一頁最多三個 block，`hf audit` 會檢查。實際樣子：`claude/projects/block-vocabulary-reference`。
 
 ## 模板裡有什麼
 

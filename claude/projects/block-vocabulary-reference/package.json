@@ -1,0 +1,22 @@
+{
+  "name": "block-vocabulary-reference",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "hf": "node ../../../shared/tools/hf.mjs",
+    "html": "node ../../../shared/tools/hf.mjs html",
+    "tts:prepare": "node ../../../shared/tools/hf.mjs prepare-tts",
+    "tts": "node ../../../shared/tools/hf.mjs tts",
+    "measure": "node ../../../shared/tools/hf.mjs measure",
+    "sync": "node ../../../shared/tools/hf.mjs sync",
+    "audit": "node ../../../shared/tools/hf.mjs audit",
+    "pipeline": "node ../../../shared/tools/hf.mjs pipeline",
+    "lint": "npx --yes hyperframes@0.8.6 lint",
+    "check": "node ../../../shared/tools/hf.mjs audit && npx --yes hyperframes@0.8.6 check",
+    "dev": "npx --yes hyperframes@0.8.6 preview",
+    "preview": "npx --yes hyperframes@0.8.6 preview",
+    "snapshot": "npx --yes hyperframes@0.8.6 snapshot",
+    "render": "npx --yes hyperframes@0.8.6 render . --output renders/blocks-lab.mp4",
+    "doctor": "npx --yes hyperframes@0.8.6 doctor"
+  }
+}

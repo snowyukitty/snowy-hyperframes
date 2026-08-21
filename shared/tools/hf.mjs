@@ -18,6 +18,8 @@
  *   fit-audio               keep slide windows, set each narration clip's data-duration to its MP3 length
  *                           (HyperFrames >=0.8 clip_media_fit) and fix the root data-duration — for legacy demos
  *   vendor                  copy shared/vendor/gsap.min.js into ./vendor and point index.html at it (no CDN at render)
+ *   review [--artifact]     build the human preview gate: one self-contained HTML with a frame + the real
+ *                           narration per slide, per-slide verdicts, and a paste-ready approval summary
  *   audit [--all] [--json]  structural + schema + timing + audio-cut-risk checks (CI-safe, no browser)
  *   repo-check              publication guard: allowlist, secrets, >95 MB files (run from repo root)
  *   pipeline                prepare-tts -> tts -> measure -> sync -> audit
@@ -155,6 +157,7 @@ function loadStoryboard(projectRoot) {
       durationTarget: Number(s.durationTarget ?? s.duration ?? s.originalTargetDuration ?? 0) || 0,
       image: s.image || (s.visuals && s.visuals.imageName ? `assets/images/${s.visuals.imageName}` : "") || "",
       imageInferred: !s.image && !!(s.visuals && s.visuals.imageName),
+      blocks: Array.isArray(s.blocks) ? s.blocks : [],
       subtitle: s.subtitle ?? "",
       narration: s.narration ?? s.displayText ?? "",
       ttsText: s.ttsText ?? "",
@@ -203,7 +206,10 @@ function validateSchema(schema, data, where = "$", out = []) {
 // external tools
 // ---------------------------------------------------------------------------
 function run(cmd, args, opts = {}) {
-  const r = spawnSync(cmd, args, { encoding: "utf8", shell: false, ...opts });
+  // args === undefined means cmd is a full command line (used with shell:true)
+  const r = args === undefined
+    ? spawnSync(cmd, { encoding: "utf8", ...opts })
+    : spawnSync(cmd, args, { encoding: "utf8", shell: false, ...opts });
   return { ok: r.status === 0, status: r.status, stdout: r.stdout || "", stderr: r.stderr || "", error: r.error };
 }
 function ffprobeDuration(file) {
@@ -357,6 +363,70 @@ const HF_SLIDES_END = "<!-- hf:slides:end -->";
 function esc(s) {
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
+
+// --- content blocks -------------------------------------------------------
+// A slide may carry `blocks: [...]` — the information layer of a research slide.
+// Deliberately a small, typographic vocabulary: every type has a fixed shape, so
+// `hf html` can render it, `hf audit` can judge its density, and a human editing
+// the storyboard never has to touch HTML. See shared/docs/design-v2.md §2B.
+const BLOCK_TYPES = ["lead", "metrics", "cards", "list", "quote", "source"];
+const BLOCK_LIMITS = { metrics: [2, 4], cards: [2, 3], list: [2, 5] };
+
+function renderBlocks(blocks, pad = "          ") {
+  const out = [];
+  for (const b of blocks) {
+    const type = b && b.type;
+    if (!BLOCK_TYPES.includes(type)) throw new Error(`unknown storyboard block type ${JSON.stringify(type)} (expected: ${BLOCK_TYPES.join(", ")})`);
+    const items = Array.isArray(b.items) ? b.items : [];
+    if (type === "lead") out.push(`${pad}<p class="block lead">${esc(b.text || "")}</p>`);
+    else if (type === "source") out.push(`${pad}<p class="block source">${esc(b.text || "")}</p>`);
+    else if (type === "quote")
+      out.push(
+        `${pad}<figure class="block quote">`,
+        `${pad}  <p>${esc(b.text || "")}</p>`,
+        b.source ? `${pad}  <figcaption>${esc(b.source)}</figcaption>` : null,
+        `${pad}</figure>`
+      );
+    else if (type === "metrics")
+      out.push(
+        `${pad}<div class="block metrics" style="--n:${items.length || 1}">`,
+        ...items.map((m) =>
+          [
+            `${pad}  <div class="metric">`,
+            `${pad}    <div class="label">${esc(m.label || "")}</div>`,
+            `${pad}    <div class="value">${esc(m.value ?? "")}</div>`,
+            m.note ? `${pad}    <div class="note">${esc(m.note)}</div>` : null,
+            `${pad}  </div>`,
+          ]
+            .filter(Boolean)
+            .join("\n")
+        ),
+        `${pad}</div>`
+      );
+    else if (type === "cards")
+      out.push(
+        `${pad}<div class="block cards" style="--n:${items.length || 1}">`,
+        ...items.map((c) =>
+          [
+            `${pad}  <div class="card">`,
+            `${pad}    <strong>${esc(c.title || "")}</strong>`,
+            c.text ? `${pad}    <p>${esc(c.text)}</p>` : null,
+            `${pad}  </div>`,
+          ]
+            .filter(Boolean)
+            .join("\n")
+        ),
+        `${pad}</div>`
+      );
+    else if (type === "list")
+      out.push(
+        `${pad}<${b.ordered ? "ol" : "ul"} class="block list">`,
+        ...items.map((li) => `${pad}  <li>${esc(typeof li === "string" ? li : li.text || "")}</li>`),
+        `${pad}</${b.ordered ? "ol" : "ul"}>`
+      );
+  }
+  return out.filter(Boolean).join("\n");
+}
 function renderAudioRegion(timeline) {
   const lines = timeline.map(
     (s, i) =>
@@ -367,27 +437,41 @@ function renderAudioRegion(timeline) {
 function renderSlidesRegion(timeline, slides) {
   const total = timeline.length;
   const byId = Object.fromEntries(slides.map((s) => [s.id, s]));
-  const blocks = timeline.map((t, i) => {
-    const s = byId[t.id] || { title: t.id, chapter: "", subtitle: "", image: "" };
-    const chapterClass = s.chapter ? ` ${String(s.chapter).toLowerCase().replace(/[^a-z0-9-]+/g, "-")}` : "";
+  const sections = timeline.map((t, i) => {
+    const s = byId[t.id] || { title: t.id, chapter: "", subtitle: "", image: "", blocks: [] };
+    // chapter classes are namespaced: a bare chapter name like "quote" or "list" would
+    // collide with the block vocabulary's own class names and restyle the whole slide.
+    const chapterClass = s.chapter ? ` chapter-${String(s.chapter).toLowerCase().replace(/[^a-z0-9-]+/g, "-")}` : "";
+    const blocks = Array.isArray(s.blocks) ? s.blocks : [];
+    const ring = `        <svg class="deco" viewBox="0 0 100 100" aria-hidden="true"><circle class="track" cx="50" cy="50" r="46"/><circle class="arc" cx="50" cy="50" r="46" stroke-dasharray="${(((i + 1) / total) * 2 * Math.PI * 46).toFixed(2)} 999"/><circle class="dot" cx="50" cy="4" r="1.6" transform="rotate(${(((i + 1) / total) * 360).toFixed(1)} 50 50)"/></svg>`;
     const bg = s.image
       ? `        <img class="bg" data-layout-allow-overflow="" src="${esc(s.image)}" alt="">`
-      : `        <div class="bg bg-generated" data-layout-allow-overflow=""></div>\n        <svg class="deco" viewBox="0 0 100 100" aria-hidden="true"><circle class="track" cx="50" cy="50" r="46"/><circle class="arc" cx="50" cy="50" r="46" stroke-dasharray="${(((i + 1) / total) * 2 * Math.PI * 46).toFixed(2)} 999"/><circle class="dot" cx="50" cy="4" r="1.6" transform="rotate(${(((i + 1) / total) * 360).toFixed(1)} 50 50)"/></svg>`;
+      : `        <div class="bg bg-generated" data-layout-allow-overflow=""></div>` + (blocks.length ? "" : `\n${ring}`);
     return [
-      `      <section id="${t.id}" class="clip slide${s.image ? "" : " no-image"}${chapterClass}" style="--i:${i}" data-start="${t.start}" data-duration="${t.duration}" data-track-index="${i + 1}">`,
+      `      <section id="${t.id}" class="clip slide${s.image ? "" : " no-image"}${blocks.length ? " with-blocks" : ""}${chapterClass}" style="--i:${i}" data-start="${t.start}" data-duration="${t.duration}" data-track-index="${i + 1}">`,
       bg,
       `        <div class="shade"></div>`,
       `        <div class="content">`,
       s.chapter ? `          <div class="eyebrow">${esc(s.chapter)}</div>` : `          <div class="eyebrow">${String(i + 1).padStart(2, "0")}</div>`,
       `          <h1>${esc(s.title)}</h1>`,
+      blocks.length ? `          <div class="blocks">\n${renderBlocks(blocks, "            ")}\n          </div>` : null,
       `        </div>`,
       `        <div class="caption">${esc(s.subtitle || "")}</div>`,
       `        <div class="progress">${String(i + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}</div>`,
       `      </section>`,
-    ].join("\n");
+    ]
+      .filter(Boolean)
+      .join("\n");
   });
-  return `${HF_SLIDES_START}\n${blocks.join("\n\n")}\n      ${HF_SLIDES_END}`;
+  return `${HF_SLIDES_START}\n${sections.join("\n\n")}\n      ${HF_SLIDES_END}`;
 }
+function regionOf(html, startMarker, endMarker) {
+  const a = html.indexOf(startMarker);
+  const b = html.indexOf(endMarker);
+  return a === -1 || b === -1 || b < a ? null : html.slice(a + startMarker.length, b);
+}
+const normalizeRegion = (s) => s.replace(/\sdata-(start|duration)="[^"]*"/g, "").replace(/\s+/g, " ").trim();
+
 function replaceRegion(html, startMarker, endMarker, replacement) {
   const a = html.indexOf(startMarker);
   const b = html.indexOf(endMarker);
@@ -719,6 +803,28 @@ function auditProject(projectRoot, repo) {
   if (dupIds.length) E("storyboard", `duplicate slide ids: ${dupIds.join(", ")}`);
   const renderStage = ["ready-to-render", "rendered"].includes(project.status);
 
+  // content blocks: shape + density (a slide a viewer cannot read in its narration window is a defect)
+  for (const s of sb.slides) {
+    const seen = {};
+    for (const b of s.blocks) {
+      const type = b && b.type;
+      if (!BLOCK_TYPES.includes(type)) {
+        E("block-type", `${s.id}: unknown block type ${JSON.stringify(type)} (expected: ${BLOCK_TYPES.join(", ")})`);
+        continue;
+      }
+      seen[type] = (seen[type] || 0) + 1;
+      const n = Array.isArray(b.items) ? b.items.length : 0;
+      const lim = BLOCK_LIMITS[type];
+      if (lim && (n < lim[0] || n > lim[1])) W("block-density", `${s.id}: ${type} has ${n} item(s); readable range is ${lim[0]}-${lim[1]} at 1080p`);
+      if (type === "metrics") for (const m of b.items || []) if (!m || m.value === undefined || !m.label) W("block-shape", `${s.id}: a metrics item needs both label and value`);
+      if (type === "cards") for (const c of b.items || []) if (!c || !c.title) W("block-shape", `${s.id}: a cards item needs a title`);
+      if ((type === "lead" || type === "quote" || type === "source") && !(b.text || "").trim()) W("block-shape", `${s.id}: ${type} block has no text`);
+      if (type === "lead" && (b.text || "").length > 60) W("block-density", `${s.id}: lead is ${b.text.length} chars; keep it under ~60 so it reads as one breath`);
+    }
+    for (const t of ["metrics", "cards", "quote"]) if (seen[t] > 1) W("block-density", `${s.id}: ${seen[t]} ${t} blocks on one slide; split it`);
+    if (s.blocks.length > 3) W("block-density", `${s.id}: ${s.blocks.length} blocks on one slide; 1-3 is the readable range`);
+  }
+
   // assets
   const images = new Map();
   for (const s of sb.slides) {
@@ -737,6 +843,17 @@ function auditProject(projectRoot, repo) {
     if (!/data-composition-id=/.test(html)) E("composition", "index.html has no data-composition-id root");
     if (/<audio\b[^>]*\bcontrols\b/.test(html)) E("audio-controls", "an <audio> element has native controls — they render into the video");
     if (/<script[^>]+src="https?:\/\//.test(html)) I("cdn-script", "index.html loads a script from a CDN (render needs network; consider vendoring for determinism)");
+    // is the generated region still what the storyboard says? (timing attrs are excluded — `sync` owns those)
+    const currentRegion = regionOf(html, HF_SLIDES_START, HF_SLIDES_END);
+    if (currentRegion !== null) {
+      try {
+        const expected = renderSlidesRegion(sb.slides.map((s) => ({ id: s.id, start: 0, duration: 0 })), sb.slides);
+        if (normalizeRegion(currentRegion) !== normalizeRegion(regionOf(expected, HF_SLIDES_START, HF_SLIDES_END) || ""))
+          W("stale-html", "index.html's generated slide region no longer matches data/storyboard.json — run `hf html` then `hf sync`");
+      } catch (e) {
+        E("block-type", String(e.message || e));
+      }
+    }
     const timing = parseTimingFromHtml(html, ids);
     let prevEnd = 0;
     let lastEnd = 0;
@@ -948,6 +1065,405 @@ function cmdVendor(projectRoot = findProjectRoot()) {
   log(`vendor: vendor/gsap.min.js in place${r.rewrote ? "; index.html now loads it instead of the CDN" : ""}`);
 }
 
+// --- the review kit page (self-contained; no external requests, no build step) ---
+const REVIEW_CSS = `
+:root {
+  --bg: #0a0d10; --panel: #121820; --panel-2: #171f28; --line: #26313c;
+  --ink: #eef3ef; --ink-dim: #a9b6b2; --accent: #94f0e7; --warm: #ffe6a3;
+  --ok: #7fe0a8; --warn: #ffcf85; --bad: #ff9a8b;
+  --radius: 12px;
+  color-scheme: dark;
+}
+/* Deliberately single-theme: this page frames stills from a dark 1080p composition,
+   so a light ground would fight the content. Every colour is painted explicitly from
+   the tokens above, and the font stack matches the video's own (no web font, no CDN —
+   the kit has to open offline, on a plane, from a file:// URL). */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+body {
+  background: var(--bg); color: var(--ink); line-height: 1.5;
+  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", -apple-system, system-ui, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 20px 80px; }
+header.top {
+  position: sticky; top: 0; z-index: 20; background: rgba(10,13,16,.94);
+  border-bottom: 1px solid var(--line); backdrop-filter: blur(8px);
+}
+.top-in { max-width: 1180px; margin: 0 auto; padding: 14px 20px; display: flex; gap: 10px 14px; align-items: center; flex-wrap: wrap; }
+.top h1 { font-size: 19px; font-weight: 800; letter-spacing: .01em; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip {
+  font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px;
+  border: 1px solid var(--line); color: var(--ink-dim); white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.chip.accent { color: var(--accent); border-color: rgba(148,240,231,.35); }
+#tally { font-variant-numeric: tabular-nums; }
+.chip.ok { color: var(--ok); border-color: rgba(127,224,168,.4); }
+.chip.warn { color: var(--warn); border-color: rgba(255,207,133,.4); }
+.chip.bad { color: var(--bad); border-color: rgba(255,154,139,.45); }
+.spacer { flex: 1 1 auto; }
+button {
+  font: inherit; font-weight: 700; font-size: 13px; cursor: pointer;
+  background: var(--panel-2); color: var(--ink); border: 1px solid var(--line);
+  border-radius: 999px; padding: 8px 16px;
+}
+button:hover { border-color: var(--accent); color: var(--accent); }
+button.primary { background: var(--accent); color: #06231f; border-color: var(--accent); }
+button.primary:hover { filter: brightness(1.08); color: #06231f; }
+.lede { padding: 26px 0 6px; color: var(--ink-dim); font-size: 14px; max-width: 74ch; }
+.lede b { color: var(--ink); }
+.card {
+  margin-top: 22px; background: var(--panel); border: 1px solid var(--line);
+  border-radius: var(--radius); overflow: hidden;
+  display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+}
+.card.done { border-color: rgba(127,224,168,.45); }
+.shot { background: #05070a; display: grid; place-items: center; }
+.shot img { display: block; width: 100%; height: auto; }
+.shot .noimg { aspect-ratio: 16/9; display: grid; place-items: center; color: var(--ink-dim); font-size: 13px; }
+.body { padding: 20px 22px 22px; display: flex; flex-direction: column; gap: 12px; }
+.eyebrow { display: flex; gap: 8px; align-items: center; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.eyebrow .num { color: var(--ink-dim); font-variant-numeric: tabular-nums; letter-spacing: 0; }
+h2 { font-size: 22px; font-weight: 800; line-height: 1.25; }
+.sub { color: var(--ink-dim); font-size: 14px; }
+.narr {
+  background: var(--panel-2); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0;
+  padding: 12px 14px; font-size: 15px; color: var(--ink);
+}
+audio { width: 100%; height: 34px; }
+.gates { display: flex; gap: 8px; flex-wrap: wrap; }
+.gate {
+  display: inline-flex; align-items: center; gap: 7px; cursor: pointer; user-select: none;
+  font-size: 13px; font-weight: 700; padding: 7px 13px; border-radius: 999px;
+  border: 1px solid var(--line); color: var(--ink-dim); background: var(--panel-2);
+}
+.gate input { position: absolute; opacity: 0; width: 0; height: 0; }
+.gate .box { width: 15px; height: 15px; border-radius: 4px; border: 1.5px solid var(--ink-dim); display: grid; place-items: center; font-size: 10px; color: transparent; }
+.gate.on { color: var(--ok); border-color: rgba(127,224,168,.5); }
+.gate.on .box { background: var(--ok); border-color: var(--ok); color: #05291a; }
+.note {
+  width: 100%; font: inherit; font-size: 13px; color: var(--ink); background: var(--panel-2);
+  border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; resize: vertical; min-height: 38px;
+}
+.note:focus { outline: none; border-color: var(--accent); }
+footer { margin-top: 34px; color: var(--ink-dim); font-size: 12.5px; border-top: 1px solid var(--line); padding-top: 16px; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .93em; color: var(--warm); }
+/* cinema */
+#cinema { position: fixed; inset: 0; z-index: 50; background: #000; display: none; }
+#cinema.on { display: grid; grid-template-rows: 1fr auto; }
+#cinema .stage { position: relative; display: grid; place-items: center; overflow: hidden; }
+#cinema .stage img { max-width: 100%; max-height: 100%; display: block; }
+#cinema .cap {
+  position: absolute; left: 4%; right: 4%; bottom: 5%; padding: 14px 20px; border-radius: 10px;
+  background: rgba(5,10,13,.8); border: 1px solid rgba(255,255,255,.14); font-size: clamp(14px, 1.7vw, 22px);
+  font-weight: 600; text-align: left;
+}
+#cinema .hud { position: absolute; top: 3%; right: 4%; font-variant-numeric: tabular-nums; color: rgba(255,255,255,.75); font-weight: 700; }
+#cinema .bar { height: 3px; background: #1b2229; }
+#cinema .bar > i { display: block; height: 100%; width: 0; background: var(--accent); }
+#cinema .ctl { display: flex; gap: 10px; align-items: center; padding: 12px 18px; background: #0a0d10; border-top: 1px solid var(--line); flex-wrap: wrap; }
+@media (max-width: 900px) { .card { grid-template-columns: 1fr; } .top h1 { font-size: 16px; } }
+`;
+
+function reviewHtml(meta, slides, opts = {}) {
+  const data = JSON.stringify({ meta, slides }).replace(/</g, "\\u003c");
+  const head = `<title>${esc(meta.title)}</title>\n<style>${REVIEW_CSS}</style>`;
+  const body = `
+<header class="top">
+  <div class="top-in">
+    <h1>${esc(meta.title)}</h1>
+    <div class="chips">
+      <span class="chip accent">${esc(meta.workflow)}</span>
+      <span class="chip">${meta.total}s</span>
+      <span class="chip">旁白 ${meta.narration}s</span>
+      ${meta.voice ? `<span class="chip">${esc(meta.voice)}</span>` : ""}
+      <span class="chip" id="tally">0 / ${slides.length} 已通過</span>
+    </div>
+    <span class="spacer"></span>
+    <button id="play">▶ 連續播放</button>
+    <button id="copy" class="primary">複製審核結論</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <p class="lede">
+    這是 <b>${esc(meta.project)}</b> 的人工審核包：每頁一張實際畫格、真實旁白音檔、字幕與時間餘裕。
+    請確認三件事 —— <b>發音</b>（中英混讀是否自然）、<b>節奏</b>（旁白與頁面長度是否舒服）、
+    <b>可讀性</b>（字幕與畫面文字是否看得清）。全部通過後按「複製審核結論」，把結果貼回工作階段或
+    <code>docs/retrospective.md</code>。勾選只存在你這台裝置的瀏覽器裡。
+  </p>
+  <div id="list"></div>
+  <footer>
+    由 <code>hf review</code> 產生於 ${esc(meta.generatedAt)} · 專案狀態 <code>${esc(meta.status)}</code> ·
+    通過後把 <code>project.json.status</code> 改為 <code>rendered</code>，並把成片放到 GitHub Releases（不要進 git）。
+  </footer>
+</div>
+
+<div id="cinema">
+  <div class="stage"><img id="c-img" alt=""><div class="hud" id="c-hud"></div><div class="cap" id="c-cap"></div></div>
+  <div>
+    <div class="bar"><i id="c-bar"></i></div>
+    <div class="ctl">
+      <button id="c-prev">◀ 上一頁</button>
+      <button id="c-toggle" class="primary">暫停</button>
+      <button id="c-next">下一頁 ▶</button>
+      <span class="chip" id="c-meta"></span>
+      <span class="spacer"></span>
+      <button id="c-exit">結束（Esc）</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var D = ${data};
+var KEY = "hf-review:" + D.meta.id;
+var state = {};
+try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { state = {}; }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+function st(id) { if (!state[id]) state[id] = { p: false, r: false, l: false, note: "" }; return state[id]; }
+function passed(id) { var s = st(id); return s.p && s.r && s.l; }
+function fmt(n) { return (Math.round(n * 100) / 100).toFixed(2); }
+var GATES = [["p", "發音"], ["r", "節奏"], ["l", "可讀性"]];
+
+function marginChip(s) {
+  if (s.mp3 == null) return '<span class="chip warn">無音檔</span>';
+  var m = s.duration - s.mp3;
+  var cls = m < 0 ? "bad" : m < 0.3 ? "warn" : "ok";
+  return '<span class="chip ' + cls + '">餘裕 ' + fmt(m) + 's</span>';
+}
+function render() {
+  var list = document.getElementById("list");
+  list.innerHTML = "";
+  D.slides.forEach(function (s) {
+    var el = document.createElement("article");
+    el.className = "card" + (passed(s.id) ? " done" : "");
+    el.id = "card-" + s.id;
+    var shot = s.img ? '<img src="' + s.img + '" alt="">' : '<div class="noimg">沒有畫格（跑 hf review 時 snapshot 失敗）</div>';
+    var gates = GATES.map(function (g) {
+      var on = st(s.id)[g[0]];
+      return '<label class="gate' + (on ? " on" : "") + '" data-slide="' + s.id + '" data-gate="' + g[0] + '">' +
+        '<input type="checkbox"' + (on ? " checked" : "") + '><span class="box">✓</span>' + g[1] + "</label>";
+    }).join("");
+    el.innerHTML =
+      '<div class="shot">' + shot + "</div>" +
+      '<div class="body">' +
+        '<div class="eyebrow">' + (s.chapter ? "<span>" + s.chapter + "</span>" : "") +
+          '<span class="num">' + String(s.n).padStart(2, "0") + " / " + String(D.slides.length).padStart(2, "0") + "</span></div>" +
+        "<h2>" + s.title + "</h2>" +
+        (s.subtitle ? '<div class="sub">字幕：' + s.subtitle + "</div>" : "") +
+        '<div class="narr">' + (s.narration || "（無旁白稿）") + "</div>" +
+        (s.audio ? '<audio controls preload="none" src="' + s.audio + '"></audio>' : "") +
+        '<div class="chips"><span class="chip">起 ' + fmt(s.start) + "s</span>" +
+          '<span class="chip">頁面 ' + fmt(s.duration) + "s</span>" +
+          '<span class="chip">旁白 ' + (s.mp3 == null ? "—" : fmt(s.mp3) + "s") + "</span>" + marginChip(s) + "</div>" +
+        '<div class="gates">' + gates + "</div>" +
+        '<textarea class="note" data-slide="' + s.id + '" placeholder="需要修的地方（會出現在審核結論裡）">' + (st(s.id).note || "") + "</textarea>" +
+      "</div>";
+    list.appendChild(el);
+  });
+  tally();
+}
+function tally() {
+  var n = D.slides.filter(function (s) { return passed(s.id); }).length;
+  var t = document.getElementById("tally");
+  t.textContent = n + " / " + D.slides.length + " 已通過";
+  t.className = "chip " + (n === D.slides.length ? "ok" : n ? "warn" : "");
+}
+document.addEventListener("click", function (e) {
+  var g = e.target.closest ? e.target.closest(".gate") : null;
+  if (!g) return;
+  e.preventDefault();
+  var s = st(g.dataset.slide);
+  s[g.dataset.gate] = !s[g.dataset.gate];
+  save();
+  g.classList.toggle("on", s[g.dataset.gate]);
+  g.querySelector("input").checked = s[g.dataset.gate];
+  var card = document.getElementById("card-" + g.dataset.slide);
+  if (card) card.classList.toggle("done", passed(g.dataset.slide));
+  tally();
+});
+document.addEventListener("input", function (e) {
+  if (!e.target.classList || !e.target.classList.contains("note")) return;
+  st(e.target.dataset.slide).note = e.target.value;
+  save();
+});
+
+document.getElementById("copy").addEventListener("click", function () {
+  var all = D.slides.every(function (s) { return passed(s.id); });
+  var lines = ["## 人工 preview 審核 — " + D.meta.title, "", "- 專案：\`" + D.meta.project + "\`",
+    "- 產生：" + D.meta.generatedAt + " · 長度 " + D.meta.total + "s（旁白 " + D.meta.narration + "s）",
+    "- 結論：" + (all ? "**通過**，可以 render / 發布" : "**未通過**，見下方待修項"), ""];
+  D.slides.forEach(function (s) {
+    var v = st(s.id);
+    var miss = GATES.filter(function (g) { return !v[g[0]]; }).map(function (g) { return g[1]; });
+    lines.push("- [" + (miss.length ? " " : "x") + "] " + s.id + " " + s.title +
+      (miss.length ? " — 未通過：" + miss.join("、") : "") + (v.note ? " — " + v.note : ""));
+  });
+  var text = lines.join("\\n");
+  var done = function () { var b = document.getElementById("copy"); b.textContent = "已複製 ✓"; setTimeout(function () { b.textContent = "複製審核結論"; }, 1800); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () { window.prompt("複製這段：", text); });
+  else window.prompt("複製這段：", text);
+});
+
+/* cinema — plays the real narration in order, so pacing can be judged without a render */
+var cin = document.getElementById("cinema"), ci = 0, timer = null, playing = false;
+var au = new Audio();
+function show(i) {
+  ci = Math.max(0, Math.min(D.slides.length - 1, i));
+  var s = D.slides[ci];
+  document.getElementById("c-img").src = s.img || "";
+  document.getElementById("c-cap").textContent = s.subtitle || s.narration || "";
+  document.getElementById("c-hud").textContent = String(s.n).padStart(2, "0") + " / " + String(D.slides.length).padStart(2, "0");
+  document.getElementById("c-meta").textContent = s.title;
+  document.getElementById("c-bar").style.width = ((ci + 1) / D.slides.length * 100) + "%";
+  clearTimeout(timer);
+  au.pause();
+  if (!playing) return;
+  if (s.audio) {
+    au.src = s.audio;
+    au.currentTime = 0;
+    au.play().catch(function () {});
+    au.onended = function () { timer = setTimeout(next, Math.max(0, (s.duration - (s.mp3 || 0)) * 1000)); };
+  } else timer = setTimeout(next, s.duration * 1000);
+}
+function next() { if (ci >= D.slides.length - 1) { stop(); return; } show(ci + 1); }
+function stop() { playing = false; au.pause(); clearTimeout(timer); document.getElementById("c-toggle").textContent = "播放"; }
+document.getElementById("play").addEventListener("click", function () { cin.classList.add("on"); playing = true; document.getElementById("c-toggle").textContent = "暫停"; show(0); });
+document.getElementById("c-exit").addEventListener("click", function () { stop(); cin.classList.remove("on"); });
+document.getElementById("c-next").addEventListener("click", function () { show(ci + 1); });
+document.getElementById("c-prev").addEventListener("click", function () { show(ci - 1); });
+document.getElementById("c-toggle").addEventListener("click", function () {
+  playing = !playing;
+  document.getElementById("c-toggle").textContent = playing ? "暫停" : "播放";
+  if (playing) show(ci); else stop();
+});
+document.addEventListener("keydown", function (e) {
+  if (!cin.classList.contains("on")) return;
+  if (e.key === "Escape") { stop(); cin.classList.remove("on"); }
+  if (e.key === "ArrowRight") show(ci + 1);
+  if (e.key === "ArrowLeft") show(ci - 1);
+});
+render();
+</script>`;
+  if (opts.artifact) return `${head}\n${body}\n`;
+  return `<!DOCTYPE html>\n<html lang="zh-Hant">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n${head}\n</head>\n<body>\n${body}\n</body>\n</html>\n`;
+}
+
+// ---------------------------------------------------------------------------
+// COMMAND: review  — build a self-contained review kit for the human preview gate
+// ---------------------------------------------------------------------------
+// Rule 2 of AGENTS.md says a human must preview pacing, pronunciation and
+// readability before render. That gate used to cost a dev server, a browser and
+// a timeline scrub. This builds ONE offline HTML file — slide frames + the real
+// narration audio inlined — that plays the piece end to end, records a per-slide
+// verdict in localStorage, and hands back a paste-ready approval summary. It can
+// be opened locally or published (e.g. as an Artifact) so the gate can happen
+// from a phone, away from the machine that rendered it.
+function hfPin(projectRoot) {
+  const pk = path.join(projectRoot, "package.json");
+  if (exists(pk)) {
+    const m = /hyperframes@([0-9][\w.-]*)/.exec(readText(pk));
+    if (m) return m[1];
+  }
+  return "0.8.6";
+}
+function dataUri(file, mime) {
+  return `data:${mime};base64,${fs.readFileSync(file).toString("base64")}`;
+}
+// Node >=20 refuses to spawn .cmd/.bat without a shell (EINVAL), so npx needs shell:true on Windows.
+function runNpx(args, opts = {}) {
+  const win = process.platform === "win32";
+  // with shell:true Node warns about un-escaped arg arrays, so pass one command string instead
+  return win ? run(["npx.cmd", ...args].join(" "), undefined, { ...opts, shell: true }) : run("npx", args, opts);
+}
+function takeSnapshots(projectRoot, times) {
+  const r = runNpx(["--yes", `hyperframes@${hfPin(projectRoot)}`, "snapshot", "--at", times.map((t) => String(t)).join(",")], { cwd: projectRoot });
+  if (!r.ok) warn(`  snapshot failed (kit will be built without frames):\n${(r.stderr || r.stdout || "").split("\n").slice(-4).join("\n")}`);
+  return r.ok;
+}
+function collectFrames(projectRoot) {
+  const dir = path.join(projectRoot, "snapshots");
+  if (!exists(dir)) return [];
+  return fs
+    .readdirSync(dir)
+    .map((f) => ({ file: path.join(dir, f), t: Number((/at-([0-9.]+)s\.png$/.exec(f) || [])[1]) }))
+    .filter((x) => Number.isFinite(x.t))
+    .sort((a, b) => a.t - b.t);
+}
+function cmdReview(projectRoot = findProjectRoot()) {
+  const repo = repoRootOrDie(projectRoot);
+  const sb = loadStoryboard(projectRoot);
+  const project = readJson(path.join(projectRoot, "project.json"));
+  const tlPath = path.join(projectRoot, "data", "timeline.json");
+  const timeline = exists(tlPath) ? readJson(tlPath).slides : provisionalTimeline(projectRoot, sb);
+  const byId = Object.fromEntries(sb.slides.map((s) => [s.id, s]));
+
+  // one frame per slide, taken after the entrance animation has settled
+  const times = timeline.map((t) => Math.round((t.start + Math.min(2.4, Math.max(0.8, t.duration * 0.3))) * 10) / 10);
+  if (!FLAGS["no-snapshot"]) {
+    log(`review: capturing ${times.length} frame(s) at ${times.join(", ")}s …`);
+    takeSnapshots(projectRoot, times);
+  }
+  const frames = collectFrames(projectRoot);
+  const tmp = path.join(projectRoot, ".hf-review-tmp");
+  fs.mkdirSync(tmp, { recursive: true });
+
+  let bytes = 0;
+  const slides = timeline.map((t, i) => {
+    const s = byId[t.id] || {};
+    const frame = frames.find((f) => f.t >= t.start && f.t < t.start + t.duration) || frames[i];
+    let img = null;
+    if (frame && exists(frame.file)) {
+      const jpg = path.join(tmp, `${t.id}.jpg`);
+      const r = run("ffmpeg", ["-y", "-loglevel", "error", "-i", frame.file, "-vf", "scale=1180:-1", "-q:v", "5", jpg]);
+      if (r.ok && exists(jpg)) img = dataUri(jpg, "image/jpeg");
+    }
+    const mp3 = path.join(projectRoot, "assets", "audio", `${t.id}.mp3`);
+    const audio = exists(mp3) ? dataUri(mp3, "audio/mpeg") : null;
+    const displayPath = path.join(projectRoot, "assets", "audio", `${t.id}.display.txt`);
+    bytes += (img ? img.length : 0) + (audio ? audio.length : 0);
+    return {
+      id: t.id,
+      n: i + 1,
+      chapter: s.chapter || "",
+      title: s.title || t.id,
+      subtitle: s.subtitle || "",
+      narration: exists(displayPath) ? readText(displayPath).trim() : s.narration || "",
+      start: t.start,
+      duration: t.duration,
+      mp3: t.mp3Duration ?? t.mp3 ?? null,
+      img,
+      audio,
+    };
+  });
+  try {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  } catch {}
+
+  const total = timeline.length ? round1(timeline[timeline.length - 1].start + timeline[timeline.length - 1].duration) : 0;
+  const meta = {
+    id: project.id || path.basename(projectRoot),
+    title: project.title || sb.title || project.id,
+    workflow: project.workflow || "",
+    status: project.status || "",
+    total,
+    narration: Math.round(slides.reduce((a, s) => a + (s.mp3 || 0), 0) * 10) / 10,
+    voice: (sb.voice && sb.voice.voice) || "",
+    generatedAt: nowIso().slice(0, 19).replace("T", " ") + "Z",
+    project: rel(repo, projectRoot),
+  };
+  const outDir = path.resolve(projectRoot, String(FLAGS.out || "review"));
+  const outFile = path.join(outDir, FLAGS.artifact ? "review.artifact.html" : "index.html");
+  writeText(outFile, reviewHtml(meta, slides, { artifact: !!FLAGS.artifact }));
+  const mb = fs.statSync(outFile).size / 1048576;
+  log(`review: ${outFile}`);
+  log(`  ${slides.length} slide(s), ${slides.filter((s) => s.img).length} frame(s), ${slides.filter((s) => s.audio).length} clip(s), ${mb.toFixed(1)} MB self-contained`);
+  if (mb > 14) warn("  ! over 14 MB — too large to publish as an Artifact; re-run with fewer slides or smaller frames");
+  log(`  open it, run 連續播放 (cinema), tick the three gates per slide, then press 複製審核結論.`);
+}
+
 // ---------------------------------------------------------------------------
 // COMMAND: pipeline
 // ---------------------------------------------------------------------------
@@ -973,6 +1489,7 @@ const commands = {
   measure: () => cmdMeasure(),
   sync: () => cmdSync(),
   "fit-audio": () => cmdFitAudio(),
+  review: () => cmdReview(),
   vendor: () => cmdVendor(),
   audit: cmdAudit,
   "repo-check": cmdRepoCheck,

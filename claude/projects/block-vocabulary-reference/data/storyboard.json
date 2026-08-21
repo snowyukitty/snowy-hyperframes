@@ -1,0 +1,157 @@
+{
+  "title": "Block Vocabulary Reference",
+  "targetDurationSeconds": 50,
+  "language": "zh-Hant",
+  "voice": {
+    "tool": "edge-tts",
+    "voice": "zh-TW-HsiaoChenNeural",
+    "rate": "+5%",
+    "pitch": "-3Hz",
+    "volume": "+0%"
+  },
+  "slides": [
+    {
+      "id": "slide-01",
+      "title": "metrics：讓一個數字占住視線",
+      "chapter": "metrics",
+      "durationTarget": 10,
+      "image": "",
+      "subtitle": "數字用 metrics：標籤在上、數值在中、註解在下，一列二到四個。",
+      "narration": "數字用 metrics，一列二到四個。",
+      "blocks": [
+        {
+          "type": "lead",
+          "text": "這一頁的每個數字都來自本 repo 自己的規則。"
+        },
+        {
+          "type": "metrics",
+          "items": [
+            {
+              "label": "block 類型",
+              "value": "6",
+              "note": "lead · metrics · cards · list · quote · source"
+            },
+            {
+              "label": "一頁上限",
+              "value": "3",
+              "note": "超過三個 block 就該拆頁"
+            },
+            {
+              "label": "安全邊界",
+              "value": "0.6s",
+              "note": "旁白結束後保留的呼吸空間"
+            }
+          ]
+        },
+        {
+          "type": "source",
+          "text": "來源：shared/tools/hf.mjs 的 BLOCK_TYPES 與 BLOCK_LIMITS（本 repo 內可驗證）。"
+        }
+      ]
+    },
+    {
+      "id": "slide-02",
+      "title": "cards：三個並列的概念",
+      "chapter": "cards",
+      "durationTarget": 10,
+      "image": "",
+      "subtitle": "概念用 cards，標題一行、說明兩行以內。",
+      "narration": "概念用 cards。",
+      "blocks": [
+        {
+          "type": "cards",
+          "items": [
+            {
+              "title": "官方",
+              "text": "廠商自己公布的數字，可直接引用。"
+            },
+            {
+              "title": "社群",
+              "text": "使用者實測回報，需標明樣本與日期。"
+            },
+            {
+              "title": "估算",
+              "text": "我們推導的數字，必須寫明推導方式。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "slide-03",
+      "title": "list：一次講五件事的上限",
+      "chapter": "list",
+      "durationTarget": 10,
+      "image": "",
+      "subtitle": "步驟用 list，最多五項，超過就拆頁。",
+      "narration": "步驟用 list。",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "storyboard 寫下意圖",
+            "prepare-tts 產生朗讀稿",
+            "tts 生成旁白",
+            "measure 量測實際長度",
+            "sync 回寫所有時間軸"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "slide-04",
+      "title": "quote：讓一句話占住畫面",
+      "chapter": "quote",
+      "durationTarget": 10,
+      "image": "",
+      "subtitle": "結論或引述用 quote，一頁只放一則。",
+      "narration": "結論用 quote。",
+      "blocks": [
+        {
+          "type": "quote",
+          "text": "永遠不要用估計的秒數 render；先量 MP3，再決定要縮稿還是延長頁面。",
+          "source": "shared/docs/hyperframes-production-playbook.md §4.6"
+        },
+        {
+          "type": "source",
+          "text": "此規則來自 2026-06 的旁白截斷事故。"
+        }
+      ]
+    },
+    {
+      "id": "slide-05",
+      "title": "混合：導語加數字加來源",
+      "chapter": "mixed",
+      "durationTarget": 10,
+      "image": "",
+      "subtitle": "一頁最多三個 block；再多就該拆頁。",
+      "narration": "一頁最多三個 block。",
+      "blocks": [
+        {
+          "type": "lead",
+          "text": "旁白長度決定頁面長度，不是反過來。"
+        },
+        {
+          "type": "metrics",
+          "items": [
+            {
+              "label": "量測",
+              "value": "ffprobe",
+              "note": "每段 MP3 的實際秒數"
+            },
+            {
+              "label": "回寫",
+              "value": "hf sync",
+              "note": "頁面、字幕、metadata 一次同步"
+            }
+          ]
+        },
+        {
+          "type": "source",
+          "text": "來源：data/timeline.json（由 hf sync 產生）"
+        }
+      ]
+    }
+  ]
+}

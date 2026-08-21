@@ -78,6 +78,7 @@ the new pipeline, with information-dense image-free slides, accurate captions, a
 local no-API-key TTS option measured against Edge-TTS.
 
 Each item below is self-contained: scope, spec, files, acceptance. Suggested order: A → B → C → D → E → F → G.
+**Status 2026-08-22: B and B2 are built and verified; A, C, D, E, F, G remain.**
 Items B, C, D are independent of each other and can run in parallel sessions.
 
 ### A. Human preview gate for the existing demo (15 min, human + agent)
@@ -90,35 +91,55 @@ Items B, C, D are independent of each other and can run in parallel sessions.
   link it from the project README. Do **not** commit the MP4.
 - Acceptance: status honest, Release exists, `hf repo-check` still clean.
 
-### B. Template content blocks — information density without bitmaps (core of the milestone)
+### B. Template content blocks — information density without bitmaps ✅ BUILT 2026-08-22
 
-**Problem.** Research slides need numbers, comparisons, lists, quotes. Today an image-free slide is title + caption only.
-
-**Spec.** Extend the storyboard slide with an optional `blocks` array; `hf html` renders them inside
-`.content` after `h1`, inside the generated region. Keep the vocabulary small and typographic:
+**Shipped.** Storyboard slides take an optional `blocks: []`; `hf html` renders them; `hf audit` polices density.
 
 ```jsonc
 "blocks": [
-  { "type": "lead",    "text": "一句話的導語（≤ 40 字）" },
-  { "type": "metrics", "items": [ { "label": "成本", "value": "$0", "note": "Edge-TTS" }, ... ] },   // 2–4 items, grid
-  { "type": "cards",   "items": [ { "title": "Kokoro", "text": "82M 參數，CPU 可跑" }, ... ] },       // 2–3 items
-  { "type": "list",    "items": [ "…", "…" ], "ordered": false },                                     // ≤ 5 items
-  { "type": "quote",   "text": "…", "source": "IEA WEO 2025" },
-  { "type": "source",  "text": "資料：… ／ 估算" }                                                   // bottom-left footnote
+  { "type": "lead",    "text": "一句話導語" },
+  { "type": "metrics", "items": [ { "label": "量測", "value": "ffprobe", "note": "每段 MP3 的實際秒數" } ] },  // 2-4
+  { "type": "cards",   "items": [ { "title": "官方", "text": "廠商公布的數字" } ] },                            // 2-3
+  { "type": "list",    "items": ["…"], "ordered": true },                                                       // 2-5
+  { "type": "quote",   "text": "…", "source": "…" },
+  { "type": "source",  "text": "資料：…" }
 ]
 ```
 
-- CSS for `.lead .metrics .metric .cards .card .list .quote .source` lives in the template (outside
-  markers) following the look of `codex/projects/ai-2030-three-futures/index.html` (already has
-  `.metrics/.metric/.cards/.card`; port those styles). Text sizes ≥ 22 px; contrast AA on the dark shade.
-- GSAP: template's per-slide loop adds `addIfFound(`${s} .lead, ${s} .metrics, ${s} .cards, ${s} .list, ${s} .quote`, …)` at `start + 0.72`.
-- `hf audit`: warn when a slide has > 1 `metrics`/`cards` block or > 5 list items (readability), error
-  when a block type is unknown. Update `shared/schemas/storyboard.schema.json` with the `blocks` schema (slides[] stays lenient).
-- Optional (after the above works): a `chart` block backed by upstream registry `data-chart`
-  (`npx hyperframes add data-chart`), only if it passes `check` on an image-free slide; otherwise defer.
-- **Acceptance:** a 4-slide scratch storyboard using every block type → `hf html && hf pipeline && npm run check`
-  → 0 findings; snapshot frames (`npx hyperframes@0.8.6 snapshot --at …`) look balanced (nothing overflows the 1920×1080 safe area:
-  content width ≤ 1320 px, caption clear). Update `docs` of the template README.
+As-built layout contract (differs from the sketch above it — the sketch put blocks in the normal
+flow after `h1`, which left the lower half of a 1920×1080 frame empty):
+
+- a slide with blocks gets `with-blocks`: the content column becomes a **band** (`inset: 92px 96px 220px 96px`,
+  i.e. everything above the lower-third caption), `h1` drops to 60px, and `.blocks` is a flex column with
+  `justify-content: center` so the group sits optically centred in whatever the title leaves;
+- grids cap their cell width (`--n * 470px` metrics, `--n * 540px` cards) so a 2-up row is not two half-empty billboards;
+- every small-text surface paints its own dark panel — contrast survives any background art;
+- chapter classes are namespaced `chapter-<slug>` (a chapter literally named `quote` used to inherit the
+  `.quote` block style and blew the layout by 263px — that is why);
+- entrance motion: `.blocks > *` staggered 0.12s at `start + 0.72`.
+
+Audit codes: `block-type` (error, unknown type) · `block-shape` · `block-density` · plus `stale-html`,
+which fires when the generated region no longer matches the storyboard.
+
+**Verified:** `claude/projects/block-vocabulary-reference` (one page per block type) — `hf audit` 0 findings,
+`hyperframes@0.8.6 check` lint 0/0, runtime 0/0, layout 0 issues / 9 samples, motion 0/0, **contrast 53/53 AA**.
+Deferred, still open: a `chart` block backed by the upstream registry `data-chart`.
+
+### B2. The review kit — `hf review` ✅ BUILT 2026-08-22 (not in the original plan)
+
+The gate in rule 2 was the pipeline's weakest link: it demanded a human, but cost them a dev server and a
+timeline scrub, so in practice it got skipped. `hf review` builds **one self-contained HTML** — per slide a
+real frame (`hyperframes snapshot` → ffmpeg → inline JPEG), the real narration MP3 inlined, the caption, the
+narration script, and start / slide / narration / **margin** chips colour-coded by cut risk. It has:
+
+- a **cinema mode** that plays the clips in order with the frames and captions — the pacing judgement the
+  gate actually asks for, without a render;
+- three per-slide verdicts (發音 / 節奏 / 可讀性) + a note, persisted in `localStorage`;
+- **複製審核結論** → a markdown approval summary to paste into `docs/retrospective.md` or back to the agent.
+
+`--artifact` emits a body-only variant for publishing (so the gate can happen from a phone, away from the
+render machine). Kits live in `review/` and are git-ignored. Windows note: `npx.cmd` needs `shell:true`
+(Node ≥ 20 EINVAL) — `runNpx()` handles it.
 
 ### C. Word-level captions (`hf captions`)
 

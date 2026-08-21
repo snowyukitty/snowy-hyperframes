@@ -5,7 +5,7 @@
 ```text
 shared/
 ├── tools/
-│   └── hf.mjs                 共用工具鏈（new / html / prepare-tts / tts / measure / sync / fit-audio / vendor / audit / repo-check / pipeline）
+│   └── hf.mjs                 共用工具鏈（new / html / prepare-tts / tts / measure / sync / fit-audio / vendor / review / audit / repo-check / pipeline）
 ├── vendor/
 │   └── gsap.min.js            render 不依賴 CDN
 ├── docs/
@@ -30,7 +30,12 @@ node shared/tools/hf.mjs help
 2. 填寫 `project.json`、`data/storyboard.json`（唯一的意圖來源）、`data/pronunciation-map.json`；研究型專案再填 `data/research.json`、`docs/references.md`。
 3. `npm run html`（storyboard → index.html 區塊）。
 4. `npm run pipeline`（prepare-tts → Edge-TTS → ffprobe 量測 → sync 時間軸 / 字幕 / metadata → audit）。
-5. `npm run check`（`hf audit` + `hyperframes check`），`npm run preview` 人工確認，才 `npm run render`。
+5. `npm run check`（`hf audit` + `hyperframes check`）。
+6. `npm run review` 產生人工審核包（每頁畫格 + 真實旁白 + 時間餘裕 + 逐項通過紀錄，離線可開、可分享），
+   人工通過後才 `npm run render`。
+
+資訊層（數字、清單、引述）用 storyboard 的 `slides[].blocks`；字彙表與實際樣子見
+`claude/projects/block-vocabulary-reference`。
 
 ## TTS Notes
 

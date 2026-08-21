@@ -1,0 +1,47 @@
+{
+  "$schema": "../../../schemas/project.schema.json",
+  "id": "block-vocabulary-reference",
+  "title": "Block Vocabulary Reference",
+  "workflow": "claude",
+  "createdAt": "2026-08-21T18:50:42.502Z",
+  "updatedAt": "2026-08-21T19:06:11.792Z",
+  "status": "ready-to-preview",
+  "format": "hyperframes-demo",
+  "language": "zh-Hant",
+  "durationSeconds": 50,
+  "sourceConfidence": "not-applicable",
+  "tools": [
+    "claude-code",
+    "shared/tools/hf.mjs",
+    "hyperframes@0.8.6",
+    "edge-tts",
+    "ffprobe"
+  ],
+  "auth": {
+    "required": [],
+    "notes": "No credentials. Edge-TTS needs network but no API key."
+  },
+  "imageGeneration": {
+    "mode": "none",
+    "provider": "html-only",
+    "notes": "No bitmaps: this project exists to show what the block vocabulary looks like when rendered."
+  },
+  "paths": {
+    "entry": "index.html",
+    "research": "data/research.json",
+    "storyboard": "data/storyboard.json",
+    "references": "docs/references.md",
+    "renderOutput": "renders/block-vocabulary-reference.mp4"
+  },
+  "timing": {
+    "policy": "audio",
+    "padSeconds": 0.6,
+    "source": "data/timeline.json",
+    "measured": "data/audio-durations.json"
+  },
+  "checks": {
+    "hfAudit": "pass",
+    "hyperframesCheck": "pass (0.8.6: lint 0/0, runtime 0/0, layout 0, motion 0, contrast 53/53)",
+    "humanPreview": "pending"
+  }
+}

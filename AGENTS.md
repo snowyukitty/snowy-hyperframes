@@ -38,9 +38,12 @@ snowy-hyperframes/
    Never hand-edit timing attributes; edit the storyboard or the audio and run `hf sync`.
    A narration MP3 longer than its slide is a release blocker (`hf audit` → `cut-risk`).
 2. **Preview gate before render.** `npm run check` (= `hf audit` + `hyperframes check`)
-   must pass, then a human previews pacing, pronunciation and readability in the
-   browser (`npm run preview`). Only then `npm run render`. Never render merely because
-   checks pass.
+   must pass, then a human judges pacing, pronunciation and readability. Give them
+   `npm run review` — a self-contained kit (one frame + the real narration per slide,
+   timing margins, per-slide verdicts, paste-ready summary) that opens offline and can
+   be published for remote approval — or `npm run preview` for HyperFrames Studio.
+   Only then `npm run render`. Never render merely because checks pass, and never
+   record a gate as passed that a human did not actually perform.
 3. **Publication is allowlist-only.** New project folders under `*/projects/` are
    git-ignored by default. Add a project to `.gitignore` only after the review in
    `shared/docs/repo-publication-policy.md`. `hf repo-check` enforces the guard.
@@ -61,14 +64,23 @@ snowy-hyperframes/
 npm run html          # (re)generate index.html slide/audio regions from the storyboard
 npm run pipeline      # prepare-tts -> tts (Edge-TTS) -> measure (ffprobe) -> sync -> audit
 npm run check         # hf audit + npx hyperframes@0.8.6 check   (0 errors required)
-npm run preview       # human gate — HyperFrames Studio in the browser
-npm run render        # only after the human gate
+npm run review        # build the human gate kit (frames + narration, offline, shareable)
+npm run render        # only after a human has actually passed the gate
 ```
 
 Toolkit reference: `node shared/tools/hf.mjs help`. Commands: `new`, `html`,
-`prepare-tts`, `tts`, `measure`, `sync`, `fit-audio`, `vendor`, `audit [--all]`,
+`prepare-tts`, `tts`, `measure`, `sync`, `fit-audio`, `vendor`, `review`, `audit [--all]`,
 `repo-check`, `pipeline`. Run `hf audit --all` and `hf repo-check` from the repo root
 before committing; CI runs the same two commands plus `hyperframes lint` per project.
+
+## Slide content
+
+A slide's information layer is `slides[].blocks` in the storyboard — `lead`, `metrics`,
+`cards`, `list`, `quote`, `source`. `hf html` renders them; `hf audit` enforces the
+readable ranges (max 3 blocks/slide, 2-4 metrics, 2-3 cards, 2-5 list items). Never
+hand-write that HTML, and never put a number on screen that `docs/references.md`
+cannot account for. Live reference (one page per block type):
+`claude/projects/block-vocabulary-reference`.
 
 ## HyperFrames version policy
 
