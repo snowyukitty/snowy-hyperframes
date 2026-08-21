@@ -14,6 +14,9 @@ codex/projects/ai-2030-three-futures/
 codex-pi/projects/gpt-image-2-quota-research/
 pi/projects/latest-tts-voice-clone-research/
 claude/projects/storyboard-to-video-pipeline-demo/   （2026-08-22 審核：自述內容、無外部主張、無 bitmap、無 secret；MP4 不進 git）
+claude/projects/block-vocabulary-reference/          （2026-08-22 審核：內容全部可在本 repo 驗證）
+claude/projects/measurable-vs-audible-tts/           （2026-08-22 審核：數字全部來自自有量測，明確標示未下自然度結論）
+claude/projects/tts-bakeoff-2026-08/                 （2026-08-22 審核：方法、稿子與量測公開；16 段生成音檔不進 git，可重生）
 ```
 
 共用內容也可以提交：
