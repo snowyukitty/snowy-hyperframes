@@ -13,4 +13,4 @@ node shared/tools/hf.mjs repo-check    # publication guard
 ```
 
 Design of record (what to build next, with acceptance criteria): `shared/docs/design-v2.md`.
-Latest phase summary: `shared/docs/phase-summary-2026-08-22.md`.
+Latest phase summary: `shared/docs/phase-summary-2026-08-22b.md`.

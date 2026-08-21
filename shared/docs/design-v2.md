@@ -78,7 +78,8 @@ the new pipeline, with information-dense image-free slides, accurate captions, a
 local no-API-key TTS option measured against Edge-TTS.
 
 Each item below is self-contained: scope, spec, files, acceptance. Suggested order: A → B → C → D → E → F → G.
-**Status 2026-08-22: B and B2 are built and verified; A, C, D, E, F, G remain.**
+**Status 2026-08-22 (end of second session): B, B2, C, D (harness) and F are built and verified.
+A, D (listening), E and G remain — every open item now needs a human's ears or account, not code.**
 Items B, C, D are independent of each other and can run in parallel sessions.
 
 ### A. Human preview gate for the existing demo (15 min, human + agent)
@@ -224,7 +225,24 @@ becomes public.
   `storyboard.music = { file, volume }` is present; `hf html` emits it; `hf audit` verifies the file exists and duration ≥ total.
 - **Acceptance:** render with narration clearly above the bed (LUFS difference ≥ 12 dB by ffmpeg `ebur128` on a narration segment vs a gap).
 
-### F. First real research video on the pipeline (the milestone's visible deliverable)
+### F. First real research video ✅ BUILT 2026-08-22
+
+**Shipped:** `claude/projects/measurable-vs-audible-tts` — 10 slides, 210.5 s, zero bitmaps, Edge-TTS.
+Topic as recommended (the TTS ladder), but framed around the honest gap instead of a verdict:
+*可以量的，跟只能聽的* — what is measurable about a narration engine, and why the rest needs ears.
+Every number traces to `tts-bakeoff-2026-08/data/measurements.json`; every findings slide footnotes its
+instrument (ffprobe / silencedetect / ebur128); the closing slide states that the video has not passed
+its own human gate.
+
+`hf audit` 0 findings · `hyperframes@0.8.6 check` 0 findings (contrast **58/58 AA**) · render 3m30.5 s,
+13.6 MB, 1m18.8 s. Status `ready-to-preview`, review kit published as an Artifact, render not committed.
+
+Craft note worth keeping: the first pass used estimated `durationTarget`s and left 44 s of dead air in
+242 s. Re-fitting the targets to *measured narration + 1.2 s* after the first TTS pass brought it to
+210.5 s with ~12 s of hold. Estimate the storyboard, then let the audio correct it — the timeline rule,
+applied to pacing.
+
+<details><summary>Original sketch (superseded)</summary>
 
 - Topic (recommended): **「2026 no-API-key TTS 階梯：Edge-TTS vs Kokoro 實測」** — it turns D's results into content and
   needs no external image generation. Workflow: `claude` (or `codex` if Codex drives). 8–10 slides, 3–4 min.
@@ -232,6 +250,8 @@ becomes public.
   `sourceConfidence` set honestly; numbers shown as HTML blocks (B), never baked into images.
 - Publish only after the policy review in `repo-publication-policy.md`; render → Release asset.
 - **Acceptance:** `hf audit` 0 errors, `check` 0 findings, human preview done, Release published, README lists it.
+
+</details>
 
 ### G. Portfolio hygiene (separate scope — ask before touching sibling repos)
 
