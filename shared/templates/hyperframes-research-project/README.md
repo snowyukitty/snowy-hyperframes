@@ -37,6 +37,20 @@ npm run render      #  6. renders/<project>.mp4（不進 git；要分享放 GitH
 
 一頁最多三個 block，`hf audit` 會檢查。實際樣子：`claude/projects/block-vocabulary-reference`。
 
+## 音樂床（可選）
+
+在 storyboard 頂層宣告即可，`hf html` 會生成一條跨全片的 `bgm` 音軌：
+
+```jsonc
+"music": { "file": "assets/audio/bgm.mp3", "volume": 0.14 }
+```
+
+`hf audit` 會檢查檔案存在、**長度不短於全片**（太短會被 HyperFrames 靜靜截掉）、音量範圍，
+並用「床本身的響度 × 音量」預估它在成片裡的落點。實測：床本身 −20 LUFS、volume 0.14 →
+成片裡約 −37.7 LUFS，旁白約 −15.8 LUFS，相差 22 dB。
+
+音樂本身要自備（確認你有權使用），或用上游的 `/media-use` 取得。
+
 ## 模板裡有什麼
 
 ```text

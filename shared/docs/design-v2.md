@@ -220,13 +220,33 @@ becomes public.
 
 </details>
 
-### E. BGM bed + voiceover carve (optional polish, only after B)
+### E. Music bed ✅ HALF BUILT 2026-08-22 (the half that needs no account) · carve still open
+
+**Shipped:** a storyboard may declare `music: { file, volume }`. `hf html` emits
+`<audio id="bgm" class="clip music-bed" data-track-index="19" data-volume="…">` spanning the whole
+composition, `hf sync` keeps its window in step, and `hf audit` checks four things: the file exists,
+it is **long enough** (a short bed is silently truncated by `clip_media_fit`), the volume is in a sane
+range, and — the useful one — **where the bed will actually land**, from its own measured loudness times
+the volume. That check was earned: the first verification bed was synthesized at −52 LUFS, so at volume
+0.14 it rendered as pure silence and the feature looked broken when it was not.
+
+Measured on a real 210 s render: a bed mastered to **−20 LUFS at volume 0.14 lands at −37.7 LUFS**
+against narration at **−15.8** — **22 dB** of separation, comfortably past this item's ≥12 dB bar.
+`audit` reports the predicted landing so the number is chosen, not guessed.
+
+**Still open:** sourcing a track (bring your own, or upstream `/media-use` — signing into the `heygen`
+CLI is an account action and needs Snowy's say-so), and dynamic voiceover carve (upstream
+`/hyperframes-audio`). A fixed low bed needs no ducking for narration-led research video.
+
+<details><summary>Original sketch (superseded)</summary>
 
 - Use upstream `/media-use` (`resolve --type bgm`, needs `heygen` CLI sign-in — ask Snowy before signing in; it is an account action)
   or a local CC0 track placed by hand in `assets/audio/bgm.mp3`; mix with upstream `/hyperframes-audio` voiceover carve.
 - Template: one `<audio id="bgm" class="clip" data-track-index="19" data-volume="0.18">` spanning the composition when
   `storyboard.music = { file, volume }` is present; `hf html` emits it; `hf audit` verifies the file exists and duration ≥ total.
 - **Acceptance:** render with narration clearly above the bed (LUFS difference ≥ 12 dB by ffmpeg `ebur128` on a narration segment vs a gap).
+
+</details>
 
 ### F. First real research video ✅ BUILT 2026-08-22
 

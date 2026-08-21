@@ -171,7 +171,7 @@ function loadStoryboard(projectRoot) {
       raw: s,
     };
   });
-  return { path: p, raw, slides, voice: raw.voice || {}, title: raw.title || "" };
+  return { path: p, raw, slides, voice: raw.voice || {}, title: raw.title || "", music: raw.music || null };
 }
 const padId = (n) => `slide-${String(n).padStart(2, "0")}`;
 
@@ -581,11 +581,21 @@ function renderBlocks(blocks, pad = "          ") {
   }
   return out.filter(Boolean).join("\n");
 }
-function renderAudioRegion(timeline) {
+function renderAudioRegion(timeline, music) {
   const lines = timeline.map(
     (s, i) =>
       `      <audio id="audio-${s.id}" class="clip narration-audio" data-start="${s.start}" data-duration="${audioSlot(s)}" data-track-index="${20 + i}" src="assets/audio/${s.id}.mp3"></audio>`
   );
+  // Optional music bed on its own track, under every narration clip. Sourcing a track is out of
+  // scope for this toolkit (bring a file you have the rights to, or use upstream /media-use);
+  // hf only places it, levels it, and audits that it is long enough and quiet enough.
+  if (music && music.file) {
+    const total = timeline.length ? round1(timeline[timeline.length - 1].start + timeline[timeline.length - 1].duration) : 0;
+    const vol = music.volume === undefined ? 0.14 : Number(music.volume);
+    lines.unshift(
+      `      <audio id="bgm" class="clip music-bed" data-start="0" data-duration="${total}" data-track-index="19" data-volume="${vol}" src="${esc(music.file)}"></audio>`
+    );
+  }
   return `${HF_AUDIO_START}\n${lines.join("\n")}\n      ${HF_AUDIO_END}`;
 }
 function renderSlidesRegion(timeline, slides) {
@@ -642,14 +652,14 @@ function cmdHtml(projectRoot = findProjectRoot()) {
   let html;
   if (exists(target) && !FLAGS.force) {
     html = readText(target);
-    const a = replaceRegion(html, HF_AUDIO_START, HF_AUDIO_END, renderAudioRegion(timeline));
+    const a = replaceRegion(html, HF_AUDIO_START, HF_AUDIO_END, renderAudioRegion(timeline, sb.music));
     const b = a && replaceRegion(a, HF_SLIDES_START, HF_SLIDES_END, renderSlidesRegion(timeline, sb.slides));
     if (!b) die("index.html exists but has no hf:audio / hf:slides regions. Re-run with --force to regenerate from the template (this overwrites index.html).");
     html = b;
   } else {
     if (!exists(templateHtml)) die(`template missing: ${rel(repo, templateHtml)}`);
     html = readText(templateHtml);
-    html = replaceRegion(html, HF_AUDIO_START, HF_AUDIO_END, renderAudioRegion(timeline)) || html;
+    html = replaceRegion(html, HF_AUDIO_START, HF_AUDIO_END, renderAudioRegion(timeline, sb.music)) || html;
     html = replaceRegion(html, HF_SLIDES_START, HF_SLIDES_END, renderSlidesRegion(timeline, sb.slides)) || html;
     html = html.replace(/<title>[^<]*<\/title>/, `<title>${esc(sb.title || "HyperFrames")}</title>`);
   }
@@ -877,6 +887,7 @@ function cmdSync(projectRoot = findProjectRoot()) {
       if (!a.found) missing.push(t.id);
       if (!b.found) missing.push(`audio-${t.id}`);
     }
+    if (sb.music && sb.music.file) html = patchTagById(html, "bgm", { "data-start": 0, "data-duration": total }).html;
     const r = patchRootDuration(html, total);
     html = r.html;
     const g = patchGsapStartArray(html, timeline);
@@ -1065,6 +1076,38 @@ function auditProject(projectRoot, repo) {
     if (timing.root && timing.root.duration != null && Math.abs(timing.root.duration - lastEnd) > 0.05) W("timing", `root data-duration=${timing.root.duration} but last slide ends at ${lastEnd}`);
     if (timing.root && timing.root.duration == null) W("timing", "composition root has no data-duration");
     if (project.durationSeconds && Math.abs(project.durationSeconds - lastEnd) > 1) W("timing", `project.json durationSeconds=${project.durationSeconds} but composition ends at ${lastEnd}s`);
+  }
+
+  // music bed
+  if (sb.music && sb.music.file) {
+    const f = P(sb.music.file);
+    const vol = sb.music.volume === undefined ? 0.14 : Number(sb.music.volume);
+    if (!exists(f)) E("music", `storyboard.music.file ${sb.music.file} not found`);
+    else if (exists(P("data/timeline.json"))) {
+      const tl = readJson(P("data/timeline.json")).slides || [];
+      const total = tl.length ? tl[tl.length - 1].start + tl[tl.length - 1].duration : 0;
+      try {
+        const d = ffprobeDuration(f);
+        if (d < total - 0.05) E("music", `music bed is ${fmt(d)}s but the piece is ${fmt(total)}s — the bed stops early (HyperFrames shortens a slot to its media)`);
+      } catch {}
+    }
+    if (!(vol > 0 && vol <= 0.35)) W("music", `music.volume ${vol} is outside 0.01-0.35; a bed above ~0.35 fights the narration`);
+    // A quiet source times a small volume is silence. Measured on a real render: a bed
+    // mastered to -20 LUFS at volume 0.14 lands ~-37.7 LUFS under narration at ~-15.8,
+    // i.e. 22 dB of separation. Judge the bed by where it will actually land, not by
+    // either number alone.
+    if (exists(f)) {
+      try {
+        const src = loudness(f).lufs;
+        if (src != null && vol > 0) {
+          const landed = src + 20 * Math.log10(vol);
+          if (landed < -48) W("music", `bed is ${fmt(src, 1)} LUFS at volume ${vol} → about ${fmt(landed, 1)} LUFS in the mix; that is inaudible (master the bed nearer -20 LUFS or raise the volume)`);
+          else if (landed > -28) W("music", `bed lands at about ${fmt(landed, 1)} LUFS against narration near -19; it will compete with the voice`);
+          else I("music", `bed lands at about ${fmt(landed, 1)} LUFS in the mix (source ${fmt(src, 1)} LUFS × volume ${vol})`);
+        }
+      } catch {}
+    }
+    if (exists(P("index.html")) && !/id="bgm"/.test(readText(P("index.html")))) W("music", "storyboard declares music but index.html has no bgm clip — run hf html");
   }
 
   // captions

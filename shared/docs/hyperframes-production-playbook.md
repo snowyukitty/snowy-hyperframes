@@ -351,6 +351,23 @@ ffprobe -v error -show_entries format=duration,size -show_streams -of json rende
 ffmpeg -y -i renders\<file>.mp4 -vf "fps=1/20,scale=320:-1,tile=5x4" -frames:v 1 renders\contact-sheet.jpg
 ```
 
+## 4.9 音樂床（2026-08-22 新增）
+
+storyboard 宣告 `music: { file, volume }` 即可，由 `hf html` 生成 `<audio id="bgm" data-track-index="19">`。
+
+實測對照（210 秒成片、ffmpeg `ebur128` 量測）：
+
+| 床本身 | volume | 成片中的床 | 旁白 | 相差 |
+| ---: | ---: | ---: | ---: | ---: |
+| −20 LUFS | 0.14 | −37.7 LUFS | −15.8 LUFS | 22 dB |
+
+兩個會讓人以為「功能壞掉」的陷阱：
+
+1. **床本身太安靜**：第一次驗證用的床是 −52 LUFS，乘上 0.14 之後等於靜音。`hf audit` 現在會用
+   「床的響度 + 20·log10(volume)」預估落點，低於 −48 LUFS 就警告。
+2. **床比全片短**：HyperFrames 會把 slot 縮到媒體長度（`clip_media_fit`），後面就沒有音樂了；
+   `hf audit` 會直接報 error。
+
 ## 5. 已解決問題與經驗教訓
 
 | 問題 | 解法 |
