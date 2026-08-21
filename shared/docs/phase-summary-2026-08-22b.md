@@ -84,7 +84,19 @@ storyboard 宣告 `music: { file, volume }` → `hf html` 生成跨全片的 `bg
 4. **G（Atlas registry）**：另一個 repo，另開 scope；現在有 4 條 workflow、8 個 tracked 專案。
 5. 可選：`chart` block（接上游 registry 的 `data-chart`）、`hf tts --provider kokoro`、英文 README。
 
-## 4. Stop point
+## 4. Stop point（session 於 2026-08-22 收尾）
 
 乾淨。工具鏈、template、三支影片、一個聽測 harness、CI、文件都已驗證並推上 GitHub；
-唯一未做的是需要耳朵的三件事，而它們現在都只需要十分鐘。
+唯一未做的是需要耳朵或帳號的幾件事，而它們現在都只需要十分鐘。
+
+下一次接手的入口固定為三份文件：
+
+```text
+TODO.md                    開放中的工作，以及每一件由誰負責
+shared/docs/design-v3.md   下一個里程碑：「讓研究影片能 show 資料，而不只是說」
+shared/docs/design-v2.md   §1 架構契約（仍然有效）
+```
+
+收尾時另外做的兩件小事：`hf vendor` 現在也會改寫 `compositions/*.html`（上游 registry block 自帶
+CDN GSAP，會讓 `check` 逾時）；registry 的實測結果寫進 `hyperframes-0.8-upgrade-notes.md` §3.5
+（`add <name>` 可用、`catalog --query` 會逾時、`data-chart` 是整頁淺色 composition 而不是行內元件）。

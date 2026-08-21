@@ -57,10 +57,12 @@ No-API-key / local-first TTS 升級路線：
 shared/docs/local-tts-no-api-key-strategy.md
 ```
 
-目前里程碑的設計文件（工作項 A–G 與驗收標準）：
+待辦看板與設計文件：
 
 ```text
-shared/docs/design-v2.md
+TODO.md                    開放中的工作，以及每一件由誰負責
+shared/docs/design-v3.md   目前里程碑的規格與驗收
+shared/docs/design-v2.md   §1 架構契約（仍然有效）＋ 已交付里程碑的實作紀錄
 ```
 
 目前階段性收尾：

@@ -26,10 +26,10 @@
 | `npx hyperframes doctor --json` | `npm run doctor`；CI 可用 `jq -e '.ok'` gate |
 | `npx hyperframes snapshot --at t1,t2` | 取代我們用 ffmpeg 做 contact sheet 看 preview 的土法（兩者都好用） |
 | `npx hyperframes tts`（**本機 Kokoro**，含 `zf_` / `zm_` 中文聲音，`--lang zh`） | 這就是 phase-summary-2026-06-03 想做的 Tier-1 Kokoro adapter；下一步直接拿來跑 8 段 golden samples 跟 Edge-TTS 對比，不必自己寫 adapter |
-| `npx hyperframes transcribe`（word timings → captions） | 對應 `pi` 研究裡 WhisperX 的用途；可以給 `hf` 加一個 `captions --word-level` |
-| `/media-use` skill（BGM、SFX、icon、voice、grade） | 研究影片下一層：BGM bed + voiceover carve（`/hyperframes-audio`） |
+| `npx hyperframes transcribe`（word timings → captions） | **沒有採用**：需要下載 whisper 模型，而且會把剛唸出去的 zh-Hant 再轉錄一次。`hf captions` 改用 Edge-TTS 自己的 `WordBoundary`（見 `design-v2.md` §2C）；未來換非 Edge 引擎時它仍是備案。 |
+| `/media-use` skill（BGM、SFX、icon、voice、grade） | 音樂床的**管線已完成並量測**（storyboard 宣告 `music`）；還缺的是實際樂曲——`/media-use` 需要 `heygen` CLI 登入，屬於帳號動作。動態 ducking 仍在 `/hyperframes-audio`。 |
 | `/faceless-explainer` skill（純 LLM 視覺的解說影片） | 與我們「研究型、zh-Hant、來源分層」的定位最接近；我們的 template 的無圖片模式就是這個方向的最小版 |
-| `frame.md` / design presets、registry blocks（`data-chart`、`flowchart`、lower-thirds） | 下一步：把 `data-chart` / `flowchart` block 接進 template 的「內容區塊」 |
+| `frame.md` / design presets、registry blocks（`data-chart`、`flowchart`、lower-thirds） | 實測後修正（見 §3.5）：registry block 是**整頁 composition**，接不進行內的「內容區塊」。行內圖表要自己做 inline SVG（`design-v3.md` §2H），整頁資料頁才用 sub-composition（§2I）。 |
 | skills：`npx skills add heygen-com/hyperframes --full-depth` | 建議在 Claude Code / Codex 安裝 core set；我們的 AGENTS.md 是 repo 規則，skills 是 HyperFrames 知識，兩者互補 |
 
 ## 3. 升級一個舊專案的步驟
@@ -45,6 +45,15 @@ npx --yes hyperframes@0.8.6 check             # 0 error
 
 若專案自己有 `hyperframes.json` slide manifest：搬到 `data/manifest.json`（或改用 `hf sync` 產生的
 `data/timeline.json`），並放一份上游格式的 `hyperframes.json`（見 template）。
+
+## 3.5 Registry 實測（2026-08-22）
+
+| 問題 | 答案（實測） |
+| --- | --- |
+| `npx hyperframes@0.8.6 add <name>` 能用嗎？ | **能。** `add data-chart` 約 10 秒完成，寫出 `compositions/data-chart.html` 並給出掛載片段。 |
+| `catalog --query` 能用嗎？ | **不能。** 它會逐一抓取 registry 的每個項目，在這條連線上整批 timeout。要瀏覽目錄請看網站，然後用 `add <name>` 按名字安裝。 |
+| registry block 可以放進我們的 block 版面嗎？ | **不行。** `data-chart` 是**整頁**（1920×1080、預設 15 秒、淺色 `--bg-color: #faf9f6`）的獨立 composition，用 `data-composition-src` 掛載。要放在標題與字幕旁邊的圖表，要自己做 inline SVG（見 `design-v3.md` §2H）。 |
+| 裝進來就能 render 嗎？ | **要先 vendor。** 上游 block 自帶 CDN 的 GSAP `<script>`，正是會讓 `check` 逾時的東西。`hf vendor` 自 2026-08-22 起也會改寫 `compositions/*.html`，並自動算好 `../vendor/gsap.min.js` 的相對深度。 |
 
 ## 4. 不做的事
 

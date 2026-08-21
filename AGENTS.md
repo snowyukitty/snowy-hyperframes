@@ -5,8 +5,12 @@ this repository. The workspace-level `AGENTS.md` one directory up (if present) o
 this file; the project-level `project.json` / `docs/runbook.md` inside a specific
 project is more specific than this file for that project only.
 
-**Design of record for the current milestone:** `shared/docs/design-v2.md` (architecture, truth-vs-generated
-contract, spec'd work items A–G with acceptance criteria). Read it before starting any work item.
+**Start here, in this order:** [`TODO.md`](TODO.md) — what is open and who owns it ·
+[`shared/docs/design-v3.md`](shared/docs/design-v3.md) — the current milestone, spec'd with acceptance
+criteria · [`shared/docs/design-v2.md`](shared/docs/design-v2.md) §1 — the architecture contract
+(truth vs generated, timing policy, toolkit API, template DOM), still binding ·
+[`shared/docs/phase-summary-2026-08-22b.md`](shared/docs/phase-summary-2026-08-22b.md) — what the last
+session built and verified.
 
 ## What this repository is
 

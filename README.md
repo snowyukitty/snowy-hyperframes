@@ -4,7 +4,9 @@
 
 > **2026-08-22 — Workflow v2.** 新增共用工具鏈 `shared/tools/hf.mjs`（storyboard → TTS → 量測 → 同步 → 檢查，一條指令可重跑）、
 > 第四條 workflow `claude/`、可直接 render 的 template、HyperFrames 0.8.6 升級、CI 與 `AGENTS.md`。
-> 設計文件（下一個里程碑的規格與驗收）：`shared/docs/design-v2.md`；接續點：`shared/docs/phase-summary-2026-08-22b.md`；升級實測：`shared/docs/hyperframes-0.8-upgrade-notes.md`。
+> 待辦看板：[`TODO.md`](TODO.md)；設計文件（下一個里程碑的規格與驗收）：`shared/docs/design-v3.md`；
+> 架構契約：`shared/docs/design-v2.md` §1；接續點：`shared/docs/phase-summary-2026-08-22b.md`；
+> 升級實測：`shared/docs/hyperframes-0.8-upgrade-notes.md`。
 >
 > **English summary.** A public, research-grade record of AI-assisted research-to-video production on
 > [HyperFrames](https://github.com/heygen-com/hyperframes): four agent workflows (`codex`, `codex-pi`, `pi`, `claude`),

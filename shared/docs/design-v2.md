@@ -1,10 +1,19 @@
 # Snowy HyperFrames — Design v2 (handoff document)
 
-Status: **authoritative design for the next milestone** · Written 2026-08-22 (Claude Fable 5) ·
-Intended reader: the next agent session (any model) implementing under this design.
+> **DELIVERED 2026-08-22.** This milestone's work items are built (B, B2, C, D-harness, E-half, F);
+> what remains needs a human's ears or account, not code. **The current design of record is
+> [`design-v3.md`](design-v3.md)**, and the open board is [`../../TODO.md`](../../TODO.md).
+>
+> This file stays authoritative for **§1 — the architecture contract** (truth vs generated files, the
+> timing policy, the toolkit API, the template DOM), and for the as-built notes and earned lessons in §2.
+> Its §2 sketches marked *superseded* record what was planned before the evidence arrived; they are kept
+> because the difference between the plan and the build is the useful part.
 
-Read in this order: `AGENTS.md` (rules) → this file (design + work items) →
-`shared/docs/phase-summary-2026-08-22.md` (what exists today) →
+Status: **delivered milestone + living architecture contract** · Written 2026-08-22 (Claude Fable 5),
+built out the same day (Claude Opus 5) · Intended reader: the next agent session (any model).
+
+Read in this order: `AGENTS.md` (rules) → `TODO.md` (open board) → `design-v3.md` (current milestone)
+→ this file §1 (architecture contract) → `shared/docs/phase-summary-2026-08-22b.md` (what was built) →
 `shared/docs/hyperframes-0.8-upgrade-notes.md` (empirical gotchas).
 
 ---

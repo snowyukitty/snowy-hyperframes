@@ -1320,14 +1320,20 @@ function vendorGsap(projectRoot, repo) {
   const dstDir = path.join(projectRoot, "vendor");
   fs.mkdirSync(dstDir, { recursive: true });
   fs.copyFileSync(src, path.join(dstDir, "gsap.min.js"));
-  const htmlPath = path.join(projectRoot, "index.html");
-  let rewrote = false;
-  if (exists(htmlPath)) {
-    const html = readText(htmlPath);
-    const next = html.replace(/<script\s+src="https?:\/\/[^"]*\/gsap(?:\.min)?\.js"><\/script>/g, '<script src="vendor/gsap.min.js"></script>');
+  // index.html plus any installed registry block: upstream blocks ship with a CDN <script>
+  // for GSAP, which is precisely what blows the 10 s navigation timeout inside `check`.
+  const targets = [path.join(projectRoot, "index.html")];
+  const compDir = path.join(projectRoot, "compositions");
+  if (exists(compDir)) for (const f of fs.readdirSync(compDir)) if (f.endsWith(".html")) targets.push(path.join(compDir, f));
+  let rewrote = 0;
+  for (const t of targets) {
+    if (!exists(t)) continue;
+    const html = readText(t);
+    const depth = path.relative(path.dirname(t), path.join(projectRoot, "vendor")).split(path.sep).join("/");
+    const next = html.replace(/<script\s+src="https?:\/\/[^"]*\/gsap(?:\.min)?\.js"><\/script>/g, `<script src="${depth}/gsap.min.js"></script>`);
     if (next !== html) {
-      writeText(htmlPath, next);
-      rewrote = true;
+      writeText(t, next);
+      rewrote++;
     }
   }
   return { ok: true, rewrote };
@@ -1336,7 +1342,7 @@ function cmdVendor(projectRoot = findProjectRoot()) {
   const repo = repoRootOrDie(projectRoot);
   const r = vendorGsap(projectRoot, repo);
   if (!r.ok) die(r.reason);
-  log(`vendor: vendor/gsap.min.js in place${r.rewrote ? "; index.html now loads it instead of the CDN" : ""}`);
+  log(`vendor: vendor/gsap.min.js in place${r.rewrote ? `; ${r.rewrote} file(s) now load it instead of the CDN` : ""}`);
 }
 
 // --- the review kit page (self-contained; no external requests, no build step) ---

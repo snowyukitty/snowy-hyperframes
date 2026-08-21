@@ -1,79 +1,40 @@
-# GitHub Update Notes
+# GitHub Publication Status
 
-Date: 2026-06-03
-
-Repository created and pushed:
+更新日期：2026-08-22（原始版本是 2026-06-03 的首次發布筆記，已改寫為長期有效的狀態說明）
 
 ```text
-https://github.com/snowyukitty/snowy-hyperframes
+https://github.com/snowyukitty/snowy-hyperframes   main
 ```
 
-Current local branch:
+## 這個 repo 上放什麼
 
-```text
-main -> origin/main
+| 進 git | 不進 git |
+| --- | --- |
+| 工作流文檔、schema、template、`shared/tools/` 工具鏈 | API key、token、`auth.json`、`.env`（任何形式的憑證） |
+| 經過審核的 demo / reference / 研究專案（稿子、設定、metadata、字幕、旁白音檔） | 未經審核的專案（`*/projects/*` 預設被忽略，要逐一 allowlist） |
+| 量測結果與可驗證的研究數據 | 新的 render 成片（`**/renders/*.mp4`；2026-06 的四支保留在歷史中） |
+| 生成的審核包所依據的素材 | 生成的審核包本身（`review/`、`bakeoff/`、`snapshots/`，都可重生） |
+
+成片要分享時放 **GitHub Releases**，不要進 git；理由是這個 repo 已經因為四支 MP4 帶著 127 MB 的歷史，
+在慢速連線上 clone 會斷。本機建議用 sparse checkout 跳過它們。
+
+## 發布前
+
+```powershell
+node shared/tools/hf.mjs repo-check     # allowlist / secret 路徑 / >95 MB / tracked 專案必備檔
+node shared/tools/hf.mjs audit --all    # 每個專案 0 error
 ```
 
-## Initial Commit Message
+CI（`.github/workflows/validate.yml`）在每次 push 跑同樣兩件事，再加上每個**有 composition 的**專案的
+`hyperframes lint`（audio-research 專案沒有 `index.html`，會被跳過）。
 
-```text
-Publish Snowy HyperFrames workflow demos
-```
+新專案要公開，先走 `shared/docs/repo-publication-policy.md` §3 的審核，再加進 `.gitignore` 的 allowlist。
 
-## Initial Commit Body
+## 現在的狀態
 
-```text
-- Add public demo/reference projects for codex, codex-pi, and pi workflows
-- Add generated images, Edge-TTS narration, captions, metadata, and MP4 demo renders
-- Add workflow comparison, production playbook, and GitHub publication policy
-- Guard future production projects with a .gitignore allowlist
-```
+- 4 條 workflow：`codex`、`codex-pi`、`pi`、`claude`。
+- 8 個 tracked 專案；`hf audit --all` 0 error；CI green。
+- 三支影片停在 `ready-to-preview`（人工 gate 未做，見 `TODO.md`）。
+- TTS 盲測的方法與量測已公開，**自然度結論尚未存在**。
 
-## Useful Git Commands
-
-```bash
-git status --short
-git remote -v
-git push
-```
-
-## Files Worth Reviewing Before Commit
-
-- `README.md`
-- `pi/README.md`
-- `shared/docs/hyperframes-production-playbook.md`
-- `shared/docs/workflow-test-summary.md`
-- `shared/docs/repo-publication-policy.md`
-- `shared/docs/workflow-boundaries.md`
-- `pi/projects/latest-tts-voice-clone-research/README.md`
-- `pi/projects/latest-tts-voice-clone-research/docs/completion-summary.md`
-- `pi/projects/latest-tts-voice-clone-research/docs/retrospective.md`
-- `pi/projects/latest-tts-voice-clone-research/docs/runbook.md`
-- `pi/projects/latest-tts-voice-clone-research/package.json`
-- `pi/projects/latest-tts-voice-clone-research/index.html`
-
-## Publication Boundary
-
-The current demo projects are allowed to be committed with assets and MP4 renders. Future production projects are ignored by default through `.gitignore`; only reusable workflow knowledge, templates, schemas, and approved demo projects should be published.
-
-## Phase Wrap-Up
-
-Latest public phase summary:
-
-```text
-shared/docs/phase-summary-2026-06-03.md
-```
-
-Latest TTS strategy addition:
-
-```text
-shared/docs/local-tts-no-api-key-strategy.md
-```
-
-Private local experiment created but not published:
-
-```text
-codex/projects/tts-local-bakeoff
-```
-
-Reason: new projects are ignored by default until explicitly reviewed and allowlisted. The public repo records the strategy and phase summary, while local bakeoff audio remains private.
+接續點：[`TODO.md`](TODO.md) → `shared/docs/design-v3.md` → `shared/docs/phase-summary-2026-08-22b.md`。
