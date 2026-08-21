@@ -1,0 +1,49 @@
+{
+  "$schema": "../../../schemas/project.schema.json",
+  "id": "measurable-vs-audible-tts",
+  "title": "可以量的，跟只能聽的：兩個免 API key 中文 TTS 引擎的實測",
+  "workflow": "claude",
+  "createdAt": "2026-08-21T19:26:46.622Z",
+  "updatedAt": "2026-08-21T19:30:11.368Z",
+  "status": "ready-to-preview",
+  "format": "hyperframes-video",
+  "language": "zh-Hant",
+  "durationSeconds": 210.5,
+  "sourceConfidence": "mixed",
+  "tools": [
+    "claude-code",
+    "shared/tools/hf.mjs",
+    "hyperframes@0.8.6",
+    "edge-tts",
+    "ffmpeg",
+    "ffprobe"
+  ],
+  "auth": {
+    "required": [],
+    "notes": "No credentials. Edge-TTS needs network but no API key."
+  },
+  "imageGeneration": {
+    "mode": "none",
+    "provider": "html-only",
+    "notes": "Deliberately zero bitmaps: a research video's density comes from the blocks layer, not from illustrations."
+  },
+  "paths": {
+    "entry": "index.html",
+    "research": "data/research.json",
+    "storyboard": "data/storyboard.json",
+    "references": "docs/references.md",
+    "renderOutput": "renders/measurable-vs-audible-tts.mp4"
+  },
+  "timing": {
+    "policy": "audio",
+    "padSeconds": 1.2,
+    "source": "data/timeline.json",
+    "measured": "data/audio-durations.json"
+  },
+  "checks": {
+    "hfAudit": "pass",
+    "hyperframesCheck": "pass (0.8.6: lint 0/0, runtime 0/0, layout 0, motion 0, contrast 58/58)",
+    "render": "pass (210.5s, 13.6 MB, 1m18.8s) — not committed, Releases only",
+    "humanPreview": "pending"
+  }
+}

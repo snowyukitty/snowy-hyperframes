@@ -1,0 +1,45 @@
+{
+  "topic": "兩個免 API key 的中文 TTS 引擎：可量測的差異，與量不到的部分",
+  "date": "2026-08-22",
+  "method": "同一組八段稿子送進兩個引擎，共十六段音檔；全部用 ffmpeg/ffprobe 量測。原始數據與音檔由 claude/projects/tts-bakeoff-2026-08 產生，可用 npm run bakeoff 完全重生。",
+  "layers": {
+    "ownMeasurement": {
+      "note": "本片的所有數字都屬於這一層：本 repo 自己量的，可重跑驗證。",
+      "source": "claude/projects/tts-bakeoff-2026-08/data/measurements.json",
+      "instruments": [
+        "ffprobe：音檔長度",
+        "ffmpeg silencedetect（-35 dB / 0.18s）：靜音段落與內部停頓數",
+        "ffmpeg ebur128（peak=true）：整合響度 LUFS 與真實峰值",
+        "合成耗時 ÷ 音檔長度：生成 RTF",
+        "拍數定義：CJK 字元計 1、拉丁字元與數字計 0.5、標點與空白計 0"
+      ],
+      "findings": [
+        { "claim": "Edge 平均語速 4.42 拍/秒（sd 0.43）、Kokoro 3.63（sd 0.32）", "slide": "slide-04" },
+        { "claim": "八段總長 Edge 101.5s、Kokoro 122.2s（+20.4%）", "slide": "slide-04" },
+        { "claim": "靜音佔比 Edge 21%、Kokoro 7%", "slide": "slide-05" },
+        { "claim": "sample-07（模型名與授權縮寫）語速 Edge 3.97、Kokoro 2.95；長度 11.21s 對 15.08s", "slide": "slide-06" },
+        { "claim": "整合響度 Edge −19.1 LUFS（sd 0.20）、Kokoro −20.7（sd 0.36）", "slide": "slide-07" },
+        { "claim": "生成 RTF Edge 0.35（含網路往返）、Kokoro 0.65（純本機）", "slide": "slide-07" }
+      ]
+    },
+    "official": {
+      "note": "只用來描述工具與授權，不用來支撐任何品質主張。",
+      "items": [
+        { "claim": "Kokoro-82M 權重採用 Apache-2.0", "source": "https://huggingface.co/hexgrad/Kokoro-82M" },
+        { "claim": "hyperframes tts 以本機 Kokoro 合成，支援 zf_xiaobei 與 --lang zh", "source": "npx hyperframes@0.8.6 tts --help（本機輸出）" },
+        { "claim": "Edge-TTS 免 API key，但依賴微軟線上服務", "source": "https://github.com/rany2/edge-tts" },
+        { "claim": "F5-TTS 推理程式 MIT、預訓練模型 CC-BY-NC（僅作為 sample-07 的稿子內容）", "source": "https://github.com/SWivid/F5-TTS" }
+      ]
+    },
+    "estimates": {
+      "note": "本片沒有使用任何推估值。",
+      "items": []
+    }
+  },
+  "explicitNonClaims": [
+    "本片不宣稱任何一個引擎比較自然、比較好聽或比較適合正式影片。",
+    "自然度沒有客觀量測；盲測聽測（claude/projects/tts-bakeoff-2026-08/docs/listening-scorecard.md）尚未完成。",
+    "本片沒有測 MeloTTS、CosyVoice、F5-TTS、ElevenLabs 等其他引擎。",
+    "Kokoro 模型大小約 311 MB 是本機 2026-08-22 的實測快取大小，不是官方公告值。"
+  ]
+}

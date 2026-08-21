@@ -23,6 +23,8 @@ claude/projects/*
 !claude/projects/storyboard-to-video-pipeline-demo/**
 !claude/projects/block-vocabulary-reference/
 !claude/projects/block-vocabulary-reference/**
+!claude/projects/measurable-vs-audible-tts/
+!claude/projects/measurable-vs-audible-tts/**
 
 # tts-bakeoff-2026-08: method, samples and measurements are published; the 16 generated
 # clips are not (they rebuild from data/bakeoff.json with `npm run bakeoff`).

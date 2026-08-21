@@ -1,0 +1,326 @@
+{
+  "title": "可以量的，跟只能聽的：兩個免 API key 中文 TTS 引擎的實測",
+  "targetDurationSeconds": 210.5,
+  "language": "zh-Hant",
+  "voice": {
+    "tool": "edge-tts",
+    "voice": "zh-TW-HsiaoChenNeural",
+    "rate": "+5%",
+    "pitch": "-3Hz",
+    "volume": "+0%",
+    "pronunciationMap": "data/pronunciation-map.json",
+    "displayTextPattern": "assets/audio/slide-XX.display.txt",
+    "ttsTextPattern": "assets/audio/slide-XX.tts.txt"
+  },
+  "timingPolicy": "audio (pad 1.2s); durationTarget was re-fitted to the measured narration after the first TTS pass",
+  "slides": [
+    {
+      "id": "slide-01",
+      "title": "可以量的，跟只能聽的",
+      "chapter": "prologue",
+      "durationTarget": 15.0,
+      "image": "",
+      "subtitle": "兩個免 API key 的中文 TTS 引擎，十六段音檔，一個方法論問題。",
+      "narration": "選一個旁白引擎，聽起來像個品味問題。但其實它有一半可以用量的。這支影片把那一半量出來，並且說清楚剩下那一半為什麼只能靠耳朵。",
+      "blocks": [
+        {
+          "type": "lead",
+          "text": "同一組稿子，兩個引擎，十六段音檔。"
+        },
+        {
+          "type": "metrics",
+          "items": [
+            {
+              "label": "受測稿子",
+              "value": "8 段",
+              "note": "每段針對一個已知弱點"
+            },
+            {
+              "label": "引擎",
+              "value": "2 個",
+              "note": "都不需要 API key"
+            },
+            {
+              "label": "音檔",
+              "value": "16 段",
+              "note": "共 223.7 秒"
+            }
+          ]
+        },
+        {
+          "type": "source",
+          "text": "資料：本 repo 的 claude/projects/tts-bakeoff-2026-08／data/measurements.json（2026-08-22 實測）"
+        }
+      ]
+    },
+    {
+      "id": "slide-02",
+      "title": "受測的兩條路",
+      "chapter": "setup",
+      "durationTarget": 20.2,
+      "image": "",
+      "subtitle": "Edge-TTS 是目前的預設；Kokoro-82M 是本機推理的候選。兩者都不需要 API key。",
+      "narration": "第一條是 Edge-TTS，微軟的線上服務，不需要金鑰，也是這個專案目前的預設。第二條是 Kokoro，只有八千兩百萬參數的開源模型，權重是 Apache 2.0，第一次下載大約三百一十一 MB 之後，就能完全在本機跑。",
+      "blocks": [
+        {
+          "type": "cards",
+          "items": [
+            {
+              "title": "Edge-TTS",
+              "text": "zh-TW-HsiaoChenNeural，線上服務、免金鑰，但不是離線。"
+            },
+            {
+              "title": "Kokoro-82M",
+              "text": "zf_xiaobei，Apache-2.0 權重，下載後可離線推理。"
+            }
+          ]
+        },
+        {
+          "type": "source",
+          "text": "授權來源：Kokoro 官方 repo 與模型頁；Edge-TTS 官方 repo。"
+        }
+      ]
+    },
+    {
+      "id": "slide-03",
+      "title": "測法：讓弱點自己現形",
+      "chapter": "setup",
+      "durationTarget": 23.5,
+      "image": "",
+      "subtitle": "八段稿子不是隨機取樣，每一段都在逼出一個已知的失敗模式。",
+      "narration": "八段稿子不是隨便挑的。每一段都在逼出一個已知的失敗模式：純中文的基準、中英混讀、數字和日期、長句換氣、柔和語氣、強調轉折、模型名稱與授權縮寫，還有一段長稿用來看音色會不會漂。所以重點不是總分，是哪一段輸。",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": false,
+          "items": [
+            "純繁中基準：單語自然度",
+            "中英混讀：產品名切換",
+            "數字、日期、價格：讀法",
+            "長句與長稿：換氣與音色漂移",
+            "模型名與授權縮寫：專有名詞"
+          ]
+        },
+        {
+          "type": "source",
+          "text": "八段稿子與用途表：tts-bakeoff-2026-08／data/bakeoff.json"
+        }
+      ]
+    },
+    {
+      "id": "slide-04",
+      "title": "量到的第一件事：語速",
+      "chapter": "findings",
+      "durationTarget": 21.2,
+      "image": "",
+      "subtitle": "同一份稿子，Kokoro 慢了兩成。",
+      "narration": "第一個差異是語速。用同一份稿子，Edge 平均每秒念四點四二拍，Kokoro 是三點六三。八段加起來，Edge 一百零一點五秒，Kokoro 一百二十二點二秒，慢了兩成。這件事只影響影片長度，還不能說誰比較好聽。",
+      "blocks": [
+        {
+          "type": "metrics",
+          "items": [
+            {
+              "label": "Edge-TTS 語速",
+              "value": "4.42",
+              "note": "拍／秒（中文字算一拍）"
+            },
+            {
+              "label": "Kokoro 語速",
+              "value": "3.63",
+              "note": "同一組稿子，慢約 20%"
+            },
+            {
+              "label": "八段總長差",
+              "value": "+20.7s",
+              "note": "101.5s 對 122.2s"
+            }
+          ]
+        },
+        {
+          "type": "source",
+          "text": "量測：ffprobe 長度 ÷ 稿子拍數；完整表格見 data/measurements.json"
+        }
+      ]
+    },
+    {
+      "id": "slide-05",
+      "title": "量到的第二件事：它不換氣",
+      "chapter": "findings",
+      "durationTarget": 20.2,
+      "image": "",
+      "subtitle": "靜音佔比 21% 對 7%：Edge 在標點處留下的停頓，Kokoro 大多沒有留。",
+      "narration": "第二個差異更有意思。用靜音偵測去量，Edge 的音檔裡有兩成一是靜音，Kokoro 只有百分之七。也就是說，Edge 在逗號和句號的地方留了換氣，Kokoro 大多沒有留。它其實念得比較慢，卻幾乎不停頓。",
+      "blocks": [
+        {
+          "type": "metrics",
+          "items": [
+            {
+              "label": "Edge 靜音佔比",
+              "value": "21%",
+              "note": "標點處留有換氣"
+            },
+            {
+              "label": "Kokoro 靜音佔比",
+              "value": "7%",
+              "note": "念得慢，卻幾乎不停頓"
+            }
+          ]
+        },
+        {
+          "type": "source",
+          "text": "量測：ffmpeg silencedetect，門檻 −35 dB、最短 0.18 秒"
+        }
+      ]
+    },
+    {
+      "id": "slide-06",
+      "title": "量到的第三件事：拉丁縮寫",
+      "chapter": "findings",
+      "durationTarget": 20.0,
+      "image": "",
+      "subtitle": "遇到 Apache 2.0、CC-BY-NC、F5-TTS 這種詞，差距最大。",
+      "narration": "差距最大的是第七段，那段稿子塞滿了模型名稱和授權縮寫。Edge 的語速掉到三點九七，Kokoro 掉到二點九五，而且整段多花了將近四秒。中英混讀本來就是這個專案最在意的弱點，這一段把它量出來了。",
+      "blocks": [
+        {
+          "type": "metrics",
+          "items": [
+            {
+              "label": "Edge（第七段）",
+              "value": "3.97",
+              "note": "拍／秒"
+            },
+            {
+              "label": "Kokoro（第七段）",
+              "value": "2.95",
+              "note": "同段落，慢了四分之一"
+            },
+            {
+              "label": "長度差",
+              "value": "+3.9s",
+              "note": "11.2s 對 15.1s"
+            }
+          ]
+        },
+        {
+          "type": "source",
+          "text": "第七段稿子：Kokoro-82M 的權重採用 Apache 2.0，F5-TTS 的推理程式是 MIT⋯⋯"
+        }
+      ]
+    },
+    {
+      "id": "slide-07",
+      "title": "工程上的兩個數字",
+      "chapter": "findings",
+      "durationTarget": 25.9,
+      "image": "",
+      "subtitle": "響度一致性與生成速度：一個影響混音，一個影響等待。",
+      "narration": "還有兩個工程上有用的數字。響度方面，Edge 平均負十九點一 LUFS，標準差只有零點二；Kokoro 負二十點七，標準差零點三六。整支影片的音量穩定度，Edge 比較好。生成速度方面，Edge 的即時率零點三五，包含網路來回；Kokoro 零點六五，完全在本機。",
+      "blocks": [
+        {
+          "type": "metrics",
+          "items": [
+            {
+              "label": "響度（Edge）",
+              "value": "−19.1",
+              "note": "LUFS，標準差 0.20"
+            },
+            {
+              "label": "響度（Kokoro）",
+              "value": "−20.7",
+              "note": "LUFS，標準差 0.36"
+            },
+            {
+              "label": "生成 RTF",
+              "value": "0.35 / 0.65",
+              "note": "Edge 含網路；Kokoro 純本機"
+            }
+          ]
+        },
+        {
+          "type": "source",
+          "text": "量測：ffmpeg ebur128（整合響度與真實峰值）、合成耗時 ÷ 音檔長度"
+        }
+      ]
+    },
+    {
+      "id": "slide-08",
+      "title": "量不到的那一半",
+      "chapter": "limits",
+      "durationTarget": 19.3,
+      "image": "",
+      "subtitle": "語速慢不等於自然，停頓少也不必然難聽。自然度沒有客觀量測。",
+      "narration": "但是上面每一個數字，都不能回答最重要的問題：哪一個比較好聽。語速慢不等於自然，停頓少也不必然難聽。自然度沒有客觀量測，只有耳朵。所以這份實測到這裡就停住，不下結論。",
+      "blocks": [
+        {
+          "type": "quote",
+          "text": "客觀數據能比較一致性與成本，不能決定好不好聽。",
+          "source": "tts-bakeoff-2026-08／README.md"
+        },
+        {
+          "type": "source",
+          "text": "因此 Tier 0 維持 Edge-TTS 為預設，Kokoro 定位為已驗證可用的離線備援。"
+        }
+      ]
+    },
+    {
+      "id": "slide-09",
+      "title": "把只能聽的，變成十分鐘的事",
+      "chapter": "method",
+      "durationTarget": 27.4,
+      "image": "",
+      "subtitle": "盲測聽測包：標籤與數據都藏到揭曉之後，聽完按一顆按鈕就有結論。",
+      "narration": "這件事在六月就該做，但拖了兩個月，卡點不是技術，是沒有工具。要人打開檔案總管、逐一播放、憑記憶比較，那種流程一定會被無限延後。所以我們把它做成一個網頁：A 和 B 兩個播放器，標籤和數據都藏起來，聽完選一邊，八段評完再揭曉，最後按一顆按鈕就得到 markdown 結論。",
+      "blocks": [
+        {
+          "type": "list",
+          "ordered": true,
+          "items": [
+            "同一段稿子，A／B 兩個播放器，順序每段不同",
+            "引擎名稱與客觀數據都藏到「揭曉」之後",
+            "選完八段，一鍵複製成 markdown 結論"
+          ]
+        },
+        {
+          "type": "source",
+          "text": "產生方式：npm run bakeoff（shared/tools/hf.mjs）"
+        }
+      ]
+    },
+    {
+      "id": "slide-10",
+      "title": "方法比結論先到",
+      "chapter": "outro",
+      "durationTarget": 17.8,
+      "image": "",
+      "subtitle": "能量的先量完，不能量的準備好給人聽。這支影片本身也還沒過人工那一關。",
+      "narration": "所以這支影片的結論是一個方法：能量的先量完，剩下的準備好，讓人在十分鐘內給出答案。誠實地說，連這支影片本身，也還沒有人聽過——它一樣要先過人工那一關，才算完成。",
+      "blocks": [
+        {
+          "type": "lead",
+          "text": "能量的先量完；不能量的，把它變便宜。"
+        },
+        {
+          "type": "cards",
+          "items": [
+            {
+              "title": "量得到",
+              "text": "語速、停頓、響度一致性、生成成本——用 ffmpeg，十六段全量。"
+            },
+            {
+              "title": "量不到",
+              "text": "自然度。沒有客觀指標，只有耳朵，所以不寫進結論。"
+            },
+            {
+              "title": "做法",
+              "text": "把聽測做成盲測網頁，讓那一半從「有空再說」變成十分鐘。"
+            }
+          ]
+        },
+        {
+          "type": "source",
+          "text": "本片狀態：ready-to-preview。人工審核包由 npm run review 產生。"
+        }
+      ]
+    }
+  ]
+}
