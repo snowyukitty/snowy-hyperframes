@@ -44,6 +44,10 @@ npm run html && npm run pipeline && npm run check
 npm run review        # 產生人工審核包（自帶畫格與旁白，可離線開）
 ```
 
+這個專案的定位是**樣式回歸基準**，不是給觀眾看的影片：改動 template 的 `<style>` 之後，重跑
+`npm run check` 與 `npx hyperframes@0.8.6 snapshot --at 5,15,25,35,45`，逐頁比對就知道有沒有改壞。
+因此它的 `status` 雖然是 `ready-to-preview`，但除非要發布它的 render，人工 gate 可以先不做。
+
 實測（2026-08-22，hyperframes 0.8.6）：lint 0/0、runtime 0/0、layout 0 issues / 9 samples、motion 0/0、
 contrast **53/53 WCAG AA**。頁面上的每個數字都能在本 repo 裡驗證（`shared/tools/hf.mjs` 的
 `BLOCK_TYPES` / `BLOCK_LIMITS`），所以 `sourceConfidence` 是 `not-applicable`。

@@ -27,6 +27,13 @@ Repo health at this checkpoint: 8 projects · `hf audit --all` **0 errors** · `
       **在這件事完成之前，任何地方都不得寫下「哪個引擎比較自然」。**
 - [ ] **決定要不要登入 `heygen` CLI**（`/media-use` 取樂曲用）。這是帳號動作，所以沒有代勞。
       音樂床的管線已經做好也量過了：storyboard 宣告 `music: { file, volume }` 即可。
+- [ ] **決定這個公開 repo 要不要加 LICENSE**（目前沒有）。沒有 LICENSE 在法律上等於保留所有權利，
+      別人不能重用 template 或工具鏈——如果那是刻意的就維持現狀，如果希望別人能用就要選一份授權。
+      這是所有權決定，所以沒有代勞。
+- [ ] （可選）**`block-vocabulary-reference` 的人工 gate** — 它的 status 也是 `ready-to-preview`，
+      本機審核包：`claude/projects/block-vocabulary-reference/review/index.html`。
+      它的用途是「block 長什麼樣」的樣式回歸基準，不是給觀眾看的影片；除非要發布它的 render，
+      否則這一關可以先不做。
 
 ### 關於這些審核包
 

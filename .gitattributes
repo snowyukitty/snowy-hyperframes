@@ -1,0 +1,11 @@
+# Generated media is binary: never let git try to translate line endings inside it.
+*.mp3 binary
+*.wav binary
+*.mp4 binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.woff2 binary
+
+# Everything else is text; git stores LF and checks out the platform's native endings.
+* text=auto

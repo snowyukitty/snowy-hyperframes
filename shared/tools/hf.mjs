@@ -1246,6 +1246,7 @@ function cmdRepoCheck() {
   }
   const secretRe = /(^|\/)(\.env(\..*)?|auth\.json|.*token.*|.*secret.*|credentials\.json)$/i;
   const maxBytes = 95 * 1024 * 1024;
+  const unchecked = [];
   for (const f of files) {
     const m = /^([a-z-]+)\/projects\/([^/]+)\//.exec(f);
     if (m && !allow.has(`${m[1]}/projects/${m[2]}`)) problems.push(`tracked but not allowlisted in .gitignore: ${m[1]}/projects/${m[2]} (${f})`);
@@ -1254,7 +1255,11 @@ function cmdRepoCheck() {
     try {
       const size = fs.statSync(path.join(repo, f)).size;
       if (size > maxBytes) problems.push(`file over 95 MB (GitHub limit 100 MB): ${f} (${(size / 1048576).toFixed(1)} MB)`);
-    } catch {}
+    } catch {
+      // tracked but not in the working tree — a sparse checkout. Silently counting it as
+      // 0 bytes would let the size guard "pass" on a file it never looked at.
+      unchecked.push(f);
+    }
   }
   // every tracked project must have project.json + README + retrospective
   const tracked = new Set(files.filter((f) => /^[a-z-]+\/projects\/[^/]+\//.test(f)).map((f) => f.split("/").slice(0, 3).join("/")));
@@ -1262,11 +1267,14 @@ function cmdRepoCheck() {
     for (const req of ["project.json", "README.md", "docs/retrospective.md"]) if (!files.includes(`${p}/${req}`)) problems.push(`${p}: missing ${req} (publication policy)`);
   }
   const mp4s = files.filter((f) => /\.mp4$/i.test(f));
-  const mp4Bytes = mp4s.reduce((a, f) => a + (fs.existsSync(path.join(repo, f)) ? fs.statSync(path.join(repo, f)).size : 0), 0);
-  log(`repo-check: ${files.length} tracked files, ${tracked.size} tracked project(s), ${allow.size} allowlisted, ${mp4s.length} mp4 (${(mp4Bytes / 1048576).toFixed(1)} MB)`);
+  const mp4Local = mp4s.filter((f) => fs.existsSync(path.join(repo, f)));
+  const mp4Bytes = mp4Local.reduce((a, f) => a + fs.statSync(path.join(repo, f)).size, 0);
+  const mp4Note = mp4Local.length === mp4s.length ? `${(mp4Bytes / 1048576).toFixed(1)} MB` : `${mp4Local.length}/${mp4s.length} present locally, ${(mp4Bytes / 1048576).toFixed(1)} MB measured`;
+  log(`repo-check: ${files.length} tracked files, ${tracked.size} tracked project(s), ${allow.size} allowlisted, ${mp4s.length} mp4 (${mp4Note})`);
+  if (unchecked.length) log(`  note: ${unchecked.length} tracked file(s) are not in this working tree (sparse checkout) — the >95 MB guard could not inspect them`);
   if (mp4s.length) log(`  note: future renders belong in GitHub Releases, not git history (see repo-publication-policy.md)`);
   for (const p of problems) log(`  ✖ ${p}`);
-  if (JSON_OUT) console.log(JSON.stringify({ ok: problems.length === 0, problems, trackedProjects: [...tracked], allowlisted: [...allow] }, null, 2));
+  if (JSON_OUT) console.log(JSON.stringify({ ok: problems.length === 0, problems, trackedProjects: [...tracked], allowlisted: [...allow], notInWorkingTree: unchecked }, null, 2));
   process.exit(problems.length ? 1 : 0);
 }
 

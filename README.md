@@ -1,5 +1,7 @@
 # Snowy HyperFrames Workflows
 
+[![validate](https://github.com/snowyukitty/snowy-hyperframes/actions/workflows/validate.yml/badge.svg)](https://github.com/snowyukitty/snowy-hyperframes/actions/workflows/validate.yml)
+
 這個根目錄用來管理多條 HyperFrames 產製工作流。每條 workflow 都有自己的 `projects/`，每個具體影片或簡報專案都放在對應 workflow 的 `projects/<project-name>/`。
 
 > **2026-08-22 — Workflow v2.** 新增共用工具鏈 `shared/tools/hf.mjs`（storyboard → TTS → 量測 → 同步 → 檢查，一條指令可重跑）、
