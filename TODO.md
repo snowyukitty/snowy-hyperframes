@@ -12,18 +12,36 @@ Repo health at this checkpoint: 8 projects · `hf audit --all` **0 errors** · `
 
 - [ ] **看過管線 demo，決定是否通過** — 六頁、77 秒。
       審核包（畫格＋真實旁白＋連續播放）：<https://claude.ai/code/artifact/3e8ebf69-9f40-4616-ac53-24da32d97624>
+      本機同一份（離線可開，直接雙擊）：`claude/projects/storyboard-to-video-pipeline-demo/review/index.html`
       通過後：`claude/projects/storyboard-to-video-pipeline-demo/project.json` 的 `status` 改 `rendered`、
       `checks.humanPreview` 填日期，`npm run render` 的成片放 GitHub Release（**不要進 git**）。
 - [ ] **看過研究影片，決定是否通過** — 十頁、210.5 秒。
       審核包：<https://claude.ai/code/artifact/650ec078-5f03-4e5c-aa51-4f95f7e79bfd>
+      本機同一份：`claude/projects/measurable-vs-audible-tts/review/index.html`
       同上：`claude/projects/measurable-vs-audible-tts`。
 - [ ] **做 TTS 盲測聽測** — 八段稿子、Edge-TTS vs Kokoro，標籤與數據都藏到「揭曉」之後。
       聽測包：<https://claude.ai/code/artifact/08c1db61-79cd-4dea-a360-2b6beccd7f12>
+      本機同一份：`claude/projects/tts-bakeoff-2026-08/bakeoff/index.html`
       聽完按「複製評測結論」→ 貼進 `claude/projects/tts-bakeoff-2026-08/docs/listening-scorecard.md`
       → 更新 `shared/docs/local-tts-no-api-key-strategy.md` §3.5。
       **在這件事完成之前，任何地方都不得寫下「哪個引擎比較自然」。**
 - [ ] **決定要不要登入 `heygen` CLI**（`/media-use` 取樂曲用）。這是帳號動作，所以沒有代勞。
       音樂床的管線已經做好也量過了：storyboard 宣告 `music: { file, volume }` 即可。
+
+### 關於這些審核包
+
+它們**本來就是本地 HTML**——artifact 是從本地檔案發布上去的。每一份都把畫格（JPEG）與旁白（MP3）
+內嵌成 data URI，外部請求數為 **0**，所以離線、飛機上、用 `file://` 直接雙擊都能開。
+
+```powershell
+# 任何時候都能重生（review/ 與 bakeoff/ 是 .gitignore 忽略的產物）
+cd claude/projects/<project> ; npm run review      # 影片專案
+cd claude/projects/tts-bakeoff-2026-08 ; npm run bakeoff   # 聽測包
+```
+
+兩個小提醒：`index.html` 是完整的獨立檔（本機用這份）；`*.artifact.html` 是去掉外層標籤、給發布用的
+變體。勾選紀錄存在瀏覽器的 localStorage，**本機檔與線上 artifact 是兩個各自獨立的儲存**，所以請固定
+在其中一邊做完，再按「複製結論」。
 
 ## Open for any agent
 
