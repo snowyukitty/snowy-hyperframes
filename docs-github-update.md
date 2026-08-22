@@ -30,6 +30,20 @@ CI（`.github/workflows/validate.yml`）在每次 push 跑同樣兩件事，再�
 
 新專案要公開，先走 `shared/docs/repo-publication-policy.md` §3 的審核，再加進 `.gitignore` 的 allowlist。
 
+## Repo metadata（2026-08-22 設定）
+
+```text
+description  Reproducible pipeline for AI-assisted research videos on HyperFrames: one storyboard
+             becomes a timed, captioned, zh-Hant narrated 1080p film. Zero-dependency toolkit,
+             blind TTS evaluation, reviewed demos. Research and demo work, not stable software.
+topics       hyperframes · html-to-video · video-generation · text-to-speech · edge-tts · kokoro-tts
+             traditional-chinese · research-video · agent-workflows · reproducible-research
+```
+
+刻意保留「research and demo work, not stable software」的定位，與 Atlas 的 publication roadmap 一致。
+可見性未更動（本來就是 public）。**Atlas registry 裡的 `summary` 與這段描述目前不同步**，要在 Atlas
+那邊更新（見 `TODO.md` 的 G）。
+
 ## 現在的狀態
 
 - 4 條 workflow：`codex`、`codex-pi`、`pi`、`claude`。

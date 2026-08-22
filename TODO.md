@@ -60,7 +60,8 @@ cd claude/projects/tts-bakeoff-2026-08 ; npm run bakeoff   # 聽測包
       script，不動時間真相。`design-v3.md` §2J。
 - [ ] **K · 雙語旁白** — 同一份 storyboard 產出第二條語音軌與字幕。`design-v3.md` §3K。
 - [ ] **G · Atlas registry 更新** — **另一個 repo，要另開 scope**：現在是 4 條 workflow、8 個 tracked
-      專案、port 3002 仍為 preview。
+      專案、port 3002 仍為 preview；另外 GitHub 的 repo description 已於 2026-08-22 更新
+      （見 `docs-github-update.md`），Atlas registry 的 `summary` 尚未跟上。
 - [ ] 小項：`hf tts --provider kokoro`（程式碼已在 `hf bakeoff` 內，等聽測結論再決定）、`README.en.md`、
       `L · series identity`（等有三支以上影片再說）。
 
