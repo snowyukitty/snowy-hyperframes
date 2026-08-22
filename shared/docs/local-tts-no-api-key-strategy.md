@@ -308,8 +308,10 @@ codex/projects/tts-local-bakeoff
 
 長期：
 
-1. 建立 `shared/scripts/tts-bakeoff`。
-2. 建立 provider-neutral adapter interface。
+1. ~~建立 `shared/scripts/tts-bakeoff`。~~ → 2026-08-22 完成，形式是 `hf bakeoff`
+   （`shared/tools/hf.mjs`）＋ `claude/projects/tts-bakeoff-2026-08`，見上面 §3.5。
+2. 建立 provider-neutral adapter interface。目前 `hf bakeoff` 的 `data/bakeoff.json` 已經是
+   provider 宣告式（`engine` + 參數），把它抽成 `hf tts --provider` 只是搬程式碼；等盲測有結論再做。
 3. 把 TTS selection 寫進 `project.json`。
 4. 正式專案以「Edge-TTS baseline + local candidate + manual QA」決定 final voice。
 
