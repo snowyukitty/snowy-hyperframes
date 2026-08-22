@@ -171,6 +171,69 @@
 
       .source { color: #c5ccc6; font-size: 23px; line-height: 1.35; font-weight: 600; }
 
+      /* ---- chart ---------------------------------------------------------
+         Bars and splits are HTML boxes so CJK labels and tabular numerals
+         render as real text; only the line is SVG, where geometry is the point.
+         Every fill animates by transform (never width) so no frame re-lays out. */
+      .chart { max-width: 1560px; display: flex; flex-direction: column; gap: 16px; }
+      .chart figcaption { color: #b9c1bb; font-size: 20px; line-height: 1.35; font-weight: 600; }
+      .chart figcaption:empty { display: none; }
+
+      .chart-bar .row {
+        display: grid; grid-template-columns: minmax(180px, 300px) 1fr minmax(150px, auto);
+        align-items: center; gap: 22px;
+      }
+      .chart-bar .rl { color: #eef3ef; font-size: 28px; font-weight: 700; }
+      .chart-bar .rt { height: 34px; border-radius: 4px; background: rgba(255, 255, 255, 0.07); overflow: hidden; }
+      .chart-bar .rf {
+        display: block; height: 100%; border-radius: 4px; background: #94f0e7;
+        transform: scaleX(var(--p, 0)); transform-origin: left center;
+      }
+      .chart-bar .row:nth-child(even) .rf { background: #ffe6a3; }
+      .chart-bar .row[data-emphasis] .rf { background: #ffb4a2; }
+      .chart-bar .rv {
+        color: #fffdf6; font-size: 34px; font-weight: 900; text-align: right;
+        font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
+      }
+      .chart-bar .ru { margin-left: 8px; color: #b9c1bb; font-size: 20px; font-weight: 700; }
+
+      .chart-split .splitbar { display: flex; height: 62px; border-radius: 6px; overflow: hidden; transform-origin: left center; }
+      .chart-split .seg {
+        flex: var(--p, 1) 1 0; display: grid; place-items: center; min-width: 0;
+        color: #06231f; font-size: 30px; font-weight: 900; font-variant-numeric: tabular-nums;
+      }
+      .chart-split .seg[data-i="0"] { background: #94f0e7; }
+      .chart-split .seg[data-i="1"] { background: #ffe6a3; }
+      .chart-split .seg[data-i="2"] { background: #b6c8f0; }
+      .chart-split .seg[data-i="3"] { background: #ffb4a2; }
+      .chart-split .splitkey { display: flex; gap: 26px; flex-wrap: wrap; }
+      .chart-split .splitkey span { position: relative; padding-left: 26px; color: #eef3ef; font-size: 24px; font-weight: 700; }
+      .chart-split .splitkey span::before {
+        content: ""; position: absolute; left: 0; top: 8px; width: 16px; height: 16px; border-radius: 4px;
+      }
+      .chart-split .splitkey span[data-i="0"]::before { background: #94f0e7; }
+      .chart-split .splitkey span[data-i="1"]::before { background: #ffe6a3; }
+      .chart-split .splitkey span[data-i="2"]::before { background: #b6c8f0; }
+      .chart-split .splitkey span[data-i="3"]::before { background: #ffb4a2; }
+
+      .chart-line .lines { width: 100%; height: 360px; display: block; }
+      .chart-line .grid { stroke: rgba(255, 255, 255, 0.10); stroke-width: 1.5; }
+      .chart-line .ln {
+        fill: none; stroke-width: 4; stroke-linejoin: round; stroke-linecap: round;
+        stroke-dasharray: 1; stroke-dashoffset: 0;
+      }
+      .chart-line .ln[data-i="0"] { stroke: #94f0e7; }
+      .chart-line .ln[data-i="1"] { stroke: #ffe6a3; }
+      .chart-line .dot[data-i="0"] { fill: #94f0e7; }
+      .chart-line .dot[data-i="1"] { fill: #ffe6a3; }
+      .chart-line .linekey { display: flex; gap: 26px; flex-wrap: wrap; }
+      .chart-line .linekey span { display: inline-flex; align-items: center; gap: 9px; color: #eef3ef; font-size: 24px; font-weight: 700; }
+      .chart-line .linekey b { color: #fffdf6; font-variant-numeric: tabular-nums; }
+      .chart-line .linekey i { width: 22px; height: 3px; border-radius: 2px; }
+      .chart-line .linekey span[data-i="0"] i { background: #94f0e7; }
+      .chart-line .linekey span[data-i="1"] i { background: #ffe6a3; }
+      .chart-line .lineaxis { display: flex; justify-content: space-between; color: #b9c1bb; font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
       /* Chapter accents. `hf html` emits `chapter-<slug>` from the storyboard's
          chapter field (namespaced so a chapter named "quote" or "list" cannot
          collide with the block vocabulary). Recolour a chapter by adding rules
@@ -190,21 +253,44 @@
     <script>
       // Per-slide entrance motion. Positions come from the DOM (data-start), so `hf sync`
       // only has to rewrite attributes and this script never drifts from the timeline.
+      //
+      // A slide may pick a motion with data-motion (emitted by `hf html` from the
+      // storyboard). Four is the whole vocabulary on purpose: a rhythm that needs a
+      // legend is a design system, not a rhythm.
+      //   rise   — the default arrival
+      //   hold   — background only; the text is already on screen (continuing a thought)
+      //   focus  — a slow push-in, the title lands late (chapter openings, closings)
+      //   reveal — the evidence arrives after the sentence that sets it up (findings)
       window.__timelines = window.__timelines || {};
       const tl = gsap.timeline({ paused: true });
       const addIfFound = (selector, vars, position) => {
         const targets = document.querySelectorAll(selector);
         if (targets.length > 0) tl.from(targets, vars, position);
       };
+      const MOTION = {
+        rise:   { bgScale: 1.055, bgDur: 1.35, text: 0.20, blocks: 0.72, chart: 1.00, cap: 0.90 },
+        hold:   { bgScale: 1.020, bgDur: 0.90, text: null, blocks: null, chart: 0.40, cap: 0.30 },
+        focus:  { bgScale: 1.120, bgDur: 3.00, text: 0.50, blocks: 1.20, chart: 1.50, cap: 1.40 },
+        reveal: { bgScale: 1.030, bgDur: 1.10, text: 0.15, blocks: 1.10, chart: 1.40, cap: 0.70 },
+      };
       document.querySelectorAll("#root > .slide").forEach((slide) => {
         const start = Number(slide.dataset.start || 0);
+        const m = MOTION[slide.dataset.motion] || MOTION.rise;
         const s = `#${slide.id}`;
-        addIfFound(`${s} .bg`, { scale: 1.055, opacity: 0.84, duration: 1.35, ease: "power2.out" }, start);
-        addIfFound(`${s} .eyebrow`, { opacity: 0, y: 16, duration: 0.52, ease: "power2.out" }, start + 0.2);
-        addIfFound(`${s} h1`, { opacity: 0, y: 34, duration: 0.78, ease: "power2.out" }, start + 0.36);
-        addIfFound(`${s} .progress`, { opacity: 0, y: 12, duration: 0.5, ease: "power2.out" }, start + 0.6);
-        addIfFound(`${s} .blocks > *`, { opacity: 0, y: 26, duration: 0.7, stagger: 0.12, ease: "power2.out" }, start + 0.72);
-        addIfFound(`${s} .caption`, { opacity: 0, y: 30, duration: 0.66, ease: "power2.out" }, start + 0.9);
+        addIfFound(`${s} .bg`, { scale: m.bgScale, opacity: 0.84, duration: m.bgDur, ease: "power2.out" }, start);
+        if (m.text !== null) {
+          addIfFound(`${s} .eyebrow`, { opacity: 0, y: 16, duration: 0.52, ease: "power2.out" }, start + m.text);
+          addIfFound(`${s} h1`, { opacity: 0, y: 34, duration: 0.78, ease: "power2.out" }, start + m.text + 0.16);
+          addIfFound(`${s} .progress`, { opacity: 0, y: 12, duration: 0.5, ease: "power2.out" }, start + m.text + 0.4);
+        }
+        if (m.blocks !== null) addIfFound(`${s} .blocks > *`, { opacity: 0, y: 26, duration: 0.7, stagger: 0.12, ease: "power2.out" }, start + m.blocks);
+        // charts draw themselves in: bars and splits grow by transform, lines draw along
+        // pathLength="1" — all seek-safe, none of them re-layout a frame.
+        addIfFound(`${s} .chart-bar .rf`, { scaleX: 0, duration: 0.9, stagger: 0.1, ease: "power2.out" }, start + m.chart);
+        addIfFound(`${s} .chart-split .splitbar`, { scaleX: 0, duration: 0.9, ease: "power2.out" }, start + m.chart);
+        addIfFound(`${s} .chart-line .ln`, { strokeDashoffset: 1, duration: 1.2, stagger: 0.15, ease: "power1.inOut" }, start + m.chart);
+        addIfFound(`${s} .chart-line .dot`, { opacity: 0, duration: 0.4, ease: "power2.out" }, start + m.chart + 0.9);
+        addIfFound(`${s} .caption`, { opacity: 0, y: 30, duration: 0.66, ease: "power2.out" }, start + m.cap);
       });
       window.__timelines["main"] = tl;
     </script>

@@ -34,6 +34,12 @@ npm run render      #  6. renders/<project>.mp4（不進 git；要分享放 GitH
 | `list` | `items[string]`（`ordered: true` 可編號） | 2–5 |
 | `quote` | `text` + `source` | 1 |
 | `source` | 頁尾來源註記 | 1 |
+| `chart` | `bar`（2–6 項）／`split`（2–4 段）／`line`（1–2 條、每條 ≤12 點）；**必填 `source`** | 1 |
+
+圖表若設了 `min`／`max`，caption 會自動加註「（縱軸自 X 起）」——截斷的座標軸一定會自己招認。
+
+每頁還可以選到場方式：`motion: rise | hold | focus | reveal`（預設 `rise`），只影響入場動畫，
+不影響任何時間真相。
 
 一頁最多三個 block，`hf audit` 會檢查。實際樣子：`claude/projects/block-vocabulary-reference`。
 

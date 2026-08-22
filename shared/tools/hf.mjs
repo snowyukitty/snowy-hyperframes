@@ -165,6 +165,7 @@ function loadStoryboard(projectRoot) {
       image: s.image || (s.visuals && s.visuals.imageName ? `assets/images/${s.visuals.imageName}` : "") || "",
       imageInferred: !s.image && !!(s.visuals && s.visuals.imageName),
       blocks: Array.isArray(s.blocks) ? s.blocks : [],
+      motion: s.motion || null,
       subtitle: s.subtitle ?? "",
       narration: s.narration ?? s.displayText ?? "",
       ttsText: s.ttsText ?? "",
@@ -523,8 +524,109 @@ function esc(s) {
 // Deliberately a small, typographic vocabulary: every type has a fixed shape, so
 // `hf html` can render it, `hf audit` can judge its density, and a human editing
 // the storyboard never has to touch HTML. See shared/docs/design-v2.md §2B.
-const BLOCK_TYPES = ["lead", "metrics", "cards", "list", "quote", "source"];
+const BLOCK_TYPES = ["lead", "metrics", "cards", "list", "quote", "source", "chart"];
 const BLOCK_LIMITS = { metrics: [2, 4], cards: [2, 3], list: [2, 5] };
+// four is the whole motion vocabulary; see the template's timeline script
+const MOTIONS = ["rise", "hold", "focus", "reveal"];
+
+// --- chart block -----------------------------------------------------------
+// A research slide that only states numbers makes the viewer do the comparison.
+// Drawing it is the whole point of this block. Deliberately NOT a charting library:
+// bars and splits are HTML boxes (so CJK labels and tabular numerals render as text,
+// which SVG text does badly), and only the line uses SVG, where geometry is the point.
+// Zero dependencies, our palette, deterministic offline.
+const CHART_KINDS = ["bar", "split", "line"];
+const CHART_LIMITS = { bar: [2, 6], split: [2, 4], line: [1, 2] };
+const LINE_MAX_POINTS = 12;
+
+const num = (v) => (typeof v === "number" && Number.isFinite(v) ? v : Number.NaN);
+const pct = (v) => `${Math.round(v * 10000) / 100}`;
+
+function chartDisplay(item, unit) {
+  if (item.display !== undefined) return String(item.display);
+  const v = num(item.value);
+  const s = Number.isFinite(v) ? (Math.abs(v) >= 100 || Number.isInteger(v) ? String(v) : v.toFixed(2)) : "";
+  return unit ? `${s}` : s;
+}
+
+function renderChart(b, pad) {
+  const kind = b.chart || "bar";
+  if (!CHART_KINDS.includes(kind)) throw new Error(`unknown chart kind ${JSON.stringify(kind)} (expected: ${CHART_KINDS.join(", ")})`);
+  const out = [`${pad}<figure class="block chart chart-${kind}">`];
+
+  if (kind === "bar") {
+    const items = Array.isArray(b.items) ? b.items : [];
+    const values = items.map((i) => num(i.value)).filter(Number.isFinite);
+    // headroom so the longest bar never touches the value column
+    const max = num(b.max) || (values.length ? Math.max(...values) * 1.18 : 1);
+    for (const it of items) {
+      const v = num(it.value);
+      const p = Number.isFinite(v) && max > 0 ? Math.max(0, Math.min(1, v / max)) : 0;
+      out.push(
+        `${pad}  <div class="row"${it.emphasis ? ' data-emphasis=""' : ""}>`,
+        `${pad}    <div class="rl">${esc(it.label || "")}</div>`,
+        `${pad}    <div class="rt"><i class="rf" style="--p:${p.toFixed(4)}"></i></div>`,
+        `${pad}    <div class="rv">${esc(chartDisplay(it, b.unit))}${b.unit ? `<span class="ru">${esc(b.unit)}</span>` : ""}</div>`,
+        `${pad}  </div>`
+      );
+    }
+  } else if (kind === "split") {
+    const items = Array.isArray(b.items) ? b.items : [];
+    const total = items.reduce((a, i) => a + (Number.isFinite(num(i.value)) ? num(i.value) : 0), 0) || 1;
+    out.push(`${pad}  <div class="splitbar">`);
+    for (const [i, it] of items.entries()) {
+      out.push(
+        `${pad}    <span class="seg" style="--p:${(num(it.value) / total).toFixed(4)}" data-i="${i}"><b>${esc(chartDisplay(it, b.unit))}</b></span>`
+      );
+    }
+    out.push(`${pad}  </div>`, `${pad}  <div class="splitkey">`);
+    for (const [i, it] of items.entries()) out.push(`${pad}    <span data-i="${i}">${esc(it.label || "")}</span>`);
+    out.push(`${pad}  </div>`);
+  } else {
+    // line: normalise every series into one viewBox; pathLength="1" makes the draw-on
+    // animation exact without measuring geometry at runtime
+    const series = Array.isArray(b.series) ? b.series : [];
+    const all = series.flatMap((s) => (s.values || []).map(num)).filter(Number.isFinite);
+    const lo = b.min !== undefined ? num(b.min) : Math.min(...all, 0);
+    const hi = b.max !== undefined ? num(b.max) : Math.max(...all, 1);
+    const span = hi - lo || 1;
+    const W = 1560;
+    const H = 300;
+    out.push(`${pad}  <svg class="lines" viewBox="0 0 ${W} ${H}" aria-hidden="true">`);
+    for (let g = 1; g <= 3; g++) out.push(`${pad}    <line class="grid" x1="0" y1="${((H / 4) * g).toFixed(1)}" x2="${W}" y2="${((H / 4) * g).toFixed(1)}"/>`);
+    for (const [si, s] of series.entries()) {
+      const vals = (s.values || []).map(num).filter(Number.isFinite);
+      if (vals.length < 2) continue;
+      const pts = vals.map((v, i) => {
+        const x = (i / (vals.length - 1)) * W;
+        const y = H - ((v - lo) / span) * H;
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+      });
+      out.push(`${pad}    <polyline class="ln" data-i="${si}" pathLength="1" points="${pts.join(" ")}"/>`);
+      const last = pts[pts.length - 1].split(",");
+      out.push(`${pad}    <circle class="dot" data-i="${si}" cx="${last[0]}" cy="${last[1]}" r="7"/>`);
+    }
+    out.push(`${pad}  </svg>`);
+    if (series.length) {
+      out.push(`${pad}  <div class="linekey">`);
+      for (const [si, s] of series.entries())
+        out.push(`${pad}    <span data-i="${si}"><i></i>${esc(s.label || "")}${s.last !== undefined ? ` <b>${esc(String(s.last))}</b>` : ""}</span>`);
+      out.push(`${pad}  </div>`);
+    }
+    if (Array.isArray(b.labels) && b.labels.length) {
+      out.push(`${pad}  <div class="lineaxis">`);
+      for (const l of b.labels) out.push(`${pad}    <span>${esc(String(l))}</span>`);
+      out.push(`${pad}  </div>`);
+    }
+  }
+
+  // A drawn comparison claims more than a stated one, so the source is not optional —
+  // and a chart whose axis does not start at zero must say so, in the chart, every time.
+  const zeroed = kind === "line" ? b.min === undefined || num(b.min) === 0 : b.max === undefined;
+  const baseline = zeroed ? "" : kind === "line" ? `（縱軸自 ${esc(String(b.min))} 起）` : `（軸上限 ${esc(String(b.max))}）`;
+  out.push(`${pad}  <figcaption>${esc(b.source || "")}${baseline}</figcaption>`, `${pad}</figure>`);
+  return out;
+}
 
 function renderBlocks(blocks, pad = "          ") {
   const out = [];
@@ -572,6 +674,7 @@ function renderBlocks(blocks, pad = "          ") {
         ),
         `${pad}</div>`
       );
+    else if (type === "chart") out.push(...renderChart(b, pad));
     else if (type === "list")
       out.push(
         `${pad}<${b.ordered ? "ol" : "ul"} class="block list">`,
@@ -612,7 +715,7 @@ function renderSlidesRegion(timeline, slides) {
       ? `        <img class="bg" data-layout-allow-overflow="" src="${esc(s.image)}" alt="">`
       : `        <div class="bg bg-generated" data-layout-allow-overflow=""></div>` + (blocks.length ? "" : `\n${ring}`);
     return [
-      `      <section id="${t.id}" class="clip slide${s.image ? "" : " no-image"}${blocks.length ? " with-blocks" : ""}${chapterClass}" style="--i:${i}" data-start="${t.start}" data-duration="${t.duration}" data-track-index="${i + 1}">`,
+      `      <section id="${t.id}" class="clip slide${s.image ? "" : " no-image"}${blocks.length ? " with-blocks" : ""}${chapterClass}" style="--i:${i}"${s.motion ? ` data-motion="${esc(s.motion)}"` : ""} data-start="${t.start}" data-duration="${t.duration}" data-track-index="${i + 1}">`,
       bg,
       `        <div class="shade"></div>`,
       `        <div class="content">`,
@@ -1007,8 +1110,36 @@ function auditProject(projectRoot, repo) {
       if (type === "metrics") for (const m of b.items || []) if (!m || m.value === undefined || !m.label) W("block-shape", `${s.id}: a metrics item needs both label and value`);
       if (type === "cards") for (const c of b.items || []) if (!c || !c.title) W("block-shape", `${s.id}: a cards item needs a title`);
       if ((type === "lead" || type === "quote" || type === "source") && !(b.text || "").trim()) W("block-shape", `${s.id}: ${type} block has no text`);
+      if (type === "chart") {
+        const kind = b.chart || "bar";
+        if (!CHART_KINDS.includes(kind)) {
+          E("chart", `${s.id}: unknown chart kind ${JSON.stringify(kind)} (expected: ${CHART_KINDS.join(", ")})`);
+          continue;
+        }
+        // a drawn comparison asserts more than a stated one — it must be attributable
+        if (!(b.source || "").trim()) E("chart", `${s.id}: a ${kind} chart has no source; every drawn comparison must be attributable`);
+        const lim = CHART_LIMITS[kind];
+        if (kind === "line") {
+          const series = Array.isArray(b.series) ? b.series : [];
+          if (series.length < lim[0] || series.length > lim[1]) W("block-density", `${s.id}: line chart has ${series.length} series; ${lim[0]}-${lim[1]} stays readable`);
+          for (const ser of series) {
+            const vals = (ser.values || []).map((v) => (typeof v === "number" && Number.isFinite(v) ? v : NaN));
+            if (vals.length < 2) E("chart", `${s.id}: line series ${JSON.stringify(ser.label || "")} needs at least 2 points`);
+            if (vals.some((v) => !Number.isFinite(v))) E("chart", `${s.id}: line series ${JSON.stringify(ser.label || "")} has a non-numeric value`);
+            if (vals.length > LINE_MAX_POINTS) W("block-density", `${s.id}: line series has ${vals.length} points; over ${LINE_MAX_POINTS} is unreadable at 1080p`);
+          }
+        } else {
+          const its = Array.isArray(b.items) ? b.items : [];
+          if (its.length < lim[0] || its.length > lim[1]) W("block-density", `${s.id}: ${kind} chart has ${its.length} item(s); ${lim[0]}-${lim[1]} stays readable`);
+          for (const it of its) {
+            if (!it || !String(it.label || "").trim()) W("block-shape", `${s.id}: a ${kind} chart item has no label`);
+            if (!(typeof it.value === "number" && Number.isFinite(it.value))) E("chart", `${s.id}: ${kind} chart item ${JSON.stringify(it && it.label)} has a non-numeric value`);
+          }
+        }
+      }
       if (type === "lead" && (b.text || "").length > 60) W("block-density", `${s.id}: lead is ${b.text.length} chars; keep it under ~60 so it reads as one breath`);
     }
+    if (s.motion && !MOTIONS.includes(s.motion)) E("motion", `${s.id}: unknown motion ${JSON.stringify(s.motion)} (expected: ${MOTIONS.join(", ")})`);
     for (const t of ["metrics", "cards", "quote"]) if (seen[t] > 1) W("block-density", `${s.id}: ${seen[t]} ${t} blocks on one slide; split it`);
     if (s.blocks.length > 3) W("block-density", `${s.id}: ${s.blocks.length} blocks on one slide; 1-3 is the readable range`);
   }

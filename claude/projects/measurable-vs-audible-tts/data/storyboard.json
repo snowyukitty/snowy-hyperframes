@@ -51,7 +51,8 @@
           "type": "source",
           "text": "資料：本 repo 的 claude/projects/tts-bakeoff-2026-08／data/measurements.json（2026-08-22 實測）"
         }
-      ]
+      ],
+      "motion": "focus"
     },
     {
       "id": "slide-02",
@@ -117,30 +118,27 @@
       "narration": "第一個差異是語速。用同一份稿子，Edge 平均每秒念四點四二拍，Kokoro 是三點六三。八段加起來，Edge 一百零一點五秒，Kokoro 一百二十二點二秒，慢了兩成。這件事只影響影片長度，還不能說誰比較好聽。",
       "blocks": [
         {
-          "type": "metrics",
-          "items": [
-            {
-              "label": "Edge-TTS 語速",
-              "value": "4.42",
-              "note": "拍／秒（中文字算一拍）"
-            },
-            {
-              "label": "Kokoro 語速",
-              "value": "3.63",
-              "note": "同一組稿子，慢約 20%"
-            },
-            {
-              "label": "八段總長差",
-              "value": "+20.7s",
-              "note": "101.5s 對 122.2s"
-            }
-          ]
+          "type": "lead",
+          "text": "同一份稿子，八段加起來差了二十點七秒。"
         },
         {
-          "type": "source",
-          "text": "量測：ffprobe 長度 ÷ 稿子拍數；完整表格見 data/measurements.json"
+          "type": "chart",
+          "chart": "bar",
+          "unit": "拍／秒",
+          "items": [
+            {
+              "label": "Edge-TTS",
+              "value": 4.42
+            },
+            {
+              "label": "Kokoro-82M",
+              "value": 3.63
+            }
+          ],
+          "source": "八段稿子的平均語速；tts-bakeoff-2026-08／data/measurements.json"
         }
-      ]
+      ],
+      "motion": "reveal"
     },
     {
       "id": "slide-05",
@@ -152,25 +150,28 @@
       "narration": "第二個差異更有意思。用靜音偵測去量，Edge 的音檔裡有兩成一是靜音，Kokoro 只有百分之七。也就是說，Edge 在逗號和句號的地方留了換氣，Kokoro 大多沒有留。它其實念得比較慢，卻幾乎不停頓。",
       "blocks": [
         {
-          "type": "metrics",
-          "items": [
-            {
-              "label": "Edge 靜音佔比",
-              "value": "21%",
-              "note": "標點處留有換氣"
-            },
-            {
-              "label": "Kokoro 靜音佔比",
-              "value": "7%",
-              "note": "念得慢，卻幾乎不停頓"
-            }
-          ]
+          "type": "lead",
+          "text": "念得比較慢的那一個，反而幾乎不停頓。"
         },
         {
-          "type": "source",
-          "text": "量測：ffmpeg silencedetect，門檻 −35 dB、最短 0.18 秒"
+          "type": "chart",
+          "chart": "bar",
+          "unit": "%",
+          "items": [
+            {
+              "label": "Edge-TTS",
+              "value": 21
+            },
+            {
+              "label": "Kokoro-82M",
+              "value": 7,
+              "emphasis": true
+            }
+          ],
+          "source": "音檔中的靜音佔比；ffmpeg silencedetect（−35 dB／0.18 秒）"
         }
-      ]
+      ],
+      "motion": "reveal"
     },
     {
       "id": "slide-06",
@@ -182,30 +183,58 @@
       "narration": "差距最大的是第七段，那段稿子塞滿了模型名稱和授權縮寫。Edge 的語速掉到三點九七，Kokoro 掉到二點九五，而且整段多花了將近四秒。中英混讀本來就是這個專案最在意的弱點，這一段把它量出來了。",
       "blocks": [
         {
-          "type": "metrics",
-          "items": [
-            {
-              "label": "Edge（第七段）",
-              "value": "3.97",
-              "note": "拍／秒"
-            },
-            {
-              "label": "Kokoro（第七段）",
-              "value": "2.95",
-              "note": "同段落，慢了四分之一"
-            },
-            {
-              "label": "長度差",
-              "value": "+3.9s",
-              "note": "11.2s 對 15.1s"
-            }
-          ]
+          "type": "lead",
+          "text": "八段稿子裡，有一段特別難念。"
         },
         {
-          "type": "source",
-          "text": "第七段稿子：Kokoro-82M 的權重採用 Apache 2.0，F5-TTS 的推理程式是 MIT⋯⋯"
+          "type": "chart",
+          "chart": "line",
+          "min": 2.5,
+          "max": 5.5,
+          "labels": [
+            "01",
+            "02",
+            "03",
+            "04",
+            "05",
+            "06",
+            "07",
+            "08"
+          ],
+          "series": [
+            {
+              "label": "Edge-TTS",
+              "last": "4.53",
+              "values": [
+                4.37,
+                5.08,
+                4.62,
+                4.94,
+                3.82,
+                3.99,
+                3.97,
+                4.53
+              ]
+            },
+            {
+              "label": "Kokoro-82M",
+              "last": "4.00",
+              "values": [
+                3.49,
+                3.54,
+                3.83,
+                3.88,
+                3.53,
+                3.86,
+                2.95,
+                4.0
+              ]
+            }
+          ],
+          "source": "逐段語速（拍／秒）；第七段是模型名與授權縮寫。tts-bakeoff-2026-08／data/measurements.json"
         }
-      ]
+      ],
+      "motion": "reveal"
     },
     {
       "id": "slide-07",
@@ -240,7 +269,8 @@
           "type": "source",
           "text": "量測：ffmpeg ebur128（整合響度與真實峰值）、合成耗時 ÷ 音檔長度"
         }
-      ]
+      ],
+      "motion": "reveal"
     },
     {
       "id": "slide-08",
@@ -260,7 +290,8 @@
           "type": "source",
           "text": "因此 Tier 0 維持 Edge-TTS 為預設，Kokoro 定位為已驗證可用的離線備援。"
         }
-      ]
+      ],
+      "motion": "focus"
     },
     {
       "id": "slide-09",
@@ -320,7 +351,8 @@
           "type": "source",
           "text": "本片狀態：ready-to-preview。人工審核包由 npm run review 產生。"
         }
-      ]
+      ],
+      "motion": "focus"
     }
   ]
 }

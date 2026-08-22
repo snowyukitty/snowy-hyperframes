@@ -80,11 +80,21 @@ before committing; CI runs the same two commands plus `hyperframes lint` per pro
 ## Slide content
 
 A slide's information layer is `slides[].blocks` in the storyboard — `lead`, `metrics`,
-`cards`, `list`, `quote`, `source`. `hf html` renders them; `hf audit` enforces the
-readable ranges (max 3 blocks/slide, 2-4 metrics, 2-3 cards, 2-5 list items). Never
-hand-write that HTML, and never put a number on screen that `docs/references.md`
-cannot account for. Live reference (one page per block type):
-`claude/projects/block-vocabulary-reference`.
+`cards`, `list`, `quote`, `source`, `chart`. `hf html` renders them; `hf audit` enforces the
+readable ranges (max 3 blocks/slide, 2-4 metrics, 2-3 cards, 2-5 list items, bar 2-6,
+split 2-4, line 1-2 series x <=12 points). Never hand-write that HTML, and never put a
+number on screen that `docs/references.md` cannot account for. Live reference (one page
+per block type): `claude/projects/block-vocabulary-reference`.
+
+Two rules specific to charts, both enforced: **a chart must carry a `source`** — a drawn
+comparison asserts more than a stated one — and **a chart that sets `min`/`max` discloses
+it automatically** in its caption, so an axis can never be quietly zoomed to exaggerate a
+difference.
+
+A slide may also pick how it arrives: `motion: rise | hold | focus | reveal` (default
+`rise`). Four is the whole vocabulary on purpose — a rhythm that needs a legend is a
+design system, not a rhythm. It lives in the template's timeline script and changes
+nothing about timing truth.
 
 ## HyperFrames version policy
 

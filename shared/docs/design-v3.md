@@ -43,12 +43,49 @@ toolkit API, the template DOM. Added since, and equally binding:
 
 ---
 
-## 2. The next milestone — **「讓研究影片能 show 資料，而不只是說」**
+## 2. The milestone — **「讓研究影片能 show 資料，而不只是說」** — H and J delivered 2026-08-22
 
-Three work items, in order. H is the core; I is optional depth; J is what stops a three-minute piece
-from feeling like a loop. Each is written so it can be picked up cold.
+Three work items. **H (charts) and J (motion) are built and verified**; **I stays open** as optional
+depth. The research video now draws three of its findings and varies its rhythm across ten slides.
 
-### H. A native `chart` block
+### H. A native `chart` block ✅ BUILT 2026-08-22
+
+**Shipped**, and the "why native" reasoning above held up under test. Three kinds:
+
+```jsonc
+{ "type": "chart", "chart": "bar",  "unit": "拍／秒",
+  "items": [ { "label": "Edge-TTS", "value": 4.42 },
+             { "label": "Kokoro-82M", "value": 3.63, "emphasis": true } ],
+  "source": "…" }                                   // REQUIRED — hf audit errors without it
+{ "type": "chart", "chart": "split", "items": [ { "label": "旁白發聲", "value": 79, "display": "79%" }, … ] }
+{ "type": "chart", "chart": "line", "min": 2.5, "max": 5.5, "labels": ["01", …],
+  "series": [ { "label": "Edge-TTS", "last": "4.53", "values": [4.37, 5.08, …] } ] }
+```
+
+As-built decisions worth keeping:
+
+- **Bars and splits are HTML boxes, only the line is SVG.** The sketch said "inline SVG" throughout;
+  in practice SVG renders CJK labels and tabular numerals badly, and a bar is a box with a number
+  beside it. SVG earns its place only where geometry is the content.
+- **Every fill animates by `transform`, never `width`** — a width tween re-lays out every frame.
+  Lines draw along `pathLength="1"`, which makes the reveal exact without measuring geometry.
+- **A truncated axis discloses itself.** If a chart sets `min` (line) or `max` (bar), the renderer
+  appends 「（縱軸自 X 起）」 to the caption automatically. An author cannot quietly zoom an axis to make
+  a difference look bigger — the chart says so, every time, in the frame.
+- **`source` is mandatory** (`hf audit` → `chart` error): a drawn comparison asserts more than a
+  stated one, so it must be attributable.
+- Density: bar 2–6, split 2–4, line 1–2 series × ≤12 points.
+
+**Bug worth remembering:** the first line chart rendered as scattered dashes. Cause: a viewBox stretched
+non-uniformly (`preserveAspectRatio="none"`) combined with `vector-effect: non-scaling-stroke` broke
+`pathLength` dash normalisation. Fix: draw in near-pixel user units (1560×300) so scaling stays uniform.
+
+**Verified.** `claude/projects/block-vocabulary-reference` gained one page per kind
+(`hyperframes check` 0 findings, contrast 54/54 AA), and the research video now *draws* three of its
+findings instead of stating them — speed as bars, the silence surprise as an emphasised bar, and the
+per-sample trend as a line where the sample-07 dip is visible rather than described.
+
+<details><summary>Original sketch (superseded)</summary>
 
 **Why native rather than upstream.** Probed on 2026-08-22: upstream's `data-chart` is a **full-frame,
 light-themed (`--bg-color: #faf9f6`), 15-second standalone composition**, mounted via
@@ -84,6 +121,8 @@ a drawn comparison makes a stronger claim than a stated one.
 `hyperframes@0.8.6 check` 0 findings including contrast; inspect `snapshot` frames — every label legible,
 nothing overflowing the band; the numbers on screen match the cited file.
 
+</details>
+
 ### I. A full-frame data slide from the registry (optional depth)
 
 For a single deliberate "here is the data" moment, upstream's block is better than anything we would
@@ -104,7 +143,23 @@ custom properties to the dark palette; run `hf vendor` (which since 2026-08-22 a
 runtime stage — and its 15 s default duration is reconciled with the narration by `hf sync` like any
 other slide.
 
-### J. A small motion vocabulary
+### J. A small motion vocabulary ✅ BUILT 2026-08-22
+
+**Shipped exactly as specified** — four values, implemented entirely in the template's timeline script,
+emitted by `hf html` as `data-motion`, validated by `hf audit` (`motion` error on an unknown value).
+`rise` (default) · `hold` (background only; the text is already on screen) · `focus` (slow push-in, the
+title lands late) · `reveal` (the evidence arrives after the sentence that sets it up).
+
+The research video uses `focus` for its opening, its limits slide and its close, `reveal` for the four
+findings slides, `rise` elsewhere. The fixture exercises all four so a template change that breaks one
+shows up in its snapshots.
+
+**Seek-safety verified the way it must be** — one `snapshot` pass at 0.4 s past each slide's start:
+`hold` slides are already complete at +0.4 s, `reveal` slides show title-without-evidence, `focus`
+slides are still settling. Every frame is consistent with its absolute time rather than playback
+history, which is the property a renderer depends on. `check`'s motion stage: 0 findings.
+
+<details><summary>Original sketch (superseded)</summary>
 
 **Why.** Every slide currently enters identically: background scale, eyebrow, title, progress, caption.
 Over ten slides that reads as a template rather than a piece.
@@ -125,6 +180,8 @@ Keep it to four. A motion vocabulary that needs a legend is a design system, not
 **Acceptance.** `check`'s motion stage 0 findings; snapshots at 0.3 s, mid-slide and 0.3 s before the end
 of a slide of each kind look correct (seek-safety: a rendered frame must not depend on playback history);
 contact sheet of the full render inspected at every transition.
+
+</details>
 
 ---
 

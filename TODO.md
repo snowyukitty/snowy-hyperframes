@@ -4,7 +4,10 @@ Checkpoint: **2026-08-22**. Everything below is either waiting on a person, or s
 for any agent to start cold. Specs live in `shared/docs/design-v3.md`; the rules live in `AGENTS.md`.
 
 Repo health at this checkpoint: 8 projects · `hf audit --all` **0 errors** · `hf repo-check` clean ·
-`hyperframes@0.8.6 check` 0 findings on all three videos · CI green.
+`hyperframes@0.8.6 check` 0 findings on all three videos（對比度 62/62、54/54、18/18 全數 AA）· CI green.
+
+最近一輪（2026-08-22 第三次）完成了 `design-v3.md` 的 **H（圖表）與 J（動態語彙）**，研究影片的三頁
+改成用畫的；詳見 `shared/docs/phase-summary-2026-08-22c.md`。
 
 ---
 
@@ -52,12 +55,12 @@ cd claude/projects/tts-bakeoff-2026-08 ; npm run bakeoff   # 聽測包
 
 ## Open for any agent
 
-- [ ] **H · `chart` block**（下一個里程碑的核心）— 內嵌 SVG 圖表，`bar` / `line` / `split`，
-      每張圖必須有 `source`。規格與驗收：`design-v3.md` §2H。
+- [x] ~~**H · `chart` block**~~ — 2026-08-22 完成：`bar` / `split` / `line`，每張圖必須有 `source`，
+      截斷的座標軸會自動在 caption 上招認。見 `design-v3.md` §2H。
 - [ ] **I · 整頁資料頁**（可選）— 用上游 registry 的 `data-chart` 當 sub-composition。
       注意：`hyperframes add <name>` 在這條網路上可用，`catalog --query` 會逾時。`design-v3.md` §2I。
-- [ ] **J · 動態語彙** — 每頁可選 `motion: rise | hold | focus | reveal`，只改 template 的 timeline
-      script，不動時間真相。`design-v3.md` §2J。
+- [x] ~~**J · 動態語彙**~~ — 2026-08-22 完成：每頁可選 `motion: rise | hold | focus | reveal`，
+      seek-safety 以「每頁起點 +0.4 秒」逐頁驗證。見 `design-v3.md` §2J。
 - [ ] **K · 雙語旁白** — 同一份 storyboard 產出第二條語音軌與字幕。`design-v3.md` §3K。
 - [ ] **G · Atlas registry 更新** — **另一個 repo，要另開 scope**：現在是 4 條 workflow、8 個 tracked
       專案、port 3002 仍為 preview；另外 GitHub 的 repo description 已於 2026-08-22 更新
@@ -74,3 +77,4 @@ cd claude/projects/tts-bakeoff-2026-08 ; npm run bakeoff   # 聽測包
 - [x] 第一支研究影片 `measurable-vs-audible-tts`
 - [x] 音樂床（不需帳號的那一半），含「床會落在哪裡」的響度檢查
 - [x] `hf audit` 的 placeholder / stale-html / music / captions / bakeoff 檢查、CI 修正
+- [x] `chart` block（`bar` / `split` / `line`；必填 `source`；截斷軸自動揭露）與 `motion` 四種到場方式

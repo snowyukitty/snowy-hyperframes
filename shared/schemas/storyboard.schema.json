@@ -73,7 +73,8 @@
                     "cards",
                     "list",
                     "quote",
-                    "source"
+                    "source",
+                    "chart"
                   ]
                 },
                 "text": {
@@ -87,10 +88,40 @@
                 },
                 "items": {
                   "type": "array"
+                },
+                "chart": {
+                  "enum": [
+                    "bar",
+                    "split",
+                    "line"
+                  ]
+                },
+                "series": {
+                  "type": "array"
+                },
+                "labels": {
+                  "type": "array"
+                },
+                "unit": {
+                  "type": "string"
+                },
+                "max": {
+                  "type": "number"
+                },
+                "min": {
+                  "type": "number"
                 }
               },
               "additionalProperties": true
             }
+          },
+          "motion": {
+            "enum": [
+              "rise",
+              "hold",
+              "focus",
+              "reveal"
+            ]
           }
         },
         "additionalProperties": true

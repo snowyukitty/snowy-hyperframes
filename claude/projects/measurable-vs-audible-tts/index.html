@@ -171,6 +171,69 @@
 
       .source { color: #c5ccc6; font-size: 23px; line-height: 1.35; font-weight: 600; }
 
+      /* ---- chart ---------------------------------------------------------
+         Bars and splits are HTML boxes so CJK labels and tabular numerals
+         render as real text; only the line is SVG, where geometry is the point.
+         Every fill animates by transform (never width) so no frame re-lays out. */
+      .chart { max-width: 1560px; display: flex; flex-direction: column; gap: 16px; }
+      .chart figcaption { color: #b9c1bb; font-size: 20px; line-height: 1.35; font-weight: 600; }
+      .chart figcaption:empty { display: none; }
+
+      .chart-bar .row {
+        display: grid; grid-template-columns: minmax(180px, 300px) 1fr minmax(150px, auto);
+        align-items: center; gap: 22px;
+      }
+      .chart-bar .rl { color: #eef3ef; font-size: 28px; font-weight: 700; }
+      .chart-bar .rt { height: 34px; border-radius: 4px; background: rgba(255, 255, 255, 0.07); overflow: hidden; }
+      .chart-bar .rf {
+        display: block; height: 100%; border-radius: 4px; background: #94f0e7;
+        transform: scaleX(var(--p, 0)); transform-origin: left center;
+      }
+      .chart-bar .row:nth-child(even) .rf { background: #ffe6a3; }
+      .chart-bar .row[data-emphasis] .rf { background: #ffb4a2; }
+      .chart-bar .rv {
+        color: #fffdf6; font-size: 34px; font-weight: 900; text-align: right;
+        font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
+      }
+      .chart-bar .ru { margin-left: 8px; color: #b9c1bb; font-size: 20px; font-weight: 700; }
+
+      .chart-split .splitbar { display: flex; height: 62px; border-radius: 6px; overflow: hidden; transform-origin: left center; }
+      .chart-split .seg {
+        flex: var(--p, 1) 1 0; display: grid; place-items: center; min-width: 0;
+        color: #06231f; font-size: 30px; font-weight: 900; font-variant-numeric: tabular-nums;
+      }
+      .chart-split .seg[data-i="0"] { background: #94f0e7; }
+      .chart-split .seg[data-i="1"] { background: #ffe6a3; }
+      .chart-split .seg[data-i="2"] { background: #b6c8f0; }
+      .chart-split .seg[data-i="3"] { background: #ffb4a2; }
+      .chart-split .splitkey { display: flex; gap: 26px; flex-wrap: wrap; }
+      .chart-split .splitkey span { position: relative; padding-left: 26px; color: #eef3ef; font-size: 24px; font-weight: 700; }
+      .chart-split .splitkey span::before {
+        content: ""; position: absolute; left: 0; top: 8px; width: 16px; height: 16px; border-radius: 4px;
+      }
+      .chart-split .splitkey span[data-i="0"]::before { background: #94f0e7; }
+      .chart-split .splitkey span[data-i="1"]::before { background: #ffe6a3; }
+      .chart-split .splitkey span[data-i="2"]::before { background: #b6c8f0; }
+      .chart-split .splitkey span[data-i="3"]::before { background: #ffb4a2; }
+
+      .chart-line .lines { width: 100%; height: 360px; display: block; }
+      .chart-line .grid { stroke: rgba(255, 255, 255, 0.10); stroke-width: 1.5; }
+      .chart-line .ln {
+        fill: none; stroke-width: 4; stroke-linejoin: round; stroke-linecap: round;
+        stroke-dasharray: 1; stroke-dashoffset: 0;
+      }
+      .chart-line .ln[data-i="0"] { stroke: #94f0e7; }
+      .chart-line .ln[data-i="1"] { stroke: #ffe6a3; }
+      .chart-line .dot[data-i="0"] { fill: #94f0e7; }
+      .chart-line .dot[data-i="1"] { fill: #ffe6a3; }
+      .chart-line .linekey { display: flex; gap: 26px; flex-wrap: wrap; }
+      .chart-line .linekey span { display: inline-flex; align-items: center; gap: 9px; color: #eef3ef; font-size: 24px; font-weight: 700; }
+      .chart-line .linekey b { color: #fffdf6; font-variant-numeric: tabular-nums; }
+      .chart-line .linekey i { width: 22px; height: 3px; border-radius: 2px; }
+      .chart-line .linekey span[data-i="0"] i { background: #94f0e7; }
+      .chart-line .linekey span[data-i="1"] i { background: #ffe6a3; }
+      .chart-line .lineaxis { display: flex; justify-content: space-between; color: #b9c1bb; font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
       /* Chapter accents. `hf html` emits `chapter-<slug>` from the storyboard's
          chapter field (namespaced so a chapter named "quote" or "list" cannot
          collide with the block vocabulary). Recolour a chapter by adding rules
@@ -194,7 +257,7 @@
       <!-- hf:audio:end -->
 
       <!-- hf:slides:start -->
-      <section id="slide-01" class="clip slide no-image with-blocks chapter-prologue" style="--i:0" data-start="0" data-duration="15" data-track-index="1">
+      <section id="slide-01" class="clip slide no-image with-blocks chapter-prologue" style="--i:0" data-motion="focus" data-start="0" data-duration="15" data-track-index="1">
         <div class="bg bg-generated" data-layout-allow-overflow=""></div>
         <div class="shade"></div>
         <div class="content">
@@ -271,95 +334,101 @@
         <div class="progress">03 / 10</div>
       </section>
 
-      <section id="slide-04" class="clip slide no-image with-blocks chapter-findings" style="--i:3" data-start="58.7" data-duration="21.2" data-track-index="4">
+      <section id="slide-04" class="clip slide no-image with-blocks chapter-findings" style="--i:3" data-motion="reveal" data-start="58.7" data-duration="21.2" data-track-index="4">
         <div class="bg bg-generated" data-layout-allow-overflow=""></div>
         <div class="shade"></div>
         <div class="content">
           <div class="eyebrow">findings</div>
           <h1>量到的第一件事：語速</h1>
           <div class="blocks">
-            <div class="block metrics" style="--n:3">
-              <div class="metric">
-                <div class="label">Edge-TTS 語速</div>
-                <div class="value">4.42</div>
-                <div class="note">拍／秒（中文字算一拍）</div>
+            <p class="block lead">同一份稿子，八段加起來差了二十點七秒。</p>
+            <figure class="block chart chart-bar">
+              <div class="row">
+                <div class="rl">Edge-TTS</div>
+                <div class="rt"><i class="rf" style="--p:0.8475"></i></div>
+                <div class="rv">4.42<span class="ru">拍／秒</span></div>
               </div>
-              <div class="metric">
-                <div class="label">Kokoro 語速</div>
-                <div class="value">3.63</div>
-                <div class="note">同一組稿子，慢約 20%</div>
+              <div class="row">
+                <div class="rl">Kokoro-82M</div>
+                <div class="rt"><i class="rf" style="--p:0.6960"></i></div>
+                <div class="rv">3.63<span class="ru">拍／秒</span></div>
               </div>
-              <div class="metric">
-                <div class="label">八段總長差</div>
-                <div class="value">+20.7s</div>
-                <div class="note">101.5s 對 122.2s</div>
-              </div>
-            </div>
-            <p class="block source">量測：ffprobe 長度 ÷ 稿子拍數；完整表格見 data/measurements.json</p>
+              <figcaption>八段稿子的平均語速；tts-bakeoff-2026-08／data/measurements.json</figcaption>
+            </figure>
           </div>
         </div>
         <div class="caption">同一份稿子，Kokoro 慢了兩成。</div>
         <div class="progress">04 / 10</div>
       </section>
 
-      <section id="slide-05" class="clip slide no-image with-blocks chapter-findings" style="--i:4" data-start="79.9" data-duration="20.2" data-track-index="5">
+      <section id="slide-05" class="clip slide no-image with-blocks chapter-findings" style="--i:4" data-motion="reveal" data-start="79.9" data-duration="20.2" data-track-index="5">
         <div class="bg bg-generated" data-layout-allow-overflow=""></div>
         <div class="shade"></div>
         <div class="content">
           <div class="eyebrow">findings</div>
           <h1>量到的第二件事：它不換氣</h1>
           <div class="blocks">
-            <div class="block metrics" style="--n:2">
-              <div class="metric">
-                <div class="label">Edge 靜音佔比</div>
-                <div class="value">21%</div>
-                <div class="note">標點處留有換氣</div>
+            <p class="block lead">念得比較慢的那一個，反而幾乎不停頓。</p>
+            <figure class="block chart chart-bar">
+              <div class="row">
+                <div class="rl">Edge-TTS</div>
+                <div class="rt"><i class="rf" style="--p:0.8475"></i></div>
+                <div class="rv">21<span class="ru">%</span></div>
               </div>
-              <div class="metric">
-                <div class="label">Kokoro 靜音佔比</div>
-                <div class="value">7%</div>
-                <div class="note">念得慢，卻幾乎不停頓</div>
+              <div class="row" data-emphasis="">
+                <div class="rl">Kokoro-82M</div>
+                <div class="rt"><i class="rf" style="--p:0.2825"></i></div>
+                <div class="rv">7<span class="ru">%</span></div>
               </div>
-            </div>
-            <p class="block source">量測：ffmpeg silencedetect，門檻 −35 dB、最短 0.18 秒</p>
+              <figcaption>音檔中的靜音佔比；ffmpeg silencedetect（−35 dB／0.18 秒）</figcaption>
+            </figure>
           </div>
         </div>
         <div class="caption">靜音佔比 21% 對 7%：Edge 在標點處留下的停頓，Kokoro 大多沒有留。</div>
         <div class="progress">05 / 10</div>
       </section>
 
-      <section id="slide-06" class="clip slide no-image with-blocks chapter-findings" style="--i:5" data-start="100.1" data-duration="20" data-track-index="6">
+      <section id="slide-06" class="clip slide no-image with-blocks chapter-findings" style="--i:5" data-motion="reveal" data-start="100.1" data-duration="20" data-track-index="6">
         <div class="bg bg-generated" data-layout-allow-overflow=""></div>
         <div class="shade"></div>
         <div class="content">
           <div class="eyebrow">findings</div>
           <h1>量到的第三件事：拉丁縮寫</h1>
           <div class="blocks">
-            <div class="block metrics" style="--n:3">
-              <div class="metric">
-                <div class="label">Edge（第七段）</div>
-                <div class="value">3.97</div>
-                <div class="note">拍／秒</div>
+            <p class="block lead">八段稿子裡，有一段特別難念。</p>
+            <figure class="block chart chart-line">
+              <svg class="lines" viewBox="0 0 1560 300" aria-hidden="true">
+                <line class="grid" x1="0" y1="75.0" x2="1560" y2="75.0"/>
+                <line class="grid" x1="0" y1="150.0" x2="1560" y2="150.0"/>
+                <line class="grid" x1="0" y1="225.0" x2="1560" y2="225.0"/>
+                <polyline class="ln" data-i="0" pathLength="1" points="0.0,113.0 222.9,42.0 445.7,88.0 668.6,56.0 891.4,168.0 1114.3,151.0 1337.1,153.0 1560.0,97.0"/>
+                <circle class="dot" data-i="0" cx="1560.0" cy="97.0" r="7"/>
+                <polyline class="ln" data-i="1" pathLength="1" points="0.0,201.0 222.9,196.0 445.7,167.0 668.6,162.0 891.4,197.0 1114.3,164.0 1337.1,255.0 1560.0,150.0"/>
+                <circle class="dot" data-i="1" cx="1560.0" cy="150.0" r="7"/>
+              </svg>
+              <div class="linekey">
+                <span data-i="0"><i></i>Edge-TTS <b>4.53</b></span>
+                <span data-i="1"><i></i>Kokoro-82M <b>4.00</b></span>
               </div>
-              <div class="metric">
-                <div class="label">Kokoro（第七段）</div>
-                <div class="value">2.95</div>
-                <div class="note">同段落，慢了四分之一</div>
+              <div class="lineaxis">
+                <span>01</span>
+                <span>02</span>
+                <span>03</span>
+                <span>04</span>
+                <span>05</span>
+                <span>06</span>
+                <span>07</span>
+                <span>08</span>
               </div>
-              <div class="metric">
-                <div class="label">長度差</div>
-                <div class="value">+3.9s</div>
-                <div class="note">11.2s 對 15.1s</div>
-              </div>
-            </div>
-            <p class="block source">第七段稿子：Kokoro-82M 的權重採用 Apache 2.0，F5-TTS 的推理程式是 MIT⋯⋯</p>
+              <figcaption>逐段語速（拍／秒）；第七段是模型名與授權縮寫。tts-bakeoff-2026-08／data/measurements.json（縱軸自 2.5 起）</figcaption>
+            </figure>
           </div>
         </div>
         <div class="caption">遇到 Apache 2.0、CC-BY-NC、F5-TTS 這種詞，差距最大。</div>
         <div class="progress">06 / 10</div>
       </section>
 
-      <section id="slide-07" class="clip slide no-image with-blocks chapter-findings" style="--i:6" data-start="120.1" data-duration="25.9" data-track-index="7">
+      <section id="slide-07" class="clip slide no-image with-blocks chapter-findings" style="--i:6" data-motion="reveal" data-start="120.1" data-duration="25.9" data-track-index="7">
         <div class="bg bg-generated" data-layout-allow-overflow=""></div>
         <div class="shade"></div>
         <div class="content">
@@ -390,7 +459,7 @@
         <div class="progress">07 / 10</div>
       </section>
 
-      <section id="slide-08" class="clip slide no-image with-blocks chapter-limits" style="--i:7" data-start="146" data-duration="19.3" data-track-index="8">
+      <section id="slide-08" class="clip slide no-image with-blocks chapter-limits" style="--i:7" data-motion="focus" data-start="146" data-duration="19.3" data-track-index="8">
         <div class="bg bg-generated" data-layout-allow-overflow=""></div>
         <div class="shade"></div>
         <div class="content">
@@ -427,7 +496,7 @@
         <div class="progress">09 / 10</div>
       </section>
 
-      <section id="slide-10" class="clip slide no-image with-blocks chapter-outro" style="--i:9" data-start="192.7" data-duration="17.8" data-track-index="10">
+      <section id="slide-10" class="clip slide no-image with-blocks chapter-outro" style="--i:9" data-motion="focus" data-start="192.7" data-duration="17.8" data-track-index="10">
         <div class="bg bg-generated" data-layout-allow-overflow=""></div>
         <div class="shade"></div>
         <div class="content">
@@ -461,21 +530,44 @@
     <script>
       // Per-slide entrance motion. Positions come from the DOM (data-start), so `hf sync`
       // only has to rewrite attributes and this script never drifts from the timeline.
+      //
+      // A slide may pick a motion with data-motion (emitted by `hf html` from the
+      // storyboard). Four is the whole vocabulary on purpose: a rhythm that needs a
+      // legend is a design system, not a rhythm.
+      //   rise   — the default arrival
+      //   hold   — background only; the text is already on screen (continuing a thought)
+      //   focus  — a slow push-in, the title lands late (chapter openings, closings)
+      //   reveal — the evidence arrives after the sentence that sets it up (findings)
       window.__timelines = window.__timelines || {};
       const tl = gsap.timeline({ paused: true });
       const addIfFound = (selector, vars, position) => {
         const targets = document.querySelectorAll(selector);
         if (targets.length > 0) tl.from(targets, vars, position);
       };
+      const MOTION = {
+        rise:   { bgScale: 1.055, bgDur: 1.35, text: 0.20, blocks: 0.72, chart: 1.00, cap: 0.90 },
+        hold:   { bgScale: 1.020, bgDur: 0.90, text: null, blocks: null, chart: 0.40, cap: 0.30 },
+        focus:  { bgScale: 1.120, bgDur: 3.00, text: 0.50, blocks: 1.20, chart: 1.50, cap: 1.40 },
+        reveal: { bgScale: 1.030, bgDur: 1.10, text: 0.15, blocks: 1.10, chart: 1.40, cap: 0.70 },
+      };
       document.querySelectorAll("#root > .slide").forEach((slide) => {
         const start = Number(slide.dataset.start || 0);
+        const m = MOTION[slide.dataset.motion] || MOTION.rise;
         const s = `#${slide.id}`;
-        addIfFound(`${s} .bg`, { scale: 1.055, opacity: 0.84, duration: 1.35, ease: "power2.out" }, start);
-        addIfFound(`${s} .eyebrow`, { opacity: 0, y: 16, duration: 0.52, ease: "power2.out" }, start + 0.2);
-        addIfFound(`${s} h1`, { opacity: 0, y: 34, duration: 0.78, ease: "power2.out" }, start + 0.36);
-        addIfFound(`${s} .progress`, { opacity: 0, y: 12, duration: 0.5, ease: "power2.out" }, start + 0.6);
-        addIfFound(`${s} .blocks > *`, { opacity: 0, y: 26, duration: 0.7, stagger: 0.12, ease: "power2.out" }, start + 0.72);
-        addIfFound(`${s} .caption`, { opacity: 0, y: 30, duration: 0.66, ease: "power2.out" }, start + 0.9);
+        addIfFound(`${s} .bg`, { scale: m.bgScale, opacity: 0.84, duration: m.bgDur, ease: "power2.out" }, start);
+        if (m.text !== null) {
+          addIfFound(`${s} .eyebrow`, { opacity: 0, y: 16, duration: 0.52, ease: "power2.out" }, start + m.text);
+          addIfFound(`${s} h1`, { opacity: 0, y: 34, duration: 0.78, ease: "power2.out" }, start + m.text + 0.16);
+          addIfFound(`${s} .progress`, { opacity: 0, y: 12, duration: 0.5, ease: "power2.out" }, start + m.text + 0.4);
+        }
+        if (m.blocks !== null) addIfFound(`${s} .blocks > *`, { opacity: 0, y: 26, duration: 0.7, stagger: 0.12, ease: "power2.out" }, start + m.blocks);
+        // charts draw themselves in: bars and splits grow by transform, lines draw along
+        // pathLength="1" — all seek-safe, none of them re-layout a frame.
+        addIfFound(`${s} .chart-bar .rf`, { scaleX: 0, duration: 0.9, stagger: 0.1, ease: "power2.out" }, start + m.chart);
+        addIfFound(`${s} .chart-split .splitbar`, { scaleX: 0, duration: 0.9, ease: "power2.out" }, start + m.chart);
+        addIfFound(`${s} .chart-line .ln`, { strokeDashoffset: 1, duration: 1.2, stagger: 0.15, ease: "power1.inOut" }, start + m.chart);
+        addIfFound(`${s} .chart-line .dot`, { opacity: 0, duration: 0.4, ease: "power2.out" }, start + m.chart + 0.9);
+        addIfFound(`${s} .caption`, { opacity: 0, y: 30, duration: 0.66, ease: "power2.out" }, start + m.cap);
       });
       window.__timelines["main"] = tl;
     </script>

@@ -13,8 +13,16 @@
 | `list` | 步驟或清單（`ordered: true` 可編號） | 2–5 個 item |
 | `quote` | 要占住畫面的一句話（可附 `source`） | 1 |
 | `source` | 頁尾來源註記 | 1 |
+| `chart` | 圖表：`bar`（2–6 項）、`split`（2–4 段）、`line`（1–2 條、每條 ≤12 點） | 1 |
 
-一頁最多三個 block；超過就拆頁。`hf audit` 會用同一組上限檢查（`block-density` / `block-shape` / `block-type`）。
+一頁最多三個 block；超過就拆頁。`hf audit` 會用同一組上限檢查（`block-density` / `block-shape` /
+`block-type` / `chart`）。
+
+圖表另有兩條規則：**每張圖必須有 `source`**（畫出來的比較比說出來的主張更強），而且**設了 `min`／`max`
+的圖會自動在 caption 上加註「（縱軸自 X 起）」**——截斷的座標軸不可能被悄悄使用。
+
+這個專案同時也是**動態語彙**的基準：八頁分別用了 `focus` / `rise` / `hold` / `reveal`，
+所以改動 template 的 timeline script 之後，用同一組 snapshot 就能看出哪一種到場方式壞掉了。
 
 ## 寫法
 
@@ -48,6 +56,6 @@ npm run review        # 產生人工審核包（自帶畫格與旁白，可離�
 `npm run check` 與 `npx hyperframes@0.8.6 snapshot --at 5,15,25,35,45`，逐頁比對就知道有沒有改壞。
 因此它的 `status` 雖然是 `ready-to-preview`，但除非要發布它的 render，人工 gate 可以先不做。
 
-實測（2026-08-22，hyperframes 0.8.6）：lint 0/0、runtime 0/0、layout 0 issues / 9 samples、motion 0/0、
-contrast **53/53 WCAG AA**。頁面上的每個數字都能在本 repo 裡驗證（`shared/tools/hf.mjs` 的
+實測（2026-08-22，hyperframes 0.8.6）：lint 0/0、runtime 0/0、layout 0 issues、motion 0/0、
+contrast **54/54 WCAG AA**。頁面上的每個數字都能在本 repo 裡驗證（`shared/tools/hf.mjs` 的
 `BLOCK_TYPES` / `BLOCK_LIMITS`），所以 `sourceConfidence` 是 `not-applicable`。

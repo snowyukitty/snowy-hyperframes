@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-08-21T19:12:41.018Z",
+  "generatedAt": "2026-08-22T01:49:40.730Z",
   "generator": "shared/tools/hf.mjs sync",
   "policy": "audio",
-  "padSeconds": 0.6,
-  "durationSeconds": 50,
+  "padSeconds": 1.2,
+  "durationSeconds": 81,
   "slides": [
     {
       "id": "slide-01",
@@ -39,6 +39,27 @@
       "duration": 10,
       "mp3Duration": 2.256,
       "storyboardTarget": 10
+    },
+    {
+      "id": "slide-06",
+      "start": 50,
+      "duration": 10,
+      "mp3Duration": 3.36,
+      "storyboardTarget": 10
+    },
+    {
+      "id": "slide-07",
+      "start": 60,
+      "duration": 10,
+      "mp3Duration": 2.064,
+      "storyboardTarget": 10
+    },
+    {
+      "id": "slide-08",
+      "start": 70,
+      "duration": 11,
+      "mp3Duration": 3.336,
+      "storyboardTarget": 11
     }
   ]
 }

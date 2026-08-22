@@ -1,6 +1,6 @@
 {
   "title": "Block Vocabulary Reference",
-  "targetDurationSeconds": 50,
+  "targetDurationSeconds": 81,
   "language": "zh-Hant",
   "voice": {
     "tool": "edge-tts",
@@ -47,7 +47,8 @@
           "type": "source",
           "text": "來源：shared/tools/hf.mjs 的 BLOCK_TYPES 與 BLOCK_LIMITS（本 repo 內可驗證）。"
         }
-      ]
+      ],
+      "motion": "focus"
     },
     {
       "id": "slide-02",
@@ -75,7 +76,8 @@
             }
           ]
         }
-      ]
+      ],
+      "motion": "rise"
     },
     {
       "id": "slide-03",
@@ -97,7 +99,8 @@
             "sync 回寫所有時間軸"
           ]
         }
-      ]
+      ],
+      "motion": "hold"
     },
     {
       "id": "slide-04",
@@ -117,7 +120,8 @@
           "type": "source",
           "text": "此規則來自 2026-06 的旁白截斷事故。"
         }
-      ]
+      ],
+      "motion": "rise"
     },
     {
       "id": "slide-05",
@@ -151,7 +155,124 @@
           "type": "source",
           "text": "來源：data/timeline.json（由 hf sync 產生）"
         }
-      ]
+      ],
+      "motion": "reveal"
+    },
+    {
+      "id": "slide-06",
+      "title": "chart · bar：讓比較用看的",
+      "chapter": "chart",
+      "durationTarget": 10,
+      "image": "",
+      "subtitle": "數量比較用 bar，二到六項；每一條都要標出數值。",
+      "narration": "比較用 bar 圖，一次二到六項。",
+      "blocks": [
+        {
+          "type": "chart",
+          "chart": "bar",
+          "unit": "拍／秒",
+          "items": [
+            {
+              "label": "Edge-TTS",
+              "value": 4.42
+            },
+            {
+              "label": "Kokoro-82M",
+              "value": 3.63
+            }
+          ],
+          "source": "claude/projects/tts-bakeoff-2026-08／data/measurements.json（本 repo 可驗證）"
+        }
+      ],
+      "motion": "reveal"
+    },
+    {
+      "id": "slide-07",
+      "title": "chart · split：讓比例占住畫面",
+      "chapter": "chart",
+      "durationTarget": 10,
+      "image": "",
+      "subtitle": "比例用 split，二到四段；每段直接寫上數字。",
+      "narration": "比例用 split 圖。",
+      "blocks": [
+        {
+          "type": "chart",
+          "chart": "split",
+          "items": [
+            {
+              "label": "旁白發聲",
+              "value": 79,
+              "display": "79%"
+            },
+            {
+              "label": "停頓與換氣",
+              "value": 21,
+              "display": "21%"
+            }
+          ],
+          "source": "Edge-TTS 十六段音檔的靜音佔比量測（ffmpeg silencedetect）"
+        }
+      ],
+      "motion": "reveal"
+    },
+    {
+      "id": "slide-08",
+      "title": "chart · line：讓趨勢自己說話",
+      "chapter": "chart",
+      "durationTarget": 11,
+      "image": "",
+      "subtitle": "趨勢用 line，一到兩條線、每條最多十二個點。",
+      "narration": "趨勢用 line 圖，最多兩條線。",
+      "blocks": [
+        {
+          "type": "chart",
+          "chart": "line",
+          "labels": [
+            "01",
+            "02",
+            "03",
+            "04",
+            "05",
+            "06",
+            "07",
+            "08"
+          ],
+          "series": [
+            {
+              "label": "Edge-TTS",
+              "last": "4.53",
+              "values": [
+                4.37,
+                5.08,
+                4.62,
+                4.94,
+                3.82,
+                3.99,
+                3.97,
+                4.53
+              ]
+            },
+            {
+              "label": "Kokoro-82M",
+              "last": "4.00",
+              "values": [
+                3.49,
+                3.54,
+                3.83,
+                3.88,
+                3.53,
+                3.86,
+                2.95,
+                4.0
+              ]
+            }
+          ],
+          "source": "八段稿子的逐段語速（拍／秒）；tts-bakeoff-2026-08／data/measurements.json",
+          "min": 2.5,
+          "max": 5.5
+        }
+      ],
+      "motion": "focus"
     }
   ]
 }

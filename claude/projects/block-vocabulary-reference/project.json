@@ -4,11 +4,11 @@
   "title": "Block Vocabulary Reference",
   "workflow": "claude",
   "createdAt": "2026-08-21T18:50:42.502Z",
-  "updatedAt": "2026-08-21T19:12:41.022Z",
+  "updatedAt": "2026-08-22T01:49:40.738Z",
   "status": "ready-to-preview",
   "format": "hyperframes-demo",
   "language": "zh-Hant",
-  "durationSeconds": 50,
+  "durationSeconds": 81,
   "sourceConfidence": "not-applicable",
   "tools": [
     "claude-code",
@@ -35,7 +35,7 @@
   },
   "timing": {
     "policy": "audio",
-    "padSeconds": 0.6,
+    "padSeconds": 1.2,
     "source": "data/timeline.json",
     "measured": "data/audio-durations.json"
   },
