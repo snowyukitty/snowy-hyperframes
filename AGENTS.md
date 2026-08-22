@@ -9,7 +9,7 @@ project is more specific than this file for that project only.
 [`shared/docs/design-v3.md`](shared/docs/design-v3.md) — the current milestone, spec'd with acceptance
 criteria · [`shared/docs/design-v2.md`](shared/docs/design-v2.md) §1 — the architecture contract
 (truth vs generated, timing policy, toolkit API, template DOM), still binding ·
-[`shared/docs/phase-summary-2026-08-22b.md`](shared/docs/phase-summary-2026-08-22b.md) — what the last
+[`shared/docs/phase-summary-2026-08-22c.md`](shared/docs/phase-summary-2026-08-22c.md) — what the last
 session built and verified.
 
 ## What this repository is

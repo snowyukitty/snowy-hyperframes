@@ -51,4 +51,4 @@ topics       hyperframes · html-to-video · video-generation · text-to-speech 
 - 三支影片停在 `ready-to-preview`（人工 gate 未做，見 `TODO.md`）。
 - TTS 盲測的方法與量測已公開，**自然度結論尚未存在**。
 
-接續點：[`TODO.md`](TODO.md) → `shared/docs/design-v3.md` → `shared/docs/phase-summary-2026-08-22b.md`。
+接續點：[`TODO.md`](TODO.md) → `shared/docs/design-v3.md` → `shared/docs/phase-summary-2026-08-22c.md`。

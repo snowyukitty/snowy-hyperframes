@@ -5,7 +5,7 @@ Supersedes `design-v2.md`, whose milestone is delivered. Intended reader: the ne
 
 Read in this order: `AGENTS.md` (rules) → `TODO.md` (what is open, and who owns it) → this file →
 `design-v2.md` §1 (the architecture contract, still authoritative) →
-`shared/docs/phase-summary-2026-08-22b.md` (what the last session actually did).
+`shared/docs/phase-summary-2026-08-22c.md` (what the last session actually did).
 
 ---
 
