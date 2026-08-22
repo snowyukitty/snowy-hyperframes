@@ -18,7 +18,7 @@ Repo health at this checkpoint: 8 projects · `hf audit --all` **0 errors** · `
 - [ ] **看過研究影片，決定是否通過** — 十頁、210.5 秒。
       審核包：<https://claude.ai/code/artifact/650ec078-5f03-4e5c-aa51-4f95f7e79bfd>
       本機同一份：`claude/projects/measurable-vs-audible-tts/review/index.html`
-      同上：`claude/projects/measurable-vs-audible-tts`。
+      通過後的處理與上一項相同（專案在 `claude/projects/measurable-vs-audible-tts`）。
 - [ ] **做 TTS 盲測聽測** — 八段稿子、Edge-TTS vs Kokoro，標籤與數據都藏到「揭曉」之後。
       聽測包：<https://claude.ai/code/artifact/08c1db61-79cd-4dea-a360-2b6beccd7f12>
       本機同一份：`claude/projects/tts-bakeoff-2026-08/bakeoff/index.html`
