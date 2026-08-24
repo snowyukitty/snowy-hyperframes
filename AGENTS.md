@@ -6,10 +6,10 @@ this file; the project-level `project.json` / `docs/runbook.md` inside a specifi
 project is more specific than this file for that project only.
 
 **Start here, in this order:** [`TODO.md`](TODO.md) — what is open and who owns it ·
-[`shared/docs/design-v3.md`](shared/docs/design-v3.md) — the current milestone, spec'd with acceptance
+[`shared/docs/design-v4.md`](shared/docs/design-v4.md) — the current milestone, spec'd with acceptance
 criteria · [`shared/docs/design-v2.md`](shared/docs/design-v2.md) §1 — the architecture contract
 (truth vs generated, timing policy, toolkit API, template DOM), still binding ·
-[`shared/docs/phase-summary-2026-08-22c.md`](shared/docs/phase-summary-2026-08-22c.md) — what the last
+[`shared/docs/phase-summary-2026-08-24.md`](shared/docs/phase-summary-2026-08-24.md) — what the last
 session built and verified.
 
 ## What this repository is
@@ -67,15 +67,15 @@ snowy-hyperframes/
 ```powershell
 npm run html          # (re)generate index.html slide/audio regions from the storyboard
 npm run pipeline      # prepare-tts -> tts (Edge-TTS) -> measure (ffprobe) -> sync -> audit
-npm run check         # hf audit + npx hyperframes@0.8.6 check   (0 errors required)
+npm run check         # hidden-window hf audit + hyperframes@0.8.11 check
 npm run review        # build the human gate kit (frames + narration, offline, shareable)
 npm run render        # only after a human has actually passed the gate
 ```
 
 Toolkit reference: `node shared/tools/hf.mjs help`. Commands: `new`, `html`,
-`prepare-tts`, `tts`, `measure`, `sync`, `fit-audio`, `vendor`, `review`, `audit [--all]`,
+`prepare-tts`, `tts`, `measure`, `sync`, `captions`, `fit-audio`, `vendor`, `review`, `check`, `audit [--all]`,
 `repo-check`, `pipeline`. Run `hf audit --all` and `hf repo-check` from the repo root
-before committing; CI runs the same two commands plus `hyperframes lint` per project.
+before committing; CI also runs the zero-dependency regression tests and `hyperframes check --strict` per project.
 
 ## Slide content
 
@@ -99,13 +99,14 @@ nothing about timing truth.
 ## HyperFrames version policy
 
 - Pin the CLI per project via `npx --yes hyperframes@<version>` in `package.json`; the
-  current line is **0.8.x** (`check` replaced `validate`/`inspect`/`layout`, which are
+  verified baseline is **0.8.11** (`check` replaced `validate`/`inspect`/`layout`, which are
   deprecated aliases — do not use them in new scripts).
 - `hyperframes.json` belongs to HyperFrames (registry/paths config). Snowy's slide
   manifest lives in `data/timeline.json` (generated) — never in `hyperframes.json`.
 - GSAP is loaded from `vendor/gsap.min.js` (`hf vendor`), not a CDN: on a slow link the
   CDN alone blew the 10 s navigation timeout inside `hyperframes check`.
-- Upgrade notes and empirical results: `shared/docs/hyperframes-0.8-upgrade-notes.md`.
+- Upgrade notes and empirical results: `shared/docs/hyperframes-0.8-upgrade-notes.md` and
+  `shared/docs/phase-summary-2026-08-24.md`.
 
 ## Conventions
 

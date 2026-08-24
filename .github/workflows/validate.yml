@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   audit:
-    name: hf audit / repo-check / hyperframes lint
+    name: contracts / audit / HyperFrames browser gate
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -24,20 +24,23 @@ jobs:
       - name: Install ffmpeg (ffprobe measures narration MP3 lengths)
         run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
 
+      - name: Toolkit regression contracts (zero dependencies)
+        run: node --test shared/tests/hf.test.mjs
+
       - name: Publication guard (allowlist, secrets, file sizes)
         run: node shared/tools/hf.mjs repo-check
 
       - name: Structural / schema / timing audit of every tracked project
         run: node shared/tools/hf.mjs audit --all
 
-      - name: HyperFrames lint (static, no browser) for every composition project
+      - name: HyperFrames strict browser gate for every composition project
         run: |
           set -e
           for p in */projects/*/; do
-            # audio-research projects (e.g. a TTS bakeoff) have no composition to lint
+            # Audio-research projects (e.g. a TTS bakeoff) have no composition to check.
             if [ -f "$p/project.json" ] && [ -f "$p/index.html" ]; then
-              echo "::group::hyperframes lint $p"
-              (cd "$p" && npx --yes hyperframes@0.8.6 lint)
+              echo "::group::hyperframes check $p"
+              (cd "$p" && npm run check -- --strict)
               echo "::endgroup::"
             else
               echo "skip (no composition): $p"

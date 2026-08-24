@@ -4,10 +4,10 @@
 
 這個根目錄用來管理多條 HyperFrames 產製工作流。每條 workflow 都有自己的 `projects/`，每個具體影片或簡報專案都放在對應 workflow 的 `projects/<project-name>/`。
 
-> **2026-08-22 — Workflow v2.** 新增共用工具鏈 `shared/tools/hf.mjs`（storyboard → TTS → 量測 → 同步 → 檢查，一條指令可重跑）、
-> 第四條 workflow `claude/`、可直接 render 的 template、HyperFrames 0.8.6 升級、CI 與 `AGENTS.md`。
-> 待辦看板：[`TODO.md`](TODO.md)；設計文件（下一個里程碑的規格與驗收）：`shared/docs/design-v3.md`；
-> 架構契約：`shared/docs/design-v2.md` §1；接續點：`shared/docs/phase-summary-2026-08-22c.md`；
+> **2026-08-24 — Workflow v4 foundation.** 共用工具鏈 `shared/tools/hf.mjs`（storyboard → TTS → 量測 → 同步 → 檢查）現在有
+> zero-dependency regression tests、hidden-window `hf check`、semantic audio groups，以及全部專案實測通過的 HyperFrames 0.8.11 baseline。
+> 待辦看板：[`TODO.md`](TODO.md)；設計文件（下一個里程碑的規格與驗收）：`shared/docs/design-v4.md`；
+> 架構契約：`shared/docs/design-v2.md` §1；接續點：`shared/docs/phase-summary-2026-08-24.md`；
 > 升級實測：`shared/docs/hyperframes-0.8-upgrade-notes.md`。
 >
 > **English summary.** A public, research-grade record of AI-assisted research-to-video production on
@@ -86,7 +86,7 @@ claude/projects/storyboard-to-video-pipeline-demo  管線自述 demo
 claude/projects/tts-bakeoff-2026-08                盲測 harness 與量測（16 段音檔可重生，未進 git）
 ```
 
-完成狀態：三支影片的 `hyperframes@0.8.6 check` 皆 0 error（文字對比度全數通過 WCAG AA），皆已 smoke render；
+完成狀態：七個 composition 的 `hyperframes@0.8.11 check --strict` 皆通過（文字對比度全數通過 WCAG AA）；三支 modern 影片皆已 smoke render；
 **人工 preview 待做**（`ready-to-preview`）。TTS 盲測聽測包已產生，自然度結論待人工聽測。
 
 ## Naming Convention
@@ -180,7 +180,7 @@ shared/docs/local-tts-no-api-key-strategy.md
 目前階段性收尾與下次 wake up 接續點：
 
 ```text
-shared/docs/phase-summary-2026-08-22.md
+shared/docs/phase-summary-2026-08-24.md
 ```
 
 HyperFrames 0.6 → 0.8 升級實測與注意事項：
@@ -203,7 +203,7 @@ shared/docs/repo-publication-policy.md
 
 ## Public Demo Policy
 
-目前測試 project 可作為 demo / reference 上傳到 GitHub，包含圖片、MP3、字幕、HTML、metadata 與 MP4：
+目前 8 個 allowlisted project 可作為 demo / reference 上傳到 GitHub；新 render 仍只放 Releases：
 
 ```text
 codex/projects/ai-tool-cost-benchmark
@@ -211,6 +211,9 @@ codex/projects/ai-2030-three-futures
 codex-pi/projects/gpt-image-2-quota-research
 pi/projects/latest-tts-voice-clone-research
 claude/projects/storyboard-to-video-pipeline-demo
+claude/projects/block-vocabulary-reference
+claude/projects/measurable-vs-audible-tts
+claude/projects/tts-bakeoff-2026-08
 ```
 
 新的 render（MP4）不再進 git；四支 2026-06 的 demo MP4 保留在歷史中，之後的成片放 GitHub Releases。
@@ -219,7 +222,7 @@ claude/projects/storyboard-to-video-pipeline-demo
 
 ## Recommended Project Checks
 
-在任一具體 HyperFrames 專案內（`check` = `hf audit` + `npx hyperframes@0.8.6 check`，含音訊截斷風險檢查）：
+在任一具體 HyperFrames 專案內（`check` = hidden-window `hf audit` + `hyperframes@0.8.11 check`，含音訊截斷風險檢查）：
 
 ```powershell
 npm run check

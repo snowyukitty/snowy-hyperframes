@@ -1,12 +1,12 @@
 # Repository Publication Policy
 
-更新日期：2026-06-02
+更新日期：2026-08-24
 
 本 repo 的目標是公開 Snowy HyperFrames 的工作流、教育材料、工具使用方式、踩坑經驗、模板、schema 與可公開 demo。它不是所有未來影片專案的公開存放區。
 
 ## 1. 可以提交到 GitHub 的內容
 
-目前已測試的 demo / reference projects 可以公開提交，包含它們的圖片、MP3、字幕、HyperFrames files、metadata、docs 和 MP4：
+目前已測試的 demo / reference projects 可以公開提交其 allowlisted source artifacts；新的 MP4 只放 Releases：
 
 ```text
 codex/projects/ai-tool-cost-benchmark/
@@ -61,7 +61,7 @@ docs-github-update.md
 - `codex-pi/projects/*` 預設忽略。
 - `pi/projects/*` 預設忽略。
 - `claude/projects/*` 預設忽略。
-- 只有目前五個 demo project 被明確 allowlist；`node shared/tools/hf.mjs repo-check` 會驗證 tracked 檔案都在 allowlist 內。
+- 只有目前 8 個 demo / reference project 被明確 allowlist；`node shared/tools/hf.mjs repo-check` 會驗證 tracked 檔案都在 allowlist 內。
 
 未來若要公開新的教育 demo，先完成以下 review，再把該 project 加入 `.gitignore` allowlist：
 

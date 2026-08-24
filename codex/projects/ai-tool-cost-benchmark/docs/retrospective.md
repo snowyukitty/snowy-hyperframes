@@ -39,3 +39,10 @@ Result:
 0 lint errors, 0 lint warnings, 0 layout issues.
 Chrome AudioContext validation warning only.
 ```
+
+## 2026-08-24 maintenance
+
+- Upgraded the project pin from the 0.8.6 maintenance baseline to HyperFrames 0.8.11; `npm run check` now uses the hidden-window shared wrapper.
+- The newer layout audit found the final slide's source note behind its expanded caption. Moving the note from `bottom: 184px` to `232px` gives it a separate readable zone.
+- Verification: an explicit check at 190.02 s reports 0 layout issues; the full strict gate passes with 76/76 contrast checks.
+- The project was not rendered and no human approval state changed.

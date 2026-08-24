@@ -4,7 +4,7 @@
   "title": "Block Vocabulary Reference",
   "workflow": "claude",
   "createdAt": "2026-08-21T18:50:42.502Z",
-  "updatedAt": "2026-08-22T01:49:40.738Z",
+  "updatedAt": "2026-08-23T21:15:21.518Z",
   "status": "ready-to-preview",
   "format": "hyperframes-demo",
   "language": "zh-Hant",
@@ -13,7 +13,7 @@
   "tools": [
     "claude-code",
     "shared/tools/hf.mjs",
-    "hyperframes@0.8.6",
+    "hyperframes@0.8.11",
     "edge-tts",
     "ffprobe"
   ],
@@ -35,13 +35,13 @@
   },
   "timing": {
     "policy": "audio",
-    "padSeconds": 1.2,
+    "padSeconds": 0.6,
     "source": "data/timeline.json",
     "measured": "data/audio-durations.json"
   },
   "checks": {
     "hfAudit": "pass",
-    "hyperframesCheck": "pass (0.8.6: lint 0/0, runtime 0/0, layout 0, motion 0, contrast 53/53)",
+    "hyperframesCheck": "pass (0.8.11 strict: lint 0/0, runtime 0/0, layout 0, motion 0, contrast 54/54)",
     "humanPreview": "pending"
   }
 }

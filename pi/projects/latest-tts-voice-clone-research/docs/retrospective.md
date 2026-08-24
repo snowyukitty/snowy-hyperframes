@@ -548,3 +548,11 @@ For HyperFrames projects, `dev` should mean HyperFrames Studio preview, not a ge
 - `data/pronunciation-map.json` 轉成 shared schema 形狀（`rules[]` → `entries[]`，`matchType: regex`），規則不變。
 - `package.json` 升級 `hyperframes@0.8.6`；`check` = `hf audit` + `hyperframes check`；`vendor/gsap.min.js` 取代 CDN；audio slot 以 `hf fit-audio` 對齊 MP3 實長（slide 視窗不變）。
 - 實測：`npx hyperframes@0.8.6 check` → lint 0/0、runtime 0/0、contrast 75/75 WCAG AA，Check passed。
+
+## 2026-08-24 maintenance
+
+- Upgraded the active CLI pin to HyperFrames 0.8.11 and routed `npm run check` through the hidden-window shared wrapper.
+- Changed the header and main canvas from normal-flow stacking to absolute composition layers. The previous `main { height: 100% }` began below the header and painted most slides 42 px beyond the canvas.
+- Compacted the legacy GSAP slide table below the 0.8.11 composition-size lint threshold. The shared patcher now supports both two-field and three-field legacy rows, with a regression test.
+- Verification: `hf audit` 0 errors / 0 warnings; `hyperframes check --strict` passed with lint, runtime, layout, and motion at 0 findings and 75/75 contrast checks passing.
+- The existing historical render was not repeated.

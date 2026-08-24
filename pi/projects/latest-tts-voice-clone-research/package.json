@@ -3,18 +3,18 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "check": "node ../../../shared/tools/hf.mjs audit && npx --yes hyperframes@0.8.6 check",
-    "dev": "npx --yes hyperframes@0.8.6 preview . --port 3002",
-    "render": "npx --yes hyperframes@0.8.6 render . --output renders/latest-tts-voice-clone-research-nocut.mp4",
+    "check": "node ../../../shared/tools/hf.mjs check",
+    "dev": "npx --yes hyperframes@0.8.11 preview . --port 3002",
+    "render": "npx --yes hyperframes@0.8.11 render . --output renders/latest-tts-voice-clone-research-nocut.mp4",
     "audio:audit": "node ../../../shared/tools/hf.mjs audit",
-    "preview": "npx --yes hyperframes@0.8.6 preview . --port 3002",
-    "preview:no-open": "npx --yes hyperframes@0.8.6 preview . --port 3002 --no-open",
+    "preview": "npx --yes hyperframes@0.8.11 preview . --port 3002",
+    "preview:no-open": "npx --yes hyperframes@0.8.11 preview . --port 3002 --no-open",
     "serve:static": "node scripts/dev-server.js",
-    "lint": "npx --yes hyperframes@0.8.6 lint",
+    "lint": "npx --yes hyperframes@0.8.11 lint",
     "audit": "node ../../../shared/tools/hf.mjs audit",
     "fit-audio": "node ../../../shared/tools/hf.mjs fit-audio",
     "vendor": "node ../../../shared/tools/hf.mjs vendor",
-    "doctor": "npx --yes hyperframes@0.8.6 doctor"
+    "doctor": "npx --yes hyperframes@0.8.11 doctor"
   },
   "devDependencies": {}
 }

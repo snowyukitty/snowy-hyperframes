@@ -12,6 +12,6 @@ node shared/tools/hf.mjs audit --all   # every project, CI-equivalent, no browse
 node shared/tools/hf.mjs repo-check    # publication guard
 ```
 
-Open board: `TODO.md` · Current design of record: `shared/docs/design-v3.md` ·
+Open board: `TODO.md` · Current design of record: `shared/docs/design-v4.md` ·
 Architecture contract: `shared/docs/design-v2.md` §1 · Latest phase summary:
-`shared/docs/phase-summary-2026-08-22c.md`.
+`shared/docs/phase-summary-2026-08-24.md`.

@@ -39,3 +39,10 @@
   不代表發布品質。聽過旁白、看過 preview 後才應把 status 改為 `rendered`。
 - 沒有 BGM、沒有轉場（刻意，為了保持 demo 最小）。
 - `docs/storyboard.md` 沒有另外寫：storyboard.json 已是唯一來源；若要給人讀，可由它產生。
+
+## 2026-08-24 maintenance
+
+- Upgraded the project pin to HyperFrames 0.8.11 and moved `npm run check` behind the hidden-window `hf check` wrapper.
+- Regenerated slide/audio regions; every narration clip now belongs to the stable `voiceover` audio group.
+- Verification: `hf audit` 0 errors / 0 warnings; `hyperframes check --strict` passed with lint, runtime, layout, and motion at 0 findings and 18/18 contrast checks passing.
+- No render or human listening gate was performed; status remains `ready-to-preview`.

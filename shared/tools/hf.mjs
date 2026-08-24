@@ -22,6 +22,7 @@
  *   vendor                  copy shared/vendor/gsap.min.js into ./vendor and point index.html at it (no CDN at render)
  *   review [--artifact]     build the human preview gate: one self-contained HTML with a frame + the real
  *                           narration per slide, per-slide verdicts, and a paste-ready approval summary
+ *   check [HyperFrames flags]   hf audit -> pinned HyperFrames browser gate, with child windows hidden
  *   audit [--all] [--json]  structural + schema + timing + audio-cut-risk checks (CI-safe, no browser)
  *   bakeoff [--only id] [--force] [--no-kit]
  *                           TTS provider comparison: same golden samples through every engine,
@@ -215,9 +216,13 @@ function validateSchema(schema, data, where = "$", out = []) {
 // ---------------------------------------------------------------------------
 function run(cmd, args, opts = {}) {
   // args === undefined means cmd is a full command line (used with shell:true)
+  // On Windows, Node otherwise gives short-lived console windows to helpers such as
+  // ffprobe, Edge-TTS, FFmpeg, and npx. A pipeline can launch dozens of them, so keep
+  // every non-interactive child hidden unless a caller explicitly opts out.
+  const spawnOpts = { encoding: "utf8", windowsHide: true, ...opts };
   const r = args === undefined
-    ? spawnSync(cmd, { encoding: "utf8", ...opts })
-    : spawnSync(cmd, args, { encoding: "utf8", shell: false, ...opts });
+    ? spawnSync(cmd, spawnOpts)
+    : spawnSync(cmd, args, { ...spawnOpts, shell: false });
   return { ok: r.status === 0, status: r.status, stdout: r.stdout || "", stderr: r.stderr || "", error: r.error };
 }
 function ffprobeDuration(file) {
@@ -266,10 +271,11 @@ function patchRootDuration(html, total) {
   return { html: html.slice(0, m.index) + tag + html.slice(m.index + m[0].length), found: true };
 }
 function patchGsapStartArray(html, timeline) {
-  // legacy demos keep `["#slide-03", 40.1],` arrays; refresh them if present
+  // Legacy demos keep `["#slide-03", 40.1]` or `["#slide-03", 40.1, 12]`
+  // arrays; refresh the first numeric field (start) without touching duration.
   let n = 0;
   for (const s of timeline) {
-    const re = new RegExp(`(\\["#${s.id}",\\s*)([0-9.]+)(\\s*\\])`, "g");
+    const re = new RegExp(`(\\["#${s.id}",\\s*)([0-9.]+)(\\s*,)`, "g");
     html = html.replace(re, (_, a, __, c) => {
       n++;
       return `${a}${s.start}${c}`;
@@ -370,7 +376,10 @@ function splitDisplayCues(text, maxChars) {
     else if (CUE_SOFT_BREAK.test(chars[i]) && len >= Math.ceil(maxChars * 0.55)) flush();
     // never cut through an identifier like index.html or project.json
     else if (len >= maxChars && !/[A-Za-z0-9._-]/.test(next)) flush();
-    else if (len >= Math.ceil(maxChars * 1.6)) flush();
+    // The emergency length ceiling must obey the same identifier boundary as the
+    // normal ceiling. Otherwise a long token such as project.json is split even
+    // though the comment and caption contract explicitly promise it will not be.
+    else if (len >= Math.ceil(maxChars * 1.6) && !/[A-Za-z0-9._-]/.test(next)) flush();
   }
   flush();
   return cues;
@@ -592,14 +601,19 @@ function renderChart(b, pad) {
     const span = hi - lo || 1;
     const W = 1560;
     const H = 300;
+    // Keep endpoint dots fully inside the SVG viewport. HyperFrames 0.8.11's
+    // container audit correctly caught the old last point (cx=W, r=7) being
+    // clipped by 7 px; the inset also protects values at an explicit min/max.
+    const inset = 10;
     out.push(`${pad}  <svg class="lines" viewBox="0 0 ${W} ${H}" aria-hidden="true">`);
     for (let g = 1; g <= 3; g++) out.push(`${pad}    <line class="grid" x1="0" y1="${((H / 4) * g).toFixed(1)}" x2="${W}" y2="${((H / 4) * g).toFixed(1)}"/>`);
     for (const [si, s] of series.entries()) {
       const vals = (s.values || []).map(num).filter(Number.isFinite);
       if (vals.length < 2) continue;
       const pts = vals.map((v, i) => {
-        const x = (i / (vals.length - 1)) * W;
-        const y = H - ((v - lo) / span) * H;
+        const x = inset + (i / (vals.length - 1)) * (W - inset * 2);
+        const ratio = Math.max(0, Math.min(1, (v - lo) / span));
+        const y = H - inset - ratio * (H - inset * 2);
         return `${x.toFixed(1)},${y.toFixed(1)}`;
       });
       out.push(`${pad}    <polyline class="ln" data-i="${si}" pathLength="1" points="${pts.join(" ")}"/>`);
@@ -687,7 +701,7 @@ function renderBlocks(blocks, pad = "          ") {
 function renderAudioRegion(timeline, music) {
   const lines = timeline.map(
     (s, i) =>
-      `      <audio id="audio-${s.id}" class="clip narration-audio" data-start="${s.start}" data-duration="${audioSlot(s)}" data-track-index="${20 + i}" src="assets/audio/${s.id}.mp3"></audio>`
+      `      <audio id="audio-${s.id}" class="clip narration-audio" data-audio-group="voiceover" data-start="${s.start}" data-duration="${audioSlot(s)}" data-track-index="${20 + i}" src="assets/audio/${s.id}.mp3"></audio>`
   );
   // Optional music bed on its own track, under every narration clip. Sourcing a track is out of
   // scope for this toolkit (bring a file you have the rights to, or use upstream /media-use);
@@ -696,7 +710,7 @@ function renderAudioRegion(timeline, music) {
     const total = timeline.length ? round1(timeline[timeline.length - 1].start + timeline[timeline.length - 1].duration) : 0;
     const vol = music.volume === undefined ? 0.14 : Number(music.volume);
     lines.unshift(
-      `      <audio id="bgm" class="clip music-bed" data-start="0" data-duration="${total}" data-track-index="19" data-volume="${vol}" src="${esc(music.file)}"></audio>`
+      `      <audio id="bgm" class="clip music-bed" data-audio-group="music" data-start="0" data-duration="${total}" data-track-index="19" data-volume="${vol}" src="${esc(music.file)}"></audio>`
     );
   }
   return `${HF_AUDIO_START}\n${lines.join("\n")}\n      ${HF_AUDIO_END}`;
@@ -714,18 +728,14 @@ function renderSlidesRegion(timeline, slides) {
     const bg = s.image
       ? `        <img class="bg" data-layout-allow-overflow="" src="${esc(s.image)}" alt="">`
       : `        <div class="bg bg-generated" data-layout-allow-overflow=""></div>` + (blocks.length ? "" : `\n${ring}`);
+    // Generated regions are intentionally compact: the storyboard is the readable
+    // source, while keeping the entry composition below HyperFrames' large-file lint
+    // threshold makes the surrounding hand-authored CSS/JS easier to inspect.
+    const eyebrow = s.chapter ? esc(s.chapter) : String(i + 1).padStart(2, "0");
     return [
-      `      <section id="${t.id}" class="clip slide${s.image ? "" : " no-image"}${blocks.length ? " with-blocks" : ""}${chapterClass}" style="--i:${i}"${s.motion ? ` data-motion="${esc(s.motion)}"` : ""} data-start="${t.start}" data-duration="${t.duration}" data-track-index="${i + 1}">`,
-      bg,
-      `        <div class="shade"></div>`,
-      `        <div class="content">`,
-      s.chapter ? `          <div class="eyebrow">${esc(s.chapter)}</div>` : `          <div class="eyebrow">${String(i + 1).padStart(2, "0")}</div>`,
-      `          <h1>${esc(s.title)}</h1>`,
+      `      <section id="${t.id}" class="clip slide${s.image ? "" : " no-image"}${blocks.length ? " with-blocks" : ""}${chapterClass}" style="--i:${i}"${s.motion ? ` data-motion="${esc(s.motion)}"` : ""} data-start="${t.start}" data-duration="${t.duration}" data-track-index="${i + 1}">${bg.trim()}<div class="shade"></div><div class="content"><div class="eyebrow">${eyebrow}</div><h1>${esc(s.title)}</h1>`,
       blocks.length ? `          <div class="blocks">\n${renderBlocks(blocks, "            ")}\n          </div>` : null,
-      `        </div>`,
-      `        <div class="caption">${esc(s.subtitle || "")}</div>`,
-      `        <div class="progress">${String(i + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}</div>`,
-      `      </section>`,
+      `        </div><div class="caption">${esc(s.subtitle || "")}</div><div class="progress">${String(i + 1).padStart(2, "0")} / ${String(total).padStart(2, "0")}</div></section>`,
     ]
       .filter(Boolean)
       .join("\n");
@@ -1120,6 +1130,10 @@ function auditProject(projectRoot, repo) {
         if (!(b.source || "").trim()) E("chart", `${s.id}: a ${kind} chart has no source; every drawn comparison must be attributable`);
         const lim = CHART_LIMITS[kind];
         if (kind === "line") {
+          if (b.min !== undefined && !Number.isFinite(num(b.min))) E("chart", `${s.id}: line chart min must be numeric`);
+          if (b.max !== undefined && !Number.isFinite(num(b.max))) E("chart", `${s.id}: line chart max must be numeric`);
+          if (Number.isFinite(num(b.min)) && Number.isFinite(num(b.max)) && num(b.min) >= num(b.max))
+            E("chart", `${s.id}: line chart min ${b.min} must be below max ${b.max}`);
           const series = Array.isArray(b.series) ? b.series : [];
           if (series.length < lim[0] || series.length > lim[1]) W("block-density", `${s.id}: line chart has ${series.length} series; ${lim[0]}-${lim[1]} stays readable`);
           for (const ser of series) {
@@ -1129,6 +1143,8 @@ function auditProject(projectRoot, repo) {
             if (vals.length > LINE_MAX_POINTS) W("block-density", `${s.id}: line series has ${vals.length} points; over ${LINE_MAX_POINTS} is unreadable at 1080p`);
           }
         } else {
+          if (kind === "bar" && b.max !== undefined && !(Number.isFinite(num(b.max)) && num(b.max) > 0))
+            E("chart", `${s.id}: bar chart max must be a positive number`);
           const its = Array.isArray(b.items) ? b.items : [];
           if (its.length < lim[0] || its.length > lim[1]) W("block-density", `${s.id}: ${kind} chart has ${its.length} item(s); ${lim[0]}-${lim[1]} stays readable`);
           for (const it of its) {
@@ -1172,6 +1188,20 @@ function auditProject(projectRoot, repo) {
       } catch (e) {
         E("block-type", String(e.message || e));
       }
+    }
+    // Modern projects group every narration clip as one voiceover bus. HyperFrames
+    // 0.8.11 can then carve a future music bed against the stable group instead of a
+    // brittle list of slide ids. Keep legacy demos untouched; markers identify output
+    // owned by this generator.
+    const audioRegion = regionOf(html, HF_AUDIO_START, HF_AUDIO_END);
+    if (audioRegion !== null) {
+      const audioTags = audioRegion.match(/<audio\b[^>]*>/g) || [];
+      const narration = audioTags.filter((tag) => /\bid="audio-slide-[^"]+"/.test(tag));
+      const ungrouped = narration.filter((tag) => !/\bdata-audio-group="voiceover"/.test(tag));
+      if (ungrouped.length)
+        W("audio-group", `${ungrouped.length} narration clip(s) are not in data-audio-group="voiceover" — run \`hf html\` then \`hf sync\``);
+      const bgm = audioTags.find((tag) => /\bid="bgm"/.test(tag));
+      if (bgm && !/\bdata-audio-group="music"/.test(bgm)) W("audio-group", `the music bed is not in data-audio-group="music" — run \`hf html\` then \`hf sync\``);
     }
     const timing = parseTimingFromHtml(html, ids);
     let prevEnd = 0;
@@ -1786,7 +1816,7 @@ function hfPin(projectRoot) {
     const m = /hyperframes@([0-9][\w.-]*)/.exec(readText(pk));
     if (m) return m[1];
   }
-  return "0.8.6";
+  return "0.8.11";
 }
 function dataUri(file, mime) {
   return `data:${mime};base64,${fs.readFileSync(file).toString("base64")}`;
@@ -2295,8 +2325,40 @@ function cmdPipeline() {
 }
 
 // ---------------------------------------------------------------------------
+// COMMAND: check
+// ---------------------------------------------------------------------------
+// Keep the required static -> browser gate behind the same hidden subprocess
+// boundary as ffprobe/TTS. This prevents npm/npx/Chrome helper consoles from
+// flashing across the user's desktop during a non-interactive verification run.
+function cmdCheck() {
+  const projectRoot = findProjectRoot();
+  const repo = repoRootOrDie(projectRoot);
+  const findings = auditProject(projectRoot, repo);
+  const errors = printFindings(rel(repo, projectRoot), findings);
+  if (errors) process.exit(1);
+
+  // Forward HyperFrames check flags while consuming hf's own project selector.
+  const tail = process.argv.slice(3);
+  const forwarded = [];
+  for (let i = 0; i < tail.length; i++) {
+    if (tail[i] === "--project") {
+      i++;
+      continue;
+    }
+    if (tail[i].startsWith("--project=")) continue;
+    forwarded.push(tail[i]);
+  }
+  const r = runNpx(["--yes", `hyperframes@${hfPin(projectRoot)}`, "check", ...forwarded], { cwd: projectRoot });
+  if (r.stdout) process.stdout.write(r.stdout);
+  if (r.stderr) process.stderr.write(r.stderr);
+  if (!r.ok) process.exit(r.status || 1);
+}
+
+// ---------------------------------------------------------------------------
 function usage() {
-  console.log(readText(__filename).split("\n").slice(1, 24).map((l) => l.replace(/^ \*\s?/, "")).join("\n"));
+  const lines = readText(__filename).split("\n");
+  const end = lines.findIndex((line, i) => i > 0 && line.trim() === "*/");
+  console.log(lines.slice(2, end === -1 ? 24 : end).map((l) => l.replace(/^ \*\s?/, "")).join("\n"));
 }
 const commands = {
   new: cmdNew,
@@ -2309,18 +2371,26 @@ const commands = {
   bakeoff: () => cmdBakeoff(),
   "fit-audio": () => cmdFitAudio(),
   review: () => cmdReview(),
+  check: cmdCheck,
   vendor: () => cmdVendor(),
   audit: cmdAudit,
   "repo-check": cmdRepoCheck,
   pipeline: cmdPipeline,
   help: usage,
 };
-if (!CMD || !commands[CMD]) {
-  usage();
-  process.exit(CMD ? 2 : 0);
+const IS_MAIN = process.argv[1] && path.resolve(process.argv[1]) === __filename;
+if (IS_MAIN) {
+  if (!CMD || !commands[CMD]) {
+    usage();
+    process.exit(CMD ? 2 : 0);
+  }
+  try {
+    commands[CMD]();
+  } catch (e) {
+    die(e && e.stack ? e.stack : String(e));
+  }
 }
-try {
-  commands[CMD]();
-} catch (e) {
-  die(e && e.stack ? e.stack : String(e));
-}
+
+// Small, pure seams for zero-dependency regression tests. The CLI remains one file;
+// exporting these does not introduce a package or change its command-line contract.
+export { buildWordCues, computeTimeline, patchGsapStartArray, renderAudioRegion, renderBlocks, renderChart, renderSlidesRegion, splitDisplayCues, validateSchema };

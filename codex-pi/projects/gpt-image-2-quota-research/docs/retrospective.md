@@ -61,3 +61,10 @@
 - 若需要逐字級字幕或更精準時間，可評估 Edge-TTS `--write-subtitles`、WhisperX 或 Montreal Forced Aligner。
 - 若後續 Pi 完成 `openai-codex` login，可新增一個 `pi/projects/...` 版本，測試 Pi 自主生成圖片的流程。
 - 為繁中 render 補專案內嵌字型，避免不同機器 fallback 字型差異。
+
+## 2026-08-24 maintenance
+
+- Upgraded the active CLI pin to HyperFrames 0.8.11 and routed `npm run check` through the hidden-window shared wrapper.
+- Corrected storyboard image paths to the existing slide-specific files already used by `index.html`. This removed three duplicate-image warnings and restored the storyboard/entry agreement without changing pixels.
+- Verification: `hf audit` 0 errors / 0 warnings; `hyperframes check --strict` passed with lint, runtime, layout, and motion at 0 findings and 67/67 contrast checks passing.
+- The seven legacy slide holds remain tight (0.07–0.26 s after speech) but have no cut risk; no timing or render was changed.

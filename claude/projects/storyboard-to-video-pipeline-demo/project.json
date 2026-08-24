@@ -4,7 +4,7 @@
   "title": "從分鏡到影片：Snowy HyperFrames 工作流 v2",
   "workflow": "claude",
   "createdAt": "2026-08-21T18:15:00.000Z",
-  "updatedAt": "2026-08-21T19:12:57.759Z",
+  "updatedAt": "2026-08-23T21:15:21.735Z",
   "status": "ready-to-preview",
   "format": "hyperframes-demo",
   "language": "zh-Hant",
@@ -13,7 +13,7 @@
   "tools": [
     "claude-code",
     "shared/tools/hf.mjs",
-    "hyperframes@0.8.6",
+    "hyperframes@0.8.11",
     "edge-tts",
     "ffprobe"
   ],
@@ -41,7 +41,7 @@
   },
   "checks": {
     "hfAudit": "pass",
-    "hyperframesCheck": "pass (0.8.6: lint 0/0, runtime 0/0, layout 0, motion 0, contrast 18/18)",
+    "hyperframesCheck": "pass (0.8.11 strict: lint 0/0, runtime 0/0, layout 0, motion 0, contrast 18/18)",
     "render": "smoke render pass (77.2s, 6.9 MB, unreviewed)",
     "humanPreview": "pending"
   }

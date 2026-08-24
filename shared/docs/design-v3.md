@@ -1,7 +1,7 @@
-# Snowy HyperFrames — Design v3 (current design of record)
+# Snowy HyperFrames — Design v3 (delivered milestone)
 
-Status: **authoritative design for the next milestone** · Written 2026-08-22 (Claude Opus 5) ·
-Supersedes `design-v2.md`, whose milestone is delivered. Intended reader: the next agent session.
+Status: **delivered 2026-08-22** · Written 2026-08-22 (Claude Opus 5) ·
+Superseded by [`design-v4.md`](design-v4.md). `design-v2.md` §1 remains the architecture contract.
 
 Read in this order: `AGENTS.md` (rules) → `TODO.md` (what is open, and who owns it) → this file →
 `design-v2.md` §1 (the architecture contract, still authoritative) →

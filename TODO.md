@@ -1,13 +1,15 @@
 # TODO — Snowy HyperFrames
 
-Checkpoint: **2026-08-22**. Everything below is either waiting on a person, or specified well enough
-for any agent to start cold. Specs live in `shared/docs/design-v3.md`; the rules live in `AGENTS.md`.
+Checkpoint: **2026-08-24**. Everything below is either waiting on a person, or specified well enough
+for any agent to start cold. Specs live in `shared/docs/design-v4.md`; the rules live in `AGENTS.md`.
 
-Repo health at this checkpoint: 8 projects · `hf audit --all` **0 errors** · `hf repo-check` clean ·
-`hyperframes@0.8.6 check` 0 findings on all three videos（對比度 62/62、54/54、18/18 全數 AA）· CI green.
+Repo health at this checkpoint: 8 projects · `hf audit --all` **0 errors / 0 warnings** · `hf repo-check` clean ·
+all 7 compositions pass `hyperframes@0.8.11 check --strict` locally (392/392 contrast checks pass WCAG AA) ·
+8 zero-dependency toolkit regression tests pass. CI now runs the same strict browser gates; the updated workflow has not yet run remotely.
 
-最近一輪（2026-08-22 第三次）完成了 `design-v3.md` 的 **H（圖表）與 J（動態語彙）**，研究影片的三頁
-改成用畫的；詳見 `shared/docs/phase-summary-2026-08-22c.md`。
+The 2026-08-24 review delivered the v4 foundation: HyperFrames 0.8.11, hidden-window checks,
+semantic audio groups, explicit toolkit tests, strict browser gates in CI, and six visual/contract fixes found by the new gate.
+Details: `shared/docs/phase-summary-2026-08-24.md`.
 
 ---
 
@@ -61,7 +63,10 @@ cd claude/projects/tts-bakeoff-2026-08 ; npm run bakeoff   # 聽測包
       注意：`hyperframes add <name>` 在這條網路上可用，`catalog --query` 會逾時。`design-v3.md` §2I。
 - [x] ~~**J · 動態語彙**~~ — 2026-08-22 完成：每頁可選 `motion: rise | hold | focus | reveal`，
       seek-safety 以「每頁起點 +0.4 秒」逐頁驗證。見 `design-v3.md` §2J。
-- [ ] **K · 雙語旁白** — 同一份 storyboard 產出第二條語音軌與字幕。`design-v3.md` §3K。
+- [x] ~~**M · trustworthy verification baseline**~~ — 2026-08-24 完成：0.8.11 pins、hidden-window
+      `hf check`、semantic audio groups、8 個 core tests、CI strict browser gates，以及 upgrade 發現的 layout fixes。
+- [ ] **K · language variants** — one storyboard produces independently timed, captioned, and reviewed
+      language deliverables without copying the project. This is the next primary milestone; see `design-v4.md` §2.
 - [ ] **G · Atlas registry 更新** — **另一個 repo，要另開 scope**：現在是 4 條 workflow、8 個 tracked
       專案、port 3002 仍為 preview；另外 GitHub 的 repo description 已於 2026-08-22 更新
       （見 `docs-github-update.md`），Atlas registry 的 `summary` 尚未跟上。

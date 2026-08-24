@@ -53,3 +53,11 @@
 驗證：`hf audit` 0 findings、`hyperframes@0.8.6 check` 0 findings（對比度 **62/62 AA**）、
 render 210.5s / 14.1 MB / 1m21s、審核包已重新產生並更新到同一個 artifact URL。
 **人工 preview 仍未做**，status 維持 `ready-to-preview`。
+
+## 2026-08-24 maintenance
+
+- Upgraded to HyperFrames 0.8.11 and regenerated the owned regions with the narration clips in the `voiceover` audio group.
+- Compacted generated slide wrappers. The storyboard remains the readable source; the entry composition dropped below the new large-file lint threshold.
+- The shared line-chart inset removed the 7 px endpoint clipping finding.
+- Verification: `hf audit` 0 errors / 0 warnings; `hyperframes check --strict` passed with lint, runtime, layout, and motion at 0 findings and 62/62 contrast checks passing.
+- Render and human preview were not repeated; the existing review gate remains pending.

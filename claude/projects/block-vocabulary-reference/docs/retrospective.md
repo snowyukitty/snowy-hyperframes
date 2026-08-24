@@ -22,3 +22,11 @@
 - 人工 preview **未做**（agent session）；status 停在 `ready-to-preview`，`npm run render` 未執行。
 - 頁面上的數字全部來自本 repo 自己的規則，不引用任何外部價格或配額——第一版曾放 TTS 價格表，
   後來換掉，因為那是未經本 session 查核的外部主張（AGENTS.md 規則 6）。
+
+## 2026-08-24 maintenance
+
+- Upgraded the project pin to HyperFrames 0.8.11 and routed `npm run check` through the hidden-window `hf check` wrapper.
+- Regenerated the owned HTML/audio regions with semantic `voiceover` audio grouping.
+- Inset line-chart endpoints by 10 px; 0.8.11 had correctly reported the final dot as clipped by 7 px.
+- Verification: `hf audit` 0 errors / 0 warnings; `hyperframes check --strict` passed with runtime, layout, and motion at 0 findings and 54/54 contrast checks passing.
+- Human preview remains pending; project status is unchanged.

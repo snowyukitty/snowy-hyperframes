@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-08-22T01:49:40.730Z",
+  "generatedAt": "2026-08-23T21:15:21.513Z",
   "generator": "shared/tools/hf.mjs sync",
   "policy": "audio",
-  "padSeconds": 1.2,
+  "padSeconds": 0.6,
   "durationSeconds": 81,
   "slides": [
     {

@@ -47,3 +47,9 @@ video: 1920x1080, 30 fps, H.264
 audio: AAC stereo, 48 kHz
 size: 44,649,770 bytes
 ```
+
+## 2026-08-24 maintenance
+
+- Upgraded the active CLI pin to HyperFrames 0.8.11 and routed `npm run check` through the hidden-window shared wrapper.
+- Verification: `hf audit` 0 errors / 0 warnings; `hyperframes check --strict` passed with lint, runtime, layout, and motion at 0 findings and 40/40 contrast checks passing.
+- The historical render was not repeated and remains outside this sparse working tree.

@@ -61,14 +61,15 @@ shared/docs/local-tts-no-api-key-strategy.md
 
 ```text
 TODO.md                    開放中的工作，以及每一件由誰負責
-shared/docs/design-v3.md   目前里程碑的規格與驗收
+shared/docs/design-v4.md   目前里程碑的規格與驗收
+shared/docs/design-v3.md   已交付的圖表／動態里程碑
 shared/docs/design-v2.md   §1 架構契約（仍然有效）＋ 已交付里程碑的實作紀錄
 ```
 
 目前階段性收尾：
 
 ```text
-shared/docs/phase-summary-2026-08-22.md
+shared/docs/phase-summary-2026-08-24.md
 ```
 
 HyperFrames 0.8 升級實測：

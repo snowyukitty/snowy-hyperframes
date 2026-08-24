@@ -5,9 +5,9 @@
 <style>
 :root{--bg:#08111f;--panel:#101b2d;--text:#f3f7ff;--muted:#b7c3d8;--accent:#60a5fa;--line:rgba(255,255,255,.13)}
 *{box-sizing:border-box} html{scroll-behavior:smooth} #composition{position:relative;width:100vw;height:100vh;overflow:hidden} body{margin:0;overflow:hidden;font-family:sans-serif;background:radial-gradient(circle at top left,#1d4ed855,transparent 32%),var(--bg);color:var(--text)}
-header{position:sticky;top:0;z-index:5;display:flex;gap:18px;align-items:center;justify-content:space-between;padding:16px 4vw;background:rgba(8,17,31,.86);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+header{position:absolute;inset:0 0 auto 0;z-index:5;display:flex;gap:18px;align-items:center;justify-content:space-between;padding:16px 4vw;background:rgba(8,17,31,.86);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
 h1{font-size:clamp(20px,3vw,38px);margin:0} nav{display:flex;gap:7px;flex-wrap:wrap} nav a{color:var(--text);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:13px} nav a:hover{background:#2563eb}
-main{position:relative;width:100%;height:100%} .slide{position:absolute;inset:86px 4vw 34px 4vw;display:grid;grid-template-columns:minmax(280px,.72fr) minmax(420px,1.28fr);gap:26px;align-items:center;padding:28px;border:1px solid var(--line);border-radius:28px;background:linear-gradient(135deg,rgba(255,255,255,.075),rgba(255,255,255,.025));box-shadow:0 24px 90px rgba(0,0,0,.22);opacity:0;pointer-events:none}
+main{position:absolute;inset:0;width:100%;height:100%} .slide{position:absolute;inset:86px 4vw 34px 4vw;display:grid;grid-template-columns:minmax(280px,.72fr) minmax(420px,1.28fr);gap:26px;align-items:center;padding:28px;border:1px solid var(--line);border-radius:28px;background:linear-gradient(135deg,rgba(255,255,255,.075),rgba(255,255,255,.025));box-shadow:0 24px 90px rgba(0,0,0,.22);opacity:0;pointer-events:none}
 .kicker{color:var(--accent);letter-spacing:.14em;text-transform:uppercase;font-weight:800} h2{font-size:clamp(28px,4vw,54px);line-height:1.1;margin:.25em 0} p{color:var(--muted);font-size:clamp(17px,1.5vw,22px);line-height:1.65} audio{width:100%;margin-top:18px} .visual{position:relative} img{width:100%;max-height:68vh;object-fit:contain;border-radius:18px;background:#0f172a;box-shadow:0 18px 52px rgba(0,0,0,.25)} .placeholder{display:none;place-items:center;min-height:380px;border:2px dashed rgba(255,255,255,.25);border-radius:18px;color:var(--muted);text-align:center} .placeholder span{color:var(--text);font-weight:800}
 .narration-audio{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 @media(max-width:900px){header{position:relative;display:block} nav{margin-top:12px} .slide{grid-template-columns:1fr;min-height:auto}}
@@ -290,19 +290,7 @@ WhisperX 的三大能力
 </main><script>
 window.__timelines = window.__timelines || {};
 const tl = gsap.timeline({ paused: true });
-const slides = [
-        ["#slide-01", 0, 12.0], 
-        ["#slide-02", 12.0, 29], 
-        ["#slide-03", 41.0, 46], 
-        ["#slide-04", 87.0, 46], 
-        ["#slide-05", 133.0, 44], 
-        ["#slide-06", 177.0, 48], 
-        ["#slide-07", 225.0, 48], 
-        ["#slide-08", 273.0, 55], 
-        ["#slide-09", 328.0, 47], 
-        ["#slide-10", 375.0, 53], 
-        ["#slide-11", 428.0, 58], 
-];
+const slides = [["#slide-01",0,12],["#slide-02",12,29],["#slide-03",41,46],["#slide-04",87,46],["#slide-05",133,44],["#slide-06",177,48],["#slide-07",225,48],["#slide-08",273,55],["#slide-09",328,47],["#slide-10",375,53],["#slide-11",428,58]];
 gsap.set('.slide', { autoAlpha: 0 });
 gsap.set('#slide-01', { autoAlpha: 1 });
 slides.forEach(([selector, start, duration], index) => {
