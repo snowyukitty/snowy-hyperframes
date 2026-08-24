@@ -5,7 +5,8 @@ for any agent to start cold. Specs live in `shared/docs/design-v4.md`; the rules
 
 Repo health at this checkpoint: 8 projects · `hf audit --all` **0 errors / 0 warnings** · `hf repo-check` clean ·
 all 7 compositions pass `hyperframes@0.8.11 check --strict` locally (392/392 contrast checks pass WCAG AA) ·
-8 zero-dependency toolkit regression tests pass. CI now runs the same strict browser gates; the updated workflow has not yet run remotely.
+8 zero-dependency toolkit regression tests pass. CI runs the same strict browser gates and passed remotely on
+2026-08-24 with zero annotations ([run #32680262467](https://github.com/snowyukitty/snowy-hyperframes/actions/runs/32680262467)).
 
 The 2026-08-24 review delivered the v4 foundation: HyperFrames 0.8.11, hidden-window checks,
 semantic audio groups, explicit toolkit tests, strict browser gates in CI, and six visual/contract fixes found by the new gate.

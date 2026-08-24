@@ -41,7 +41,9 @@ The tests found a real defect immediately: the caption packer's emergency ceilin
 `project.json` into `project.j` / `son`. The ceiling now respects identifier boundaries.
 
 CI now runs those tests, `repo-check`, `hf audit --all`, and `hyperframes check --strict` for every
-composition rather than static lint alone.
+composition rather than static lint alone. After the first remote run surfaced GitHub's Node 20 action-runtime
+deprecation, the workflow also moved `actions/checkout` and `actions/setup-node` from v4 to v7. The v7 actions
+use Node 24 natively, and the follow-up run completed without annotations.
 
 ### Audio prepared for the current upstream model
 
@@ -77,6 +79,7 @@ their generated timestamps changed, as expected.
 | `ai-2030-three-futures` strict browser gate | pass; 40/40 contrast |
 | `gpt-image-2-quota-research` strict browser gate | pass; 67/67 contrast |
 | `latest-tts-voice-clone-research` strict browser gate | pass; 75/75 contrast |
+| GitHub Actions `validate` (`f230ffa`) | pass; [run #32680262467](https://github.com/snowyukitty/snowy-hyperframes/actions/runs/32680262467), all steps successful, zero annotations |
 
 Total: 392/392 text contrast checks pass WCAG AA. Runtime, layout, and motion report zero findings
 on the final strict passes.
@@ -85,8 +88,7 @@ on the final strict passes.
 
 - No render was started. Existing human gates remain pending, so rendering would violate the project contract.
 - No human preview, pronunciation judgment, or TTS naturalness verdict was recorded.
-- The updated GitHub Actions workflow was not run remotely in this session; only its local equivalents ran.
-- No sign-in, release, visibility change, push, LICENSE decision, or Atlas sibling-repository edit occurred.
+- No sign-in, release, visibility change, LICENSE decision, or Atlas sibling-repository edit occurred.
 - The pre-existing `.gitignore` change that ignores generated `mcps/` metadata was preserved as user/workspace policy work.
 
 ## 5. Next step
