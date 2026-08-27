@@ -5,7 +5,7 @@
 ```text
 shared/
 ├── tools/
-│   └── hf.mjs                 共用工具鏈（new / html / prepare-tts / tts / measure / sync / fit-audio / vendor / review / audit / repo-check / pipeline）
+│   └── hf.mjs                 共用工具鏈（製作管線、review、audit，以及 hidden-window HyperFrames CLI proxy）
 ├── vendor/
 │   └── gsap.min.js            render 不依賴 CDN
 ├── docs/
@@ -33,6 +33,10 @@ node shared/tools/hf.mjs help
 5. `npm run check`（`hf audit` + `hyperframes check`）。
 6. `npm run review` 產生人工審核包（每頁畫格 + 真實旁白 + 時間餘裕 + 逐項通過紀錄，離線可開、可分享），
    人工通過後才 `npm run render`。
+
+`lint`、`check`、`snapshot`、`doctor`、`preview`、`render` 與 `publish`
+scripts 都必須經過 `hf`；不要在 `package.json` 直接呼叫 `npx hyperframes`，
+否則 Windows GUI 啟動器可能為每個 helper 建立前景 console window。
 
 資訊層（數字、清單、引述）用 storyboard 的 `slides[].blocks`；字彙表與實際樣子見
 `claude/projects/block-vocabulary-reference`。

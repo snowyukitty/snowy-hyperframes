@@ -22,6 +22,15 @@ output family ships to every target surface.
   as the ordinary review path. The previous fragment-only artifact rendered
   Traditional Chinese review instructions as mojibake in Chrome; a unit test
   now fails if the doctype or early charset declaration disappears.
+- Made review artifacts valid HyperFrames no-timeline entries: a stable
+  composition id, source-bound duration, 1920×1080 dimensions, and explicit
+  local font faces remove all four artifact lint errors without registering a
+  fake animation timeline.
+- Routed every tracked project's pinned HyperFrames CLI scripts through the
+  shared `windowsHide: true` proxy. `repo-check` now rejects direct
+  `npx hyperframes` package scripts so foreground console storms cannot drift
+  back into new or existing projects. Each package retains an explicit
+  `hyperframesVersion` pin; quiet process launch does not weaken reproducibility.
 
 ## What was verified
 
@@ -30,8 +39,10 @@ output family ships to every target surface.
   findings; 9 layout samples; 21/21 contrast checks pass WCAG AA.
 - `npm run review -- --artifact`: three-frame self-contained review kit built;
   the rebuilt artifact is SHA-256
-  `e4761a862db040e872ec9332a342c45dc54e42a6dccda241afd4210add25245a`.
-- `node --test shared/tests/hf.test.mjs`: 9/9 pass; repo-wide audit reports all
+  `32dbba2b8d5fed3bf21a27930daa451cec310edc54edfdef6471e9b400b9b033`.
+- Linting the rebuilt artifact as a standalone HyperFrames entry: 0 errors,
+  0 warnings.
+- `node --test shared/tests/hf.test.mjs`: 10/10 pass; repo-wide audit reports all
   11 projects at 0 errors and the IconFlow project at 0 warnings.
 - Additional snapshots at 0.5, 2.8, 3.7, 5.8, and 11.5 seconds were visually
   inspected; the exact icon is centered inside the stopped physical frame.

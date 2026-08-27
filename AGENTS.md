@@ -72,9 +72,14 @@ npm run review        # build the human gate kit (frames + narration, offline, s
 npm run render        # only after a human has actually passed the gate
 ```
 
+All project `lint`, `check`, `snapshot`, `doctor`, `preview`, `render`, and
+`publish` scripts route the pinned HyperFrames CLI through `hf`. On Windows the
+wrapper sets `windowsHide: true`; interactive commands still inherit terminal
+I/O, but must not create extra foreground console windows.
+
 Toolkit reference: `node shared/tools/hf.mjs help`. Commands: `new`, `html`,
 `prepare-tts`, `tts`, `measure`, `sync`, `captions`, `fit-audio`, `vendor`, `review`, `check`, `audit [--all]`,
-`repo-check`, `pipeline`. Run `hf audit --all` and `hf repo-check` from the repo root
+`lint`, `snapshot`, `doctor`, `preview`, `render`, `publish`, `repo-check`, `pipeline`. Run `hf audit --all` and `hf repo-check` from the repo root
 before committing; CI also runs the zero-dependency regression tests and `hyperframes check --strict` per project.
 
 ## Slide content
@@ -98,9 +103,10 @@ nothing about timing truth.
 
 ## HyperFrames version policy
 
-- Pin the CLI per project via `npx --yes hyperframes@<version>` in `package.json`; the
-  verified baseline is **0.8.11** (`check` replaced `validate`/`inspect`/`layout`, which are
-  deprecated aliases — do not use them in new scripts).
+- Pin the CLI per project with `"hyperframesVersion": "<version>"` in `package.json`;
+  package scripts call the shared `hf` proxy, which resolves that pin before invoking
+  `npx`. The verified baseline is **0.8.11** (`check` replaced
+  `validate`/`inspect`/`layout`, which are deprecated aliases — do not use them in new scripts).
 - `hyperframes.json` belongs to HyperFrames (registry/paths config). Snowy's slide
   manifest lives in `data/timeline.json` (generated) — never in `hyperframes.json`.
 - GSAP is loaded from `vendor/gsap.min.js` (`hf vendor`), not a CDN: on a slow link the

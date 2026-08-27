@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   buildWordCues,
+  childProcessOptions,
   computeTimeline,
   patchGsapStartArray,
   renderAudioRegion,
@@ -129,6 +130,18 @@ test("self-contained review artifacts declare UTF-8 before non-ASCII copy", () =
   assert.match(html, /<meta charset="UTF-8">/);
   assert.match(html, /IconFlow — One Source, Every Surface/);
   assert.match(html, /人工審核包/);
+  assert.match(html, /data-composition-id="iconflow-film-review"/);
+  assert.match(html, /data-start="0" data-duration="15"/);
+  assert.match(html, /data-width="1920" data-height="1080" data-no-timeline/);
+  for (const family of ["Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "SFMono-Regular"]) {
+    assert.match(html, new RegExp(`@font-face \\{ font-family: "${family}";`));
+  }
+});
+
+test("child processes hide Windows helper consoles by default", () => {
+  assert.equal(childProcessOptions().windowsHide, true);
+  assert.equal(childProcessOptions({ stdio: "inherit" }).windowsHide, true);
+  assert.equal(childProcessOptions({ windowsHide: false }).windowsHide, false);
 });
 
 test("minimal schema validation rejects unexpected properties when requested", () => {

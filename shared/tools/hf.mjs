@@ -23,6 +23,9 @@
  *   review [--artifact]     build the human preview gate: one self-contained HTML with a frame + the real
  *                           narration per slide, per-slide verdicts, and a paste-ready approval summary
  *   check [HyperFrames flags]   hf audit -> pinned HyperFrames browser gate, with child windows hidden
+ *   lint|snapshot|doctor [HyperFrames flags]
+ *   preview|render|publish [HyperFrames flags]
+ *                           run the pinned HyperFrames CLI behind the same hidden Windows child boundary
  *   audit [--all] [--json]  structural + schema + timing + audio-cut-risk checks (CI-safe, no browser)
  *   bakeoff [--only id] [--force] [--no-kit]
  *                           TTS provider comparison: same golden samples through every engine,
@@ -214,12 +217,15 @@ function validateSchema(schema, data, where = "$", out = []) {
 // ---------------------------------------------------------------------------
 // external tools
 // ---------------------------------------------------------------------------
+function childProcessOptions(opts = {}) {
+  return { encoding: "utf8", windowsHide: true, ...opts };
+}
 function run(cmd, args, opts = {}) {
   // args === undefined means cmd is a full command line (used with shell:true)
   // On Windows, Node otherwise gives short-lived console windows to helpers such as
   // ffprobe, Edge-TTS, FFmpeg, and npx. A pipeline can launch dozens of them, so keep
   // every non-interactive child hidden unless a caller explicitly opts out.
-  const spawnOpts = { encoding: "utf8", windowsHide: true, ...opts };
+  const spawnOpts = childProcessOptions(opts);
   const r = args === undefined
     ? spawnSync(cmd, spawnOpts)
     : spawnSync(cmd, args, { ...spawnOpts, shell: false });
@@ -1047,7 +1053,7 @@ function cmdSync(projectRoot = findProjectRoot()) {
     writeJson(p, m);
     log(`  ${name}: legacy manifest timings refreshed`);
   }
-  log(`sync done. Next:  hf audit  ->  npx hyperframes check  ->  preview  ->  render`);
+  log(`sync done. Next:  hf check  ->  preview  ->  render`);
 }
 
 // ---------------------------------------------------------------------------
@@ -1427,6 +1433,25 @@ function cmdRepoCheck() {
   for (const p of tracked) {
     for (const req of ["project.json", "README.md", "docs/retrospective.md"]) if (!files.includes(`${p}/${req}`)) problems.push(`${p}: missing ${req} (publication policy)`);
   }
+  for (const f of files.filter((name) => /(^|\/)package\.json$/.test(name))) {
+    const packagePath = path.join(repo, f);
+    if (!exists(packagePath)) continue;
+    let pkg;
+    try {
+      pkg = readJson(packagePath);
+    } catch {
+      continue;
+    }
+    for (const [name, script] of Object.entries(pkg.scripts || {})) {
+      if (/\bnpx(?:\.cmd)?\b[^\r\n]*\bhyperframes@/i.test(String(script))) {
+        problems.push(`${f}: script "${name}" bypasses hf's hidden-window HyperFrames proxy`);
+      }
+    }
+    const usesProxy = Object.values(pkg.scripts || {}).some((script) => /hf\.mjs\s+(?:check|lint|snapshot|doctor|preview|render|publish)(?:\s|$)/.test(String(script)));
+    if (usesProxy && !/^[0-9][\w.-]*$/.test(String(pkg.hyperframesVersion || ""))) {
+      problems.push(`${f}: hidden-window HyperFrames proxy has no explicit hyperframesVersion pin`);
+    }
+  }
   const mp4s = files.filter((f) => /\.mp4$/i.test(f));
   const mp4Local = mp4s.filter((f) => fs.existsSync(path.join(repo, f)));
   const mp4Bytes = mp4Local.reduce((a, f) => a + fs.statSync(path.join(repo, f)).size, 0);
@@ -1516,6 +1541,10 @@ function cmdVendor(projectRoot = findProjectRoot()) {
 
 // --- the review kit page (self-contained; no external requests, no build step) ---
 const REVIEW_CSS = `
+@font-face { font-family: "Noto Sans TC"; src: local("Noto Sans TC"), local("NotoSansTC-Regular"); }
+@font-face { font-family: "PingFang TC"; src: local("PingFang TC"); }
+@font-face { font-family: "Microsoft JhengHei"; src: local("Microsoft JhengHei"), local("微軟正黑體"); }
+@font-face { font-family: "SFMono-Regular"; src: local("SFMono-Regular"); }
 :root {
   --bg: #0a0d10; --panel: #121820; --panel-2: #171f28; --line: #26313c;
   --ink: #eef3ef; --ink-dim: #a9b6b2; --accent: #94f0e7; --warm: #ffe6a3;
@@ -1619,7 +1648,8 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fo
 function reviewHtml(meta, slides, opts = {}) {
   const data = JSON.stringify({ meta, slides }).replace(/</g, "\\u003c");
   const head = `<title>${esc(meta.title)}</title>\n<style>${REVIEW_CSS}</style>`;
-  const body = `
+  const compositionId = `${meta.id}-review`;
+  const body = `<div id="review-root" data-composition-id="${esc(compositionId)}" data-start="0" data-duration="${Number(meta.total) || 0}" data-width="1920" data-height="1080" data-no-timeline>
 <header class="top">
   <div class="top-in">
     <h1>${esc(meta.title)}</h1>
@@ -1795,7 +1825,8 @@ document.addEventListener("keydown", function (e) {
   if (e.key === "ArrowLeft") show(ci - 1);
 });
 render();
-</script>`;
+</script>
+</div>`;
   return `<!DOCTYPE html>\n<html lang="zh-Hant">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n${head}\n</head>\n<body>\n${body}\n</body>\n</html>\n`;
 }
 
@@ -1812,7 +1843,10 @@ render();
 function hfPin(projectRoot) {
   const pk = path.join(projectRoot, "package.json");
   if (exists(pk)) {
-    const m = /hyperframes@([0-9][\w.-]*)/.exec(readText(pk));
+    const pkg = readJson(pk);
+    const configured = String(pkg.hyperframesVersion || "");
+    if (/^[0-9][\w.-]*$/.test(configured)) return configured;
+    const m = /hyperframes@([0-9][\w.-]*)/.exec(JSON.stringify(pkg.scripts || {}));
     if (m) return m[1];
   }
   return "0.8.11";
@@ -1825,6 +1859,27 @@ function runNpx(args, opts = {}) {
   const win = process.platform === "win32";
   // with shell:true Node warns about un-escaped arg arrays, so pass one command string instead
   return win ? run(["npx.cmd", ...args].join(" "), undefined, { ...opts, shell: true }) : run("npx", args, opts);
+}
+function forwardedHyperframesArgs() {
+  const tail = process.argv.slice(3);
+  const forwarded = [];
+  for (let i = 0; i < tail.length; i++) {
+    if (tail[i] === "--project") {
+      i++;
+      continue;
+    }
+    if (tail[i].startsWith("--project=")) continue;
+    forwarded.push(tail[i]);
+  }
+  return forwarded;
+}
+function cmdHyperframes(command) {
+  const projectRoot = findProjectRoot();
+  const r = runNpx(
+    ["--yes", `hyperframes@${hfPin(projectRoot)}`, command, ...forwardedHyperframesArgs()],
+    { cwd: projectRoot, stdio: "inherit" }
+  );
+  if (!r.ok) process.exit(r.status || 1);
 }
 function takeSnapshots(projectRoot, times) {
   const r = runNpx(["--yes", `hyperframes@${hfPin(projectRoot)}`, "snapshot", "--at", times.map((t) => String(t)).join(",")], { cwd: projectRoot });
@@ -2337,17 +2392,7 @@ function cmdCheck() {
   if (errors) process.exit(1);
 
   // Forward HyperFrames check flags while consuming hf's own project selector.
-  const tail = process.argv.slice(3);
-  const forwarded = [];
-  for (let i = 0; i < tail.length; i++) {
-    if (tail[i] === "--project") {
-      i++;
-      continue;
-    }
-    if (tail[i].startsWith("--project=")) continue;
-    forwarded.push(tail[i]);
-  }
-  const r = runNpx(["--yes", `hyperframes@${hfPin(projectRoot)}`, "check", ...forwarded], { cwd: projectRoot });
+  const r = runNpx(["--yes", `hyperframes@${hfPin(projectRoot)}`, "check", ...forwardedHyperframesArgs()], { cwd: projectRoot });
   if (r.stdout) process.stdout.write(r.stdout);
   if (r.stderr) process.stderr.write(r.stderr);
   if (!r.ok) process.exit(r.status || 1);
@@ -2371,6 +2416,12 @@ const commands = {
   "fit-audio": () => cmdFitAudio(),
   review: () => cmdReview(),
   check: cmdCheck,
+  lint: () => cmdHyperframes("lint"),
+  snapshot: () => cmdHyperframes("snapshot"),
+  doctor: () => cmdHyperframes("doctor"),
+  preview: () => cmdHyperframes("preview"),
+  render: () => cmdHyperframes("render"),
+  publish: () => cmdHyperframes("publish"),
   vendor: () => cmdVendor(),
   audit: cmdAudit,
   "repo-check": cmdRepoCheck,
@@ -2392,4 +2443,4 @@ if (IS_MAIN) {
 
 // Small, pure seams for zero-dependency regression tests. The CLI remains one file;
 // exporting these does not introduce a package or change its command-line contract.
-export { buildWordCues, computeTimeline, patchGsapStartArray, renderAudioRegion, renderBlocks, renderChart, renderSlidesRegion, reviewHtml, splitDisplayCues, validateSchema };
+export { buildWordCues, childProcessOptions, computeTimeline, patchGsapStartArray, renderAudioRegion, renderBlocks, renderChart, renderSlidesRegion, reviewHtml, splitDisplayCues, validateSchema };

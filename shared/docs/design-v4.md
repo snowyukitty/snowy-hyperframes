@@ -45,13 +45,18 @@ changelog. The gate exposed and the session fixed:
 
 ### M2. Verification must not interrupt the workstation
 
-`hf` launches non-interactive children with Node's `windowsHide: true`. `npm run check` now calls
-`hf check`, which runs static audit and the pinned HyperFrames browser gate behind that hidden boundary.
+`hf` launches child processes with Node's `windowsHide: true`. Every project script for the pinned
+HyperFrames CLI (`lint`, `check`, `snapshot`, `doctor`, `preview`, `render`, and `publish`) now calls the
+shared proxy instead of invoking `npx` directly. Non-interactive checks may capture output; interactive
+commands inherit the existing terminal, but neither path may create extra foreground console windows.
 Browser gates run sequentially during local work; CI may run them without this workstation concern.
+Each project keeps the reproducibility contract explicit through
+`"hyperframesVersion": "0.8.11"`; the proxy resolves that value rather than hiding
+an upgrade inside shared code.
 
 Interactive commands remain interactive by intent: `npm run preview` may open Studio because the user
 asked to preview. Audit, check, TTS, FFprobe, FFmpeg, snapshot, and render helpers must not flash console
-windows across the desktop.
+windows across the desktop. `repo-check` rejects tracked `package.json` scripts that bypass this proxy.
 
 ### M3. Explicit regression contracts
 

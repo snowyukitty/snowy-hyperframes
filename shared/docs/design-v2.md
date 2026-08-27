@@ -150,9 +150,11 @@ narration script, and start / slide / narration / **margin** chips colour-coded 
 - three per-slide verdicts (發音 / 節奏 / 可讀性) + a note, persisted in `localStorage`;
 - **複製審核結論** → a markdown approval summary to paste into `docs/retrospective.md` or back to the agent.
 
-`--artifact` emits a body-only variant for publishing (so the gate can happen from a phone, away from the
-render machine). Kits live in `review/` and are git-ignored. Windows note: `npx.cmd` needs `shell:true`
-(Node ≥ 20 EINVAL) — `runNpx()` handles it.
+`--artifact` emits a complete UTF-8 document for publishing (so the gate can happen from a phone, away from
+the render machine). It declares a stable, dimensioned `data-no-timeline` review root and local font faces,
+so treating the artifact as a HyperFrames entry remains lint-clean without inventing a fake GSAP timeline.
+Kits live in `review/` and are git-ignored. Windows note: `npx.cmd` needs `shell:true` (Node ≥ 20 EINVAL) —
+`runNpx()` handles it behind a `windowsHide: true` process boundary.
 
 ### C. Word-level captions ✅ BUILT 2026-08-22
 

@@ -52,8 +52,9 @@ cd claude/projects/<project> ; npm run review      # 影片專案
 cd claude/projects/tts-bakeoff-2026-08 ; npm run bakeoff   # 聽測包
 ```
 
-兩個小提醒：`index.html` 是完整的獨立檔（本機用這份）；`*.artifact.html` 是去掉外層標籤、給發布用的
-變體。勾選紀錄存在瀏覽器的 localStorage，**本機檔與線上 artifact 是兩個各自獨立的儲存**，所以請固定
+兩個小提醒：`index.html` 與 `*.artifact.html` 都是完整、UTF-8、可離線開啟的獨立文件；artifact 版本另外
+帶有 lint-clean 的 no-timeline composition metadata，適合發布。勾選紀錄存在瀏覽器的 localStorage，
+**本機檔與線上 artifact 是兩個各自獨立的儲存**，所以請固定
 在其中一邊做完，再按「複製結論」。
 
 ## Open for any agent

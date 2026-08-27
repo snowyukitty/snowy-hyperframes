@@ -228,6 +228,10 @@ claude/projects/tts-bakeoff-2026-08
 npm run check
 ```
 
+專案的 `lint`、`check`、`snapshot`、`doctor`、`preview`、`render` 與
+`publish` 都經過共用 `hf` wrapper 啟動 pinned CLI。Windows 上會抑制額外的
+foreground console window；互動式 preview 仍在原本的 terminal 顯示 log。
+
 只跑本機、不開瀏覽器的結構 / schema / 音訊檢查：
 
 ```powershell

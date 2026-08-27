@@ -2,6 +2,7 @@
   "name": "measurable-vs-audible-tts",
   "private": true,
   "type": "module",
+  "hyperframesVersion": "0.8.11",
   "scripts": {
     "hf": "node ../../../shared/tools/hf.mjs",
     "html": "node ../../../shared/tools/hf.mjs html",
@@ -11,13 +12,13 @@
     "sync": "node ../../../shared/tools/hf.mjs sync",
     "audit": "node ../../../shared/tools/hf.mjs audit",
     "pipeline": "node ../../../shared/tools/hf.mjs pipeline",
-    "lint": "npx --yes hyperframes@0.8.11 lint",
+    "lint": "node ../../../shared/tools/hf.mjs lint",
     "check": "node ../../../shared/tools/hf.mjs check",
-    "dev": "npx --yes hyperframes@0.8.11 preview",
-    "preview": "npx --yes hyperframes@0.8.11 preview",
-    "snapshot": "npx --yes hyperframes@0.8.11 snapshot",
-    "render": "npx --yes hyperframes@0.8.11 render . --output renders/measurable-vs-audible-tts.mp4",
-    "doctor": "npx --yes hyperframes@0.8.11 doctor",
+    "dev": "node ../../../shared/tools/hf.mjs preview",
+    "preview": "node ../../../shared/tools/hf.mjs preview",
+    "snapshot": "node ../../../shared/tools/hf.mjs snapshot",
+    "render": "node ../../../shared/tools/hf.mjs render . --output renders/measurable-vs-audible-tts.mp4",
+    "doctor": "node ../../../shared/tools/hf.mjs doctor",
     "review": "node ../../../shared/tools/hf.mjs review",
     "captions": "node ../../../shared/tools/hf.mjs captions"
   }

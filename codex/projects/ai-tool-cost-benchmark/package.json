@@ -2,18 +2,19 @@
   "name": "ai-tool-cost-benchmark",
   "private": true,
   "type": "module",
+  "hyperframesVersion": "0.8.11",
   "scripts": {
-    "dev": "npx --yes hyperframes@0.8.11 preview",
+    "dev": "node ../../../shared/tools/hf.mjs preview",
     "check": "node ../../../shared/tools/hf.mjs check",
     "tts:prepare": "powershell -ExecutionPolicy Bypass -File scripts/prepare-tts.ps1",
     "tts": "npm run tts:prepare && powershell -ExecutionPolicy Bypass -File scripts/generate-tts.ps1",
-    "render": "npx --yes hyperframes@0.8.11 render . --output renders/ai-tool-cost-benchmark.mp4",
-    "publish": "npx --yes hyperframes@0.8.11 publish",
-    "lint": "npx --yes hyperframes@0.8.11 lint",
+    "render": "node ../../../shared/tools/hf.mjs render . --output renders/ai-tool-cost-benchmark.mp4",
+    "publish": "node ../../../shared/tools/hf.mjs publish",
+    "lint": "node ../../../shared/tools/hf.mjs lint",
     "audit": "node ../../../shared/tools/hf.mjs audit",
     "fit-audio": "node ../../../shared/tools/hf.mjs fit-audio",
     "vendor": "node ../../../shared/tools/hf.mjs vendor",
-    "doctor": "npx --yes hyperframes@0.8.11 doctor",
-    "preview": "npx --yes hyperframes@0.8.11 preview"
+    "doctor": "node ../../../shared/tools/hf.mjs doctor",
+    "preview": "node ../../../shared/tools/hf.mjs preview"
   }
 }
