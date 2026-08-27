@@ -1,0 +1,1 @@
+Before, every regenerated voice meant editing index dot HTML, captions, manifests, and project metadata separately. If one MP3 ran longer than its slide, the final video cut the narration short.

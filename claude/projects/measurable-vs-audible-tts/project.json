@@ -4,7 +4,7 @@
   "title": "可以量的，跟只能聽的：兩個免 API key 中文 TTS 引擎的實測",
   "workflow": "claude",
   "createdAt": "2026-08-21T19:26:46.622Z",
-  "updatedAt": "2026-08-23T21:15:21.630Z",
+  "updatedAt": "2026-08-27T12:43:18.334Z",
   "status": "ready-to-preview",
   "format": "hyperframes-video",
   "language": "zh-Hant",
@@ -13,7 +13,7 @@
   "tools": [
     "claude-code",
     "shared/tools/hf.mjs",
-    "hyperframes@0.8.11",
+    "hyperframes@0.8.16",
     "edge-tts",
     "ffmpeg",
     "ffprobe"
@@ -42,7 +42,7 @@
   },
   "checks": {
     "hfAudit": "pass",
-    "hyperframesCheck": "pass (0.8.11 strict: lint 0/0, runtime 0/0, layout 0, motion 0, contrast 62/62)",
+    "hyperframesCheck": "pass (0.8.16 strict: lint 0/0, runtime 0/0, layout 0, motion 0, contrast 62/62)",
     "render": "pass (210.5s, 13.6 MB, 1m18.8s) — not committed, Releases only",
     "humanPreview": "pending"
   }

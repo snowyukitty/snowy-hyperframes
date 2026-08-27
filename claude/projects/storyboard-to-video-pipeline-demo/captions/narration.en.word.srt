@@ -1,0 +1,203 @@
+1
+00:00:00,098 --> 00:00:01,205
+This film is also its
+
+2
+00:00:01,205 --> 00:00:02,205
+own demonstration.
+
+3
+00:00:02,205 --> 00:00:04,131
+Every timestamp comes
+
+4
+00:00:04,131 --> 00:00:05,143
+from one storyboard
+
+5
+00:00:05,143 --> 00:00:06,179
+and the measured duration
+
+6
+00:00:06,179 --> 00:00:07,167
+of the real narration
+
+7
+00:00:07,167 --> 00:00:08,131
+, never from a hand
+
+8
+00:00:08,131 --> 00:00:08,702
+estimate.
+
+9
+00:00:12,098 --> 00:00:13,633
+Before, every regenerated
+
+10
+00:00:13,633 --> 00:00:14,645
+voice meant editing
+
+11
+00:00:14,645 --> 00:00:16,324
+index dot HTML,
+
+12
+00:00:16,324 --> 00:00:17,098
+captions,
+
+13
+00:00:17,098 --> 00:00:17,990
+manifests,
+
+14
+00:00:17,990 --> 00:00:19,252
+and project metadata
+
+15
+00:00:19,252 --> 00:00:21,119
+separately. If one
+
+16
+00:00:21,119 --> 00:00:22,524
+MP3 ran longer than
+
+17
+00:00:22,524 --> 00:00:23,095
+its slide,
+
+18
+00:00:23,095 --> 00:00:24,310
+the final video cut
+
+19
+00:00:24,310 --> 00:00:25,333
+the narration short.
+
+20
+00:00:26,898 --> 00:00:28,279
+Now there is one pipeline.
+
+21
+00:00:28,279 --> 00:00:30,252
+The storyboard produces
+
+22
+00:00:30,252 --> 00:00:30,812
+the script,
+
+23
+00:00:30,812 --> 00:00:32,455
+Edge TTS creates each
+
+24
+00:00:32,455 --> 00:00:34,562
+MP3, ffprobe measures
+
+25
+00:00:34,562 --> 00:00:35,407
+its real length,
+
+26
+00:00:35,407 --> 00:00:36,550
+and sync updates the
+
+27
+00:00:36,550 --> 00:00:37,860
+page, captions,
+
+28
+00:00:37,860 --> 00:00:39,205
+and metadata together.
+
+29
+00:00:40,898 --> 00:00:41,898
+Render waits behind
+
+30
+00:00:41,898 --> 00:00:44,074
+two gates. H F audit
+
+31
+00:00:44,074 --> 00:00:45,348
+checks project structure
+
+32
+00:00:45,348 --> 00:00:46,657
+, schema, and audio
+
+33
+00:00:46,657 --> 00:00:48,883
+cut risk. HyperFrames
+
+34
+00:00:48,883 --> 00:00:49,967
+check then verifies
+
+35
+00:00:49,967 --> 00:00:50,895
+runtime behavior,
+
+36
+00:00:50,895 --> 00:00:52,145
+layout, motion,
+
+37
+00:00:52,145 --> 00:00:53,479
+and text contrast.
+
+38
+00:00:55,098 --> 00:00:56,038
+Automation does not
+
+39
+00:00:56,038 --> 00:00:57,002
+replace a person.
+
+40
+00:00:57,002 --> 00:00:58,702
+Someone still has
+
+41
+00:00:58,702 --> 00:00:59,583
+to hear the pacing
+
+42
+00:00:59,583 --> 00:01:00,595
+and pronunciation
+
+43
+00:01:00,595 --> 00:01:01,964
+, inspect readability
+
+44
+00:01:01,964 --> 00:01:02,798
+, and approve that
+
+45
+00:01:02,798 --> 00:01:03,798
+specific language
+
+46
+00:01:03,798 --> 00:01:04,607
+before render.
+
+47
+00:01:07,098 --> 00:01:07,871
+From storyboard to
+
+48
+00:01:07,871 --> 00:01:08,669
+video through one
+
+49
+00:01:08,669 --> 00:01:09,740
+rerunnable pipeline.
+
+50
+00:01:09,740 --> 00:01:11,821
+This is Snowy HyperFrames
+
+51
+00:01:11,821 --> 00:01:13,000
+Workflow version two.

@@ -12,7 +12,10 @@
   ],
   "properties": {
     "title": {
-      "type": "string"
+      "type": [
+        "string",
+        "object"
+      ]
     },
     "targetDurationSeconds": {
       "type": "number"
@@ -22,6 +25,22 @@
     },
     "voice": {
       "type": "object"
+    },
+    "locales": {
+      "type": "object",
+      "description": "Deliverable locales. The top-level language is canonical; each locale may override voice settings and pronunciationMap.",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "default": {
+            "type": "boolean"
+          },
+          "voice": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": true
+      }
     },
     "slides": {
       "type": "array",
@@ -40,10 +59,16 @@
             "type": "string"
           },
           "title": {
-            "type": "string"
+            "type": [
+              "string",
+              "object"
+            ]
           },
           "chapter": {
-            "type": "string"
+            "type": [
+              "string",
+              "object"
+            ]
           },
           "durationTarget": {
             "type": "number",
@@ -53,10 +78,22 @@
             "type": "string"
           },
           "subtitle": {
-            "type": "string"
+            "type": [
+              "string",
+              "object"
+            ]
           },
           "narration": {
-            "type": "string"
+            "type": [
+              "string",
+              "object"
+            ]
+          },
+          "ttsText": {
+            "type": [
+              "string",
+              "object"
+            ]
           },
           "blocks": {
             "type": "array",
@@ -78,10 +115,16 @@
                   ]
                 },
                 "text": {
-                  "type": "string"
+                  "type": [
+                    "string",
+                    "object"
+                  ]
                 },
                 "source": {
-                  "type": "string"
+                  "type": [
+                    "string",
+                    "object"
+                  ]
                 },
                 "ordered": {
                   "type": "boolean"
@@ -100,10 +143,19 @@
                   "type": "array"
                 },
                 "labels": {
-                  "type": "array"
+                  "type": "array",
+                  "items": {
+                    "type": [
+                      "string",
+                      "object"
+                    ]
+                  }
                 },
                 "unit": {
-                  "type": "string"
+                  "type": [
+                    "string",
+                    "object"
+                  ]
                 },
                 "max": {
                   "type": "number"
@@ -129,5 +181,5 @@
     }
   },
   "additionalProperties": true,
-  "description": "Storyboard is the single source of intent: slides carry narration (spoken), subtitle (lower-third), and an optional blocks[] information layer rendered by `hf html`. Timing results live in data/timeline.json."
+  "description": "Storyboard is the single source of intent. Localizable fields may be canonical strings or explicit locale maps; spoken variant narration and subtitles never fall back silently. Measured timing results live in data/timeline.json for canonical output and data/timeline.<locale>.json for variants."
 }

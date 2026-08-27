@@ -1,0 +1,23 @@
+1
+00:00:00,000 --> 00:00:09,528
+This film is also its own demonstration. Every timestamp comes from one storyboard and the measured duration of the real narration, never from a hand estimate.
+
+2
+00:00:12,000 --> 00:00:26,160
+Before, every regenerated voice meant editing index dot HTML, captions, manifests, and project metadata separately. If one MP3 ran longer than its slide, the final video cut the narration short.
+
+3
+00:00:26,800 --> 00:00:40,048
+Now there is one pipeline. The storyboard produces the script, Edge TTS creates each MP3, ffprobe measures its real length, and sync updates the page, captions, and metadata together.
+
+4
+00:00:40,800 --> 00:00:54,312
+Render waits behind two gates. H F audit checks project structure, schema, and audio cut risk. HyperFrames check then verifies runtime behavior, layout, motion, and text contrast.
+
+5
+00:00:55,000 --> 00:01:05,440
+Automation does not replace a person. Someone still has to hear the pacing and pronunciation, inspect readability, and approve that specific language before render.
+
+6
+00:01:07,000 --> 00:01:13,840
+From storyboard to video through one rerunnable pipeline. This is Snowy HyperFrames Workflow version two.

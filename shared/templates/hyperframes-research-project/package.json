@@ -2,7 +2,7 @@
   "name": "replace-with-project-id",
   "private": true,
   "type": "module",
-  "hyperframesVersion": "0.8.11",
+  "hyperframesVersion": "0.8.16",
   "scripts": {
     "hf": "node ../../../shared/tools/hf.mjs",
     "html": "node ../../../shared/tools/hf.mjs html",

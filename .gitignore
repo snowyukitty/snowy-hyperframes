@@ -69,6 +69,7 @@ Thumbs.db
 **/bakeoff/
 **/snapshots/
 **/.hf-review-tmp/
+**/.hf-locale-work/
 
 # HyperFrames transient render/cache outputs
 **/renders/work-*/

@@ -1,0 +1,1 @@
+Render waits behind two gates. H F audit checks project structure, schema, and audio cut risk. HyperFrames check then verifies runtime behavior, layout, motion, and text contrast.

@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "provider": "edge-tts",
+  "requiresApiKey": false,
+  "charge": {
+    "currency": "USD",
+    "amount": 0,
+    "credits": 0
+  },
+  "locale": "en",
+  "slide": "slide-03",
+  "voice": "en-US-JennyNeural",
+  "params": {
+    "rate": "+5%",
+    "pitch": "-3Hz",
+    "volume": "+0%"
+  },
+  "inputFile": "assets/audio/en/slide-03.tts.txt",
+  "outputAudio": "assets/audio/en/slide-03.mp3",
+  "wordTimings": "assets/audio/en/slide-03.words.json",
+  "sourceFingerprint": "6551948018c96fe7592702534447d15c81ffffd835409ee4724ad214fe37c576",
+  "sha256": {
+    "audio": "10e25eeb89c93817e49f9cfa6a94a22b97cad2efa8386c01cf3be4cc153b9ddd",
+    "words": "0df7e1929e76f0c48e32cfdec8ed92027ffdddc12d469843110321524da77d29"
+  },
+  "generatedAt": "2026-08-27T12:46:58.726Z"
+}

@@ -8,10 +8,10 @@
  *
  * Commands (run inside a project dir, or pass --project <dir>):
  *   new <workflow>/<name>   scaffold a project from shared/templates (run anywhere in the repo)
- *   html                    generate / refresh index.html slide + audio regions from the storyboard
- *   prepare-tts             storyboard narration -> slide-NN.display.txt -> pronunciation map -> slide-NN.tts.txt
- *   tts [--only id] [--force]   Edge-TTS: slide-NN.tts.txt -> slide-NN.mp3 (voice from storyboard.voice)
- *   measure                 ffprobe every slide MP3 -> data/audio-durations.json
+ *   html [--locale id]      generate / refresh the locale entry's slide + audio regions
+ *   prepare-tts [--locale id]   storyboard narration -> display text -> pronunciation map -> TTS text
+ *   tts [--locale id] [--only id] [--force]   Edge-TTS audio + word boundaries
+ *   measure [--locale id]   ffprobe every slide MP3 -> the locale's measured durations
  *   sync [--policy audio|storyboard] [--pad 0.6] [--dry-run]
  *                           measured audio -> data/timeline.json, index.html timing attrs,
  *                           captions/narration.srt, project.json durationSeconds, legacy manifests
@@ -20,9 +20,10 @@
  *   fit-audio               keep slide windows, set each narration clip's data-duration to its MP3 length
  *                           (HyperFrames >=0.8 clip_media_fit) and fix the root data-duration — for legacy demos
  *   vendor                  copy shared/vendor/gsap.min.js into ./vendor and point index.html at it (no CDN at render)
- *   review [--artifact]     build the human preview gate: one self-contained HTML with a frame + the real
+ *   review [--locale id] [--artifact]  build the human preview gate: one self-contained HTML with a frame + the real
  *                           narration per slide, per-slide verdicts, and a paste-ready approval summary
- *   check [HyperFrames flags]   hf audit -> pinned HyperFrames browser gate, with child windows hidden
+ *   check [--locale id | --all-locales] [HyperFrames flags]
+ *                           hf audit -> pinned HyperFrames browser gate, with child windows hidden
  *   lint|snapshot|doctor [HyperFrames flags]
  *   preview|render|publish [HyperFrames flags]
  *                           run the pinned HyperFrames CLI behind the same hidden Windows child boundary
@@ -38,6 +39,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
@@ -113,6 +115,9 @@ const round1 = (n) => Math.round(n * 10) / 10;
 const ceil1 = (n) => Math.ceil(n * 10 - 1e-9) / 10;
 const fmt = (n, d = 2) => Number(n).toFixed(d);
 const round2 = (n) => Math.round(n * 100) / 100;
+const sha256 = (value) => createHash("sha256").update(value).digest("hex");
+const fileSha256 = (file) => sha256(fs.readFileSync(file));
+const ttsSourceFingerprint = (text, voice, rate, pitch, volume) => sha256(JSON.stringify({ text, voice, rate, pitch, volume }));
 // narration clip slot = exact MP3 length (HyperFrames >=0.8 shortens longer slots anyway: clip_media_fit)
 const audioSlot = (t) => (t.mp3 ? Math.min(round2(t.mp3), t.duration) : t.duration);
 
@@ -154,29 +159,132 @@ function slideNumber(id) {
   const m = /(\d+)$/.exec(id || "");
   return m ? Number(m[1]) : NaN;
 }
-function loadStoryboard(projectRoot) {
-  const p = path.join(projectRoot, "data", "storyboard.json");
-  if (!exists(p)) die(`missing ${rel(projectRoot, p)}`);
-  const raw = readJson(p);
+function localeIds(raw) {
+  const ids = new Set([String(raw.language || "").trim(), ...Object.keys(raw.locales || {})].filter(Boolean));
+  return [...ids];
+}
+function canonicalLocale(raw) {
+  const declared = Object.entries(raw.locales || {}).find(([, config]) => config && config.default === true)?.[0];
+  return String(raw.language || declared || "zh-Hant");
+}
+function assertLocale(locale, raw) {
+  const id = String(locale || canonicalLocale(raw));
+  if (!/^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/.test(id)) throw new Error(`invalid locale ${JSON.stringify(id)}`);
+  if (id !== canonicalLocale(raw) && !localeIds(raw).includes(id)) {
+    throw new Error(`locale ${JSON.stringify(id)} is not declared in storyboard.locales (${localeIds(raw).join(", ") || "none"})`);
+  }
+  return id;
+}
+function localizedValue(value, locale, canonical, context, warnings, { required = false, optional = false } = {}) {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    if (typeof value[locale] === "string") return value[locale];
+    if (locale === canonical && typeof value[canonical] === "string") return value[canonical];
+    if (optional) return "";
+    if (required) throw new Error(`${context}: missing required ${JSON.stringify(locale)} string`);
+    if (typeof value[canonical] === "string") {
+      warnings.push(`${context}: ${JSON.stringify(locale)} falls back to canonical ${JSON.stringify(canonical)}`);
+      return value[canonical];
+    }
+    return "";
+  }
+  if (locale === canonical) return value ?? "";
+  if (optional) return "";
+  if (required) throw new Error(`${context}: must be localized for ${JSON.stringify(locale)}; a canonical string cannot supply a spoken variant`);
+  if (value !== undefined && value !== null && value !== "") warnings.push(`${context}: ${JSON.stringify(locale)} falls back to canonical ${JSON.stringify(canonical)}`);
+  return value ?? "";
+}
+function localizeBlock(block, locale, canonical, slideId, warnings) {
+  const b = structuredClone(block || {});
+  const get = (owner, key, context = `slides.${slideId}.blocks[].${key}`) => {
+    if (owner && key in owner) owner[key] = localizedValue(owner[key], locale, canonical, context, warnings);
+  };
+  get(b, "text");
+  get(b, "source");
+  get(b, "unit");
+  if (Array.isArray(b.labels)) b.labels = b.labels.map((label, i) => localizedValue(label, locale, canonical, `slides.${slideId}.blocks[].labels[${i}]`, warnings));
+  if (Array.isArray(b.items)) {
+    b.items = b.items.map((item, i) => {
+      if (typeof item === "string" || (item && typeof item === "object" && !Array.isArray(item) && !Object.keys(item).some((k) => ["text", "title", "label", "value", "note", "display", "emphasis"].includes(k)))) {
+        return localizedValue(item, locale, canonical, `slides.${slideId}.blocks[].items[${i}]`, warnings);
+      }
+      const it = structuredClone(item || {});
+      for (const key of ["text", "title", "label", "note", "display"]) get(it, key, `slides.${slideId}.blocks[].items[${i}].${key}`);
+      return it;
+    });
+  }
+  if (Array.isArray(b.series)) {
+    b.series = b.series.map((series, i) => {
+      const out = structuredClone(series || {});
+      get(out, "label", `slides.${slideId}.blocks[].series[${i}].label`);
+      get(out, "last", `slides.${slideId}.blocks[].series[${i}].last`);
+      return out;
+    });
+  }
+  return b;
+}
+function resolveStoryboard(raw, locale) {
+  const canonical = canonicalLocale(raw);
+  const selected = assertLocale(locale || canonical, raw);
+  const warnings = [];
+  const variant = selected !== canonical;
   const slides = (raw.slides || []).map((s, i) => {
     const id = s.id || `slide-${String(i + 1).padStart(2, "0")}`;
     return {
       id,
       n: slideNumber(id) || i + 1,
-      title: s.title || "",
-      chapter: s.chapter || s.type || "",
+      title: localizedValue(s.title, selected, canonical, `slides.${id}.title`, warnings),
+      chapter: localizedValue(s.chapter || s.type || "", selected, canonical, `slides.${id}.chapter`, warnings),
       durationTarget: Number(s.durationTarget ?? s.duration ?? s.originalTargetDuration ?? 0) || 0,
       image: s.image || (s.visuals && s.visuals.imageName ? `assets/images/${s.visuals.imageName}` : "") || "",
       imageInferred: !s.image && !!(s.visuals && s.visuals.imageName),
-      blocks: Array.isArray(s.blocks) ? s.blocks : [],
+      blocks: Array.isArray(s.blocks) ? s.blocks.map((b) => localizeBlock(b, selected, canonical, id, warnings)) : [],
       motion: s.motion || null,
-      subtitle: s.subtitle ?? "",
-      narration: s.narration ?? s.displayText ?? "",
-      ttsText: s.ttsText ?? "",
+      subtitle: localizedValue(s.subtitle ?? "", selected, canonical, `slides.${id}.subtitle`, warnings, { required: variant }),
+      narration: localizedValue(s.narration ?? s.displayText ?? "", selected, canonical, `slides.${id}.narration`, warnings, { required: variant }),
+      ttsText: localizedValue(s.ttsText ?? "", selected, canonical, `slides.${id}.ttsText`, warnings, { optional: true }),
       raw: s,
     };
   });
-  return { path: p, raw, slides, voice: raw.voice || {}, title: raw.title || "", music: raw.music || null };
+  const localeVoice = (raw.locales && raw.locales[selected] && raw.locales[selected].voice) || {};
+  const voice = { ...(raw.voice || {}), ...localeVoice };
+  if (localeVoice.name && !localeVoice.voice) voice.voice = localeVoice.name;
+  else if (!voice.voice && voice.name) voice.voice = voice.name;
+  return {
+    raw,
+    slides,
+    locale: selected,
+    canonicalLocale: canonical,
+    isCanonical: selected === canonical,
+    locales: localeIds(raw),
+    resolutionWarnings: warnings,
+    voice,
+    title: localizedValue(raw.title || "", selected, canonical, "storyboard.title", warnings),
+    music: raw.music || null,
+  };
+}
+function loadStoryboard(projectRoot, locale) {
+  const p = path.join(projectRoot, "data", "storyboard.json");
+  if (!exists(p)) die(`missing ${rel(projectRoot, p)}`);
+  const raw = readJson(p);
+  return { path: p, ...resolveStoryboard(raw, locale) };
+}
+function localePaths(projectRoot, sb) {
+  const suffix = sb.isCanonical ? "" : `.${sb.locale}`;
+  const audioRel = sb.isCanonical ? "assets/audio" : `assets/audio/${sb.locale}`;
+  const reviewRel = sb.isCanonical ? "review" : `review/${sb.locale}`;
+  const projectId = exists(path.join(projectRoot, "project.json")) ? readJson(path.join(projectRoot, "project.json")).id || path.basename(projectRoot) : path.basename(projectRoot);
+  const relative = {
+    audioDir: audioRel,
+    pronunciation: sb.isCanonical ? sb.voice.pronunciationMap || "data/pronunciation-map.json" : sb.voice.pronunciationMap || `data/pronunciation-map.${sb.locale}.json`,
+    durations: `data/audio-durations${suffix}.json`,
+    timeline: `data/timeline${suffix}.json`,
+    entry: `index${suffix}.html`,
+    captions: `captions/narration${suffix}.srt`,
+    wordCaptions: `captions/narration${suffix}.word.srt`,
+    review: reviewRel,
+    renderOutput: `renders/${projectId}${suffix}.mp4`,
+  };
+  return { relative, ...Object.fromEntries(Object.entries(relative).map(([key, value]) => [key, path.join(projectRoot, ...value.split("/"))])) };
 }
 const padId = (n) => `slide-${String(n).padStart(2, "0")}`;
 
@@ -209,6 +317,10 @@ function validateSchema(schema, data, where = "$", out = []) {
     for (const [k, sub] of Object.entries(schema.properties || {})) if (k in data) validateSchema(sub, data[k], `${where}.${k}`, out);
     if (schema.additionalProperties === false) {
       for (const k of Object.keys(data)) if (!(k in (schema.properties || {})) && k !== "$schema") out.push(`${where}: unexpected property "${k}"`);
+    } else if (schema.additionalProperties && typeof schema.additionalProperties === "object") {
+      for (const [k, value] of Object.entries(data)) {
+        if (!(k in (schema.properties || {})) && k !== "$schema") validateSchema(schema.additionalProperties, value, `${where}.${k}`, out);
+      }
     }
   }
   return out;
@@ -276,6 +388,19 @@ function patchRootDuration(html, total) {
   const tag = setAttr(m[0], "data-duration", String(total));
   return { html: html.slice(0, m.index) + tag + html.slice(m.index + m[0].length), found: true };
 }
+function patchCompositionLocale(html, locale) {
+  const match = /data-composition-id="([^"]*)"/.exec(html);
+  if (!match) return { html, found: false, id: null };
+  const oldId = match[1];
+  const baseId = oldId.replace(new RegExp(`-${locale}$`), "");
+  const id = `${baseId}-${locale}`;
+  html = html.replace(match[0], `data-composition-id="${id}"`);
+  for (const prior of new Set([oldId, baseId])) {
+    html = html.split(`window.__timelines["${prior}"]`).join(`window.__timelines["${id}"]`);
+    html = html.split(`window.__timelines['${prior}']`).join(`window.__timelines['${id}']`);
+  }
+  return { html, found: true, id };
+}
 function patchGsapStartArray(html, timeline) {
   // Legacy demos keep `["#slide-03", 40.1]` or `["#slide-03", 40.1, 12]`
   // arrays; refresh the first numeric field (start) without touching duration.
@@ -326,10 +451,11 @@ function buildSrt(timeline, textById) {
       .map((s, i) => {
         const text = (textById[s.id] || "").trim();
         // cue ends when narration ends (mp3), not when the slide ends — keeps captions honest
-        const end = s.mp3 ? Math.min(s.start + s.mp3, s.start + s.duration) : s.start + s.duration;
-        return `${i + 1}\n${srtTime(s.start)} --> ${srtTime(end)}\n${text}\n`;
+        const mp3 = s.mp3 ?? s.mp3Duration;
+        const end = mp3 != null ? Math.min(s.start + mp3, s.start + s.duration) : s.start + s.duration;
+        return `${i + 1}\n${srtTime(s.start)} --> ${srtTime(end)}\n${text}`;
       })
-      .join("\n") + "\n"
+      .join("\n\n") + "\n"
   );
 }
 function countSrtCues(text) {
@@ -433,51 +559,51 @@ function buildWordCues(displayText, words, maxChars, offset, limit) {
   return cues.filter((c) => c.end > c.start && c.text.trim());
 }
 function renderSrt(cues) {
-  return cues.map((c, i) => `${i + 1}\n${srtTime(c.start)} --> ${srtTime(c.end)}\n${c.text.trim()}\n`).join("\n") + "\n";
+  return cues.map((c, i) => `${i + 1}\n${srtTime(c.start)} --> ${srtTime(c.end)}\n${c.text.trim()}`).join("\n\n") + "\n";
 }
-function wordCuesFor(projectRoot, timeline) {
+function wordCuesFor(projectRoot, timeline, paths = localePaths(projectRoot, loadStoryboard(projectRoot))) {
   const maxChars = Number(FLAGS["max-chars"] || 18);
   const out = [];
   let missing = 0;
   for (const t of timeline) {
-    const p = path.join(projectRoot, "assets", "audio", `${t.id}.words.json`);
+    const p = path.join(paths.audioDir, `${t.id}.words.json`);
     if (!exists(p)) {
       missing++;
       continue;
     }
     const words = readJson(p).words || [];
-    const display = path.join(projectRoot, "assets", "audio", `${t.id}.display.txt`);
+    const display = path.join(paths.audioDir, `${t.id}.display.txt`);
     out.push(...buildWordCues(exists(display) ? readText(display) : "", words, maxChars, t.start, t.start + t.duration));
   }
   return { cues: out, missing, maxChars };
 }
-function writeWordCaptions(projectRoot, timeline, { quiet = false } = {}) {
-  const { cues, missing, maxChars } = wordCuesFor(projectRoot, timeline);
-  const target = path.join(projectRoot, "captions", "narration.word.srt");
+function writeWordCaptions(projectRoot, timeline, { quiet = false, paths = localePaths(projectRoot, loadStoryboard(projectRoot)) } = {}) {
+  const { cues, missing, maxChars } = wordCuesFor(projectRoot, timeline, paths);
+  const target = paths.wordCaptions;
   if (!cues.length) {
     if (!quiet) warn(`  no word timings found (run hf tts --force to capture them); ${target} not written`);
     return null;
   }
   writeText(target, renderSrt(cues));
-  if (!quiet) log(`  captions/narration.word.srt: ${cues.length} cues (<=${maxChars} chars)${missing ? `, ${missing} slide(s) without word data` : ""}`);
+  if (!quiet) log(`  ${paths.relative.wordCaptions}: ${cues.length} cues (<=${maxChars} chars)${missing ? `, ${missing} slide(s) without word data` : ""}`);
   return cues.length;
 }
 function cmdCaptions(projectRoot = findProjectRoot()) {
-  const sb = loadStoryboard(projectRoot);
-  const tlPath = path.join(projectRoot, "data", "timeline.json");
-  const timeline = exists(tlPath) ? readJson(tlPath).slides : provisionalTimeline(projectRoot, sb);
+  const sb = loadStoryboard(projectRoot, FLAGS.locale);
+  const paths = localePaths(projectRoot, sb);
+  const timeline = exists(paths.timeline) ? readJson(paths.timeline).slides : provisionalTimeline(projectRoot, sb, paths);
   const mode = String(FLAGS.mode || "word");
   if (!["word", "slide", "both"].includes(mode)) die("--mode must be word|slide|both");
   if (mode === "slide" || mode === "both") {
     const textById = {};
     for (const s of sb.slides) {
-      const display = path.join(projectRoot, "assets", "audio", `${s.id}.display.txt`);
+      const display = path.join(paths.audioDir, `${s.id}.display.txt`);
       textById[s.id] = exists(display) ? readText(display) : s.narration || s.subtitle || "";
     }
-    writeText(path.join(projectRoot, "captions", "narration.srt"), buildSrt(timeline, textById));
-    log(`  captions/narration.srt: ${timeline.length} cues (one per slide)`);
+    writeText(paths.captions, buildSrt(timeline, textById));
+    log(`  ${paths.relative.captions}: ${timeline.length} cues (one per slide)`);
   }
-  if (mode === "word" || mode === "both") writeWordCaptions(projectRoot, timeline);
+  if (mode === "word" || mode === "both") writeWordCaptions(projectRoot, timeline, { paths });
 }
 
 // ---------------------------------------------------------------------------
@@ -704,10 +830,10 @@ function renderBlocks(blocks, pad = "          ") {
   }
   return out.filter(Boolean).join("\n");
 }
-function renderAudioRegion(timeline, music) {
+function renderAudioRegion(timeline, music, audioBase = "assets/audio") {
   const lines = timeline.map(
     (s, i) =>
-      `      <audio id="audio-${s.id}" class="clip narration-audio" data-audio-group="voiceover" data-start="${s.start}" data-duration="${audioSlot(s)}" data-track-index="${20 + i}" src="assets/audio/${s.id}.mp3"></audio>`
+      `      <audio id="audio-${s.id}" class="clip narration-audio" data-audio-group="voiceover" data-start="${s.start}" data-duration="${audioSlot(s)}" data-track-index="${20 + i}" src="${esc(audioBase)}/${s.id}.mp3"></audio>`
   );
   // Optional music bed on its own track, under every narration clip. Sourcing a track is out of
   // scope for this toolkit (bring a file you have the rights to, or use upstream /media-use);
@@ -753,7 +879,7 @@ function regionOf(html, startMarker, endMarker) {
   const b = html.indexOf(endMarker);
   return a === -1 || b === -1 || b < a ? null : html.slice(a + startMarker.length, b);
 }
-const normalizeRegion = (s) => s.replace(/\sdata-(start|duration)="[^"]*"/g, "").replace(/\s+/g, " ").trim();
+const normalizeRegion = (s) => s.replace(/\sdata-(start|duration|hf-id)="[^"]*"/g, "").replace(/\s+/g, " ").trim();
 
 function replaceRegion(html, startMarker, endMarker, replacement) {
   const a = html.indexOf(startMarker);
@@ -763,24 +889,31 @@ function replaceRegion(html, startMarker, endMarker, replacement) {
 }
 function cmdHtml(projectRoot = findProjectRoot()) {
   const repo = repoRootOrDie(projectRoot);
-  const sb = loadStoryboard(projectRoot);
+  const sb = loadStoryboard(projectRoot, FLAGS.locale);
+  const paths = localePaths(projectRoot, sb);
   if (!sb.slides.length) die("storyboard has no slides");
-  const timeline = provisionalTimeline(projectRoot, sb);
-  const target = path.join(projectRoot, "index.html");
+  const timeline = provisionalTimeline(projectRoot, sb, paths);
+  const target = paths.entry;
   const templateHtml = path.join(repo, "shared", "templates", "hyperframes-research-project", "index.html");
   let html;
   if (exists(target) && !FLAGS.force) {
     html = readText(target);
-    const a = replaceRegion(html, HF_AUDIO_START, HF_AUDIO_END, renderAudioRegion(timeline, sb.music));
+    const a = replaceRegion(html, HF_AUDIO_START, HF_AUDIO_END, renderAudioRegion(timeline, sb.music, paths.relative.audioDir));
     const b = a && replaceRegion(a, HF_SLIDES_START, HF_SLIDES_END, renderSlidesRegion(timeline, sb.slides));
     if (!b) die("index.html exists but has no hf:audio / hf:slides regions. Re-run with --force to regenerate from the template (this overwrites index.html).");
     html = b;
   } else {
-    if (!exists(templateHtml)) die(`template missing: ${rel(repo, templateHtml)}`);
-    html = readText(templateHtml);
-    html = replaceRegion(html, HF_AUDIO_START, HF_AUDIO_END, renderAudioRegion(timeline, sb.music)) || html;
+    const canonicalEntry = path.join(projectRoot, "index.html");
+    const base = !sb.isCanonical && exists(canonicalEntry) ? canonicalEntry : templateHtml;
+    if (!exists(base)) die(`template missing: ${rel(repo, base)}`);
+    html = readText(base);
+    html = replaceRegion(html, HF_AUDIO_START, HF_AUDIO_END, renderAudioRegion(timeline, sb.music, paths.relative.audioDir)) || html;
     html = replaceRegion(html, HF_SLIDES_START, HF_SLIDES_END, renderSlidesRegion(timeline, sb.slides)) || html;
-    html = html.replace(/<title>[^<]*<\/title>/, `<title>${esc(sb.title || "HyperFrames")}</title>`);
+  }
+  html = html.replace(/<title>[^<]*<\/title>/, `<title>${esc(sb.title || "HyperFrames")}</title>`);
+  if (!sb.isCanonical) {
+    html = html.replace(/<html\b[^>]*\blang="[^"]*"/, (tag) => setAttr(tag, "lang", sb.locale));
+    html = patchCompositionLocale(html, sb.locale).html;
   }
   const total = timeline.length ? round1(timeline[timeline.length - 1].start + timeline[timeline.length - 1].duration) : 0;
   html = patchRootDuration(html, total).html;
@@ -789,12 +922,12 @@ function cmdHtml(projectRoot = findProjectRoot()) {
     return;
   }
   writeText(target, html);
-  log(`wrote index.html (${timeline.length} slides, ${total}s provisional; run  hf sync  after TTS)`);
+  log(`wrote ${paths.relative.entry} (${timeline.length} slides, ${total}s provisional; run  hf sync${sb.isCanonical ? "" : ` --locale ${sb.locale}`} after TTS)`);
 }
 
 // provisional timeline: measured mp3 where available, else storyboard targets
-function provisionalTimeline(projectRoot, sb) {
-  const durations = loadDurations(projectRoot, false);
+function provisionalTimeline(projectRoot, sb, paths = localePaths(projectRoot, sb)) {
+  const durations = loadDurations(projectRoot, false, paths);
   let cursor = 0;
   return sb.slides.map((s) => {
     const mp3 = durations[s.id];
@@ -819,10 +952,11 @@ function applyPronunciationMap(text, map) {
   return text;
 }
 function cmdPrepareTts(projectRoot = findProjectRoot()) {
-  const sb = loadStoryboard(projectRoot);
-  const audioDir = path.join(projectRoot, "assets", "audio");
+  const sb = loadStoryboard(projectRoot, FLAGS.locale);
+  const paths = localePaths(projectRoot, sb);
+  const audioDir = paths.audioDir;
   fs.mkdirSync(audioDir, { recursive: true });
-  const mapPath = path.join(projectRoot, "data", "pronunciation-map.json");
+  const mapPath = paths.pronunciation;
   const map = exists(mapPath) ? readJson(mapPath) : { entries: [] };
   let wrote = 0;
   for (const s of sb.slides) {
@@ -846,14 +980,15 @@ function cmdPrepareTts(projectRoot = findProjectRoot()) {
       wrote++;
     }
   }
-  log(`prepare-tts: ${sb.slides.length} slides, ${wrote} tts.txt updated (map entries: ${(map.entries || []).length})`);
+  log(`prepare-tts${sb.isCanonical ? "" : ` --locale ${sb.locale}`}: ${sb.slides.length} slides, ${wrote} tts.txt updated (map entries: ${(map.entries || []).length})`);
 }
 
 // ---------------------------------------------------------------------------
 // COMMAND: tts (Edge-TTS)
 // ---------------------------------------------------------------------------
 function cmdTts(projectRoot = findProjectRoot()) {
-  const sb = loadStoryboard(projectRoot);
+  const sb = loadStoryboard(projectRoot, FLAGS.locale);
+  const paths = localePaths(projectRoot, sb);
   const v = sb.voice || {};
   if (v.tool && v.tool !== "edge-tts") die(`storyboard.voice.tool is "${v.tool}"; hf tts only drives edge-tts (other providers: write slide-NN.mp3 yourself, then hf measure).`);
   const voice = FLAGS.voice || v.voice || "zh-TW-HsiaoChenNeural";
@@ -865,7 +1000,7 @@ function cmdTts(projectRoot = findProjectRoot()) {
   const helper = path.join(repoRootOrDie(projectRoot), "shared", "tools", "edge_tts_words.py");
   const useHelper = py && exists(helper);
   if (!edge && !useHelper) die("edge-tts not found. Install:  pip install --user edge-tts   (or: python -m pip install edge-tts)");
-  const audioDir = path.join(projectRoot, "assets", "audio");
+  const audioDir = paths.audioDir;
   const only = FLAGS.only ? String(FLAGS.only).split(",") : null;
   let made = 0,
     skipped = 0,
@@ -881,7 +1016,10 @@ function cmdTts(projectRoot = findProjectRoot()) {
       continue;
     }
     const wordsPath = path.join(audioDir, `${s.id}.words.json`);
-    if (!FLAGS.force && exists(mp3) && fs.statSync(mp3).mtimeMs >= fs.statSync(ttsPath).mtimeMs) {
+    const providerPath = path.join(audioDir, `${s.id}.provider.json`);
+    const sourceFingerprint = ttsSourceFingerprint(readText(ttsPath), voice, rate, pitch, volume);
+    const provider = exists(providerPath) ? readJson(providerPath) : null;
+    if (!FLAGS.force && exists(mp3) && fs.statSync(mp3).mtimeMs >= fs.statSync(ttsPath).mtimeMs && provider?.sourceFingerprint === sourceFingerprint) {
       skipped++;
       if (useHelper && !exists(wordsPath)) noWords++;
       continue;
@@ -900,6 +1038,25 @@ function cmdTts(projectRoot = findProjectRoot()) {
     }
     made++;
     const words = exists(wordsPath) ? readJson(wordsPath).words.length : 0;
+    writeJson(providerPath, {
+      version: 1,
+      provider: "edge-tts",
+      requiresApiKey: false,
+      charge: { currency: "USD", amount: 0, credits: 0 },
+      locale: sb.locale,
+      slide: s.id,
+      voice,
+      params: { rate, pitch, volume },
+      inputFile: rel(projectRoot, ttsPath),
+      outputAudio: rel(projectRoot, mp3),
+      wordTimings: exists(wordsPath) ? rel(projectRoot, wordsPath) : null,
+      sourceFingerprint,
+      sha256: {
+        audio: fileSha256(mp3),
+        words: exists(wordsPath) ? fileSha256(wordsPath) : null,
+      },
+      generatedAt: new Date(fs.statSync(mp3).mtimeMs).toISOString(),
+    });
     log(`  ${s.id}: ${fmt(ffprobeDuration(mp3))}s${words ? `  (${words} word timings)` : ""}`);
   }
   log(`tts: voice=${voice} rate=${rate} pitch=${pitch}${useHelper ? " via edge_tts_words.py" : " via edge-tts CLI (no word timings)"} — generated ${made}, up-to-date ${skipped}, failed ${failed}`);
@@ -910,11 +1067,11 @@ function cmdTts(projectRoot = findProjectRoot()) {
 // ---------------------------------------------------------------------------
 // COMMAND: measure
 // ---------------------------------------------------------------------------
-function durationsPath(projectRoot) {
-  return path.join(projectRoot, "data", "audio-durations.json");
+function durationsPath(projectRoot, paths) {
+  return paths ? paths.durations : path.join(projectRoot, "data", "audio-durations.json");
 }
-function loadDurations(projectRoot, strict = true) {
-  const p = durationsPath(projectRoot);
+function loadDurations(projectRoot, strict = true, paths) {
+  const p = durationsPath(projectRoot, paths);
   if (!exists(p)) {
     if (strict) die("no data/audio-durations.json — run  hf measure");
     return {};
@@ -922,8 +1079,9 @@ function loadDurations(projectRoot, strict = true) {
   return readJson(p).durations || {};
 }
 function cmdMeasure(projectRoot = findProjectRoot()) {
-  const sb = loadStoryboard(projectRoot);
-  const audioDir = path.join(projectRoot, "assets", "audio");
+  const sb = loadStoryboard(projectRoot, FLAGS.locale);
+  const paths = localePaths(projectRoot, sb);
+  const audioDir = paths.audioDir;
   const durations = {};
   const missing = [];
   for (const s of sb.slides) {
@@ -935,10 +1093,10 @@ function cmdMeasure(projectRoot = findProjectRoot()) {
     durations[s.id] = Math.round(ffprobeDuration(mp3) * 1000) / 1000;
   }
   const out = { generatedAt: nowIso(), tool: "ffprobe", durations, total: Math.round(Object.values(durations).reduce((a, b) => a + b, 0) * 1000) / 1000 };
-  writeJson(durationsPath(projectRoot), out);
+  writeJson(durationsPath(projectRoot, paths), out);
   for (const [id, d] of Object.entries(durations)) log(`  ${id}  ${fmt(d, 3)}s`);
   if (missing.length) warn(`  missing mp3: ${missing.join(", ")}`);
-  log(`measure: ${Object.keys(durations).length} clips, narration total ${fmt(out.total)}s -> data/audio-durations.json`);
+  log(`measure: ${Object.keys(durations).length} clips, narration total ${fmt(out.total)}s -> ${paths.relative.durations}`);
   return out;
 }
 
@@ -966,11 +1124,12 @@ function computeTimeline(sb, durations, policy, pad) {
   return { timeline, total: round1(cursor), problems };
 }
 function cmdSync(projectRoot = findProjectRoot()) {
-  const sb = loadStoryboard(projectRoot);
+  const sb = loadStoryboard(projectRoot, FLAGS.locale);
+  const paths = localePaths(projectRoot, sb);
   const policy = String(FLAGS.policy || "audio");
   const pad = FLAGS.pad !== undefined ? Number(FLAGS.pad) : PAD_DEFAULT;
   if (!["audio", "storyboard"].includes(policy)) die("--policy must be audio|storyboard");
-  let durations = loadDurations(projectRoot, false);
+  let durations = loadDurations(projectRoot, false, paths);
   if (!Object.keys(durations).length) durations = cmdMeasure(projectRoot).durations;
   const { timeline, total, problems } = computeTimeline(sb, durations, policy, pad);
   for (const p of problems) warn(`  ! ${p}`);
@@ -982,7 +1141,7 @@ function cmdSync(projectRoot = findProjectRoot()) {
   if (FLAGS["dry-run"]) return;
 
   // 1. data/timeline.json (generated artefact; the Snowy manifest of record)
-  writeJson(path.join(projectRoot, "data", "timeline.json"), {
+  writeJson(paths.timeline, {
     generatedAt: nowIso(),
     generator: "shared/tools/hf.mjs sync",
     policy,
@@ -992,7 +1151,7 @@ function cmdSync(projectRoot = findProjectRoot()) {
   });
 
   // 2. index.html timing attributes (+ legacy GSAP start arrays)
-  const htmlPath = path.join(projectRoot, "index.html");
+  const htmlPath = paths.entry;
   if (exists(htmlPath)) {
     let html = readText(htmlPath);
     let patched = 0,
@@ -1012,29 +1171,43 @@ function cmdSync(projectRoot = findProjectRoot()) {
     const g = patchGsapStartArray(html, timeline);
     html = g.html;
     writeText(htmlPath, html);
-    log(`  index.html: ${patched}/${timeline.length} slides patched${r.found ? ", root data-duration=" + total : ", (no root data-duration)"}${g.count ? ", gsap starts refreshed x" + g.count : ""}${missing.length ? "; NOT FOUND: " + missing.join(", ") : ""}`);
-  } else warn("  index.html missing — run  hf html");
+    log(`  ${paths.relative.entry}: ${patched}/${timeline.length} slides patched${r.found ? ", root data-duration=" + total : ", (no root data-duration)"}${g.count ? ", gsap starts refreshed x" + g.count : ""}${missing.length ? "; NOT FOUND: " + missing.join(", ") : ""}`);
+  } else warn(`  ${paths.relative.entry} missing — run  hf html${sb.isCanonical ? "" : ` --locale ${sb.locale}`}`);
 
   // 3. captions/narration.srt from display text
   const textById = {};
   for (const s of sb.slides) {
-    const display = path.join(projectRoot, "assets", "audio", `${s.id}.display.txt`);
+    const display = path.join(paths.audioDir, `${s.id}.display.txt`);
     textById[s.id] = exists(display) ? readText(display) : s.narration || s.subtitle || "";
   }
-  writeText(path.join(projectRoot, "captions", "narration.srt"), buildSrt(timeline, textById));
-  log(`  captions/narration.srt: ${timeline.length} cues`);
-  writeWordCaptions(projectRoot, timeline, { quiet: true }) && log(`  captions/narration.word.srt: refreshed from word timings`);
+  writeText(paths.captions, buildSrt(timeline, textById));
+  log(`  ${paths.relative.captions}: ${timeline.length} cues`);
+  writeWordCaptions(projectRoot, timeline, { quiet: true, paths }) && log(`  ${paths.relative.wordCaptions}: refreshed from word timings`);
 
   // 4. project.json
   const pjPath = path.join(projectRoot, "project.json");
   const pj = readJson(pjPath);
-  pj.durationSeconds = total;
   pj.updatedAt = nowIso();
-  pj.timing = { policy, padSeconds: pad, source: "data/timeline.json", measured: "data/audio-durations.json" };
+  if (sb.isCanonical) {
+    pj.durationSeconds = total;
+    pj.timing = { policy, padSeconds: pad, source: paths.relative.timeline, measured: paths.relative.durations };
+  }
+  const existing = (pj.deliverables && pj.deliverables[sb.locale]) || {};
+  pj.deliverables = pj.deliverables || {};
+  pj.deliverables[sb.locale] = {
+    locale: sb.locale,
+    durationSeconds: total,
+    entry: paths.relative.entry,
+    measuredAudio: paths.relative.durations,
+    timeline: paths.relative.timeline,
+    captions: { slide: paths.relative.captions, word: paths.relative.wordCaptions },
+    renderOutput: paths.relative.renderOutput,
+    review: { kit: `${paths.relative.review}/index.html`, status: existing.review?.status || "pending" },
+  };
   writeJson(pjPath, pj);
 
   // 5. legacy Snowy manifests (meta.json / hyperframes.json with slides[] / slidesData[])
-  for (const name of ["meta.json", "hyperframes.json"]) {
+  for (const name of sb.isCanonical ? ["meta.json", "hyperframes.json"] : []) {
     const p = path.join(projectRoot, name);
     if (!exists(p)) continue;
     const m = readJson(p);
@@ -1310,6 +1483,137 @@ function auditProject(projectRoot, repo) {
   // renders
   const renderOut = project.paths && project.paths.renderOutput;
   if (project.status === "rendered" && renderOut && !exists(P(renderOut))) I("render", `status=rendered but ${renderOut} not present locally (fine if renders live in Releases)`);
+  for (const locale of sb.locales.filter((id) => id !== sb.canonicalLocale)) {
+    findings.push(...auditLocaleVariant(projectRoot, locale));
+  }
+  return findings;
+}
+
+// A variant is a deliverable inside the same project, not a copied project. Audit its
+// complete chain independently: resolved copy -> audio -> measured timeline -> entry ->
+// captions -> human gate metadata. Canonical checks above deliberately keep their old
+// paths and semantics.
+function auditLocaleVariant(projectRoot, locale) {
+  const findings = [];
+  const add = (level, code, msg) => findings.push({ level, code, msg: `${locale}: ${msg}` });
+  const E = (code, msg) => add("error", code, msg);
+  const W = (code, msg) => add("warn", code, msg);
+  let sb;
+  try {
+    sb = loadStoryboard(projectRoot, locale);
+  } catch (error) {
+    E("locale", String(error.message || error));
+    return findings;
+  }
+  const paths = localePaths(projectRoot, sb);
+  for (const warning of sb.resolutionWarnings) W("locale-fallback", warning);
+  for (const [label, file] of Object.entries({
+    entry: paths.entry,
+    pronunciation: paths.pronunciation,
+    "measured audio": paths.durations,
+    timeline: paths.timeline,
+    captions: paths.captions,
+    "word captions": paths.wordCaptions,
+  })) {
+    if (!exists(file)) E("missing-variant-file", `${label} missing (${rel(projectRoot, file)})`);
+  }
+  if (exists(paths.pronunciation)) {
+    const schema = path.join(repoRootOrDie(projectRoot), "shared", "schemas", "pronunciation-map.schema.json");
+    for (const error of validateSchema(readJson(schema), readJson(paths.pronunciation))) E("schema", `${paths.relative.pronunciation} ${error}`);
+  }
+  for (const slide of sb.slides) {
+    for (const ext of ["display.txt", "tts.txt", "mp3", "words.json", "provider.json"]) {
+      const file = path.join(paths.audioDir, `${slide.id}.${ext}`);
+      if (!exists(file)) E("missing-variant-audio", `${rel(projectRoot, file)} missing`);
+    }
+    const provider = path.join(paths.audioDir, `${slide.id}.provider.json`);
+    const mp3 = path.join(paths.audioDir, `${slide.id}.mp3`);
+    const words = path.join(paths.audioDir, `${slide.id}.words.json`);
+    if (exists(provider)) {
+      const receipt = readJson(provider);
+      if (receipt.provider !== "edge-tts" || receipt.locale !== locale || receipt.slide !== slide.id) E("audio-provenance", `${rel(projectRoot, provider)} identity does not match the deliverable`);
+      if (exists(mp3) && receipt.sha256?.audio !== fileSha256(mp3)) E("audio-provenance", `${slide.id}: MP3 hash does not match its provider receipt`);
+      if (exists(words) && receipt.sha256?.words !== fileSha256(words)) E("audio-provenance", `${slide.id}: word-boundary hash does not match its provider receipt`);
+    }
+  }
+  if (!exists(paths.timeline)) return findings;
+  let timeline;
+  try {
+    timeline = readJson(paths.timeline).slides || [];
+  } catch (error) {
+    E("invalid-json", `${paths.relative.timeline}: ${error.message}`);
+    return findings;
+  }
+  if (timeline.length !== sb.slides.length) E("variant-timing", `${paths.relative.timeline} has ${timeline.length} slide(s), expected ${sb.slides.length}`);
+  const total = timeline.length ? round1(timeline[timeline.length - 1].start + timeline[timeline.length - 1].duration) : 0;
+  let cursor = 0;
+  for (const [i, slide] of sb.slides.entries()) {
+    const t = timeline[i];
+    if (!t || t.id !== slide.id) {
+      E("variant-timing", `timeline row ${i + 1} does not match ${slide.id}`);
+      continue;
+    }
+    if (Math.abs(t.start - cursor) > 0.05) E("variant-timing", `${slide.id} starts at ${t.start}s, expected ${cursor}s`);
+    cursor = round1(t.start + t.duration);
+    const mp3 = path.join(paths.audioDir, `${slide.id}.mp3`);
+    if (exists(mp3)) {
+      try {
+        const measured = ffprobeDuration(mp3);
+        if (measured > t.duration + CUT_TOLERANCE) E("cut-risk", `${slide.id}: mp3 ${fmt(measured)}s > slide ${fmt(t.duration)}s`);
+        if (t.mp3Duration != null && Math.abs(measured - t.mp3Duration) > 0.05) E("variant-timing", `${slide.id}: timeline MP3 ${fmt(t.mp3Duration)}s != ffprobe ${fmt(measured)}s`);
+      } catch (error) {
+        W("ffprobe", error.message.split("\n")[0]);
+      }
+    }
+  }
+  if (exists(paths.entry)) {
+    const html = readText(paths.entry);
+    if (!new RegExp(`data-composition-id="[^"]*-${locale}"`).test(html)) E("composition", `${paths.relative.entry} does not carry a locale-specific composition id`);
+    const current = regionOf(html, HF_SLIDES_START, HF_SLIDES_END);
+    const expected = renderSlidesRegion(sb.slides.map((s) => ({ id: s.id, start: 0, duration: 0 })), sb.slides);
+    if (current === null || normalizeRegion(current) !== normalizeRegion(regionOf(expected, HF_SLIDES_START, HF_SLIDES_END) || "")) {
+      E("stale-html", `${paths.relative.entry} does not match the ${locale} storyboard resolution`);
+    }
+    const timing = parseTimingFromHtml(html, sb.slides.map((s) => s.id));
+    if (!timing.root || Math.abs((timing.root.duration ?? -1) - total) > 0.05) E("variant-timing", `${paths.relative.entry} root duration does not match ${total}s`);
+    for (const t of timeline) {
+      const found = timing.slides[t.id];
+      if (!found?.section || Math.abs(found.section.start - t.start) > 0.05 || Math.abs(found.section.duration - t.duration) > 0.05) E("variant-timing", `${t.id}: entry timing differs from ${paths.relative.timeline}`);
+      if (!found?.audio || !found.audio.tag.includes(`src="${paths.relative.audioDir}/${t.id}.mp3"`)) E("variant-audio", `${t.id}: entry does not use ${paths.relative.audioDir}/${t.id}.mp3`);
+    }
+  }
+  if (exists(paths.captions)) {
+    const actual = readText(paths.captions);
+    if (countSrtCues(actual) !== sb.slides.length) E("captions", `${paths.relative.captions} must have one cue per slide`);
+    const textById = Object.fromEntries(sb.slides.map((slide) => {
+      const display = path.join(paths.audioDir, `${slide.id}.display.txt`);
+      return [slide.id, exists(display) ? readText(display) : slide.narration || slide.subtitle || ""];
+    }));
+    const expected = buildSrt(timeline.map((row) => ({ ...row, mp3: row.mp3Duration ?? row.mp3 })), textById);
+    if (actual !== expected) E("captions", `${paths.relative.captions} does not match display copy and ${paths.relative.timeline}`);
+  }
+  if (exists(paths.wordCaptions)) {
+    const cues = parseSrtCues(readText(paths.wordCaptions));
+    if (cues.length < sb.slides.length) E("captions", `${paths.relative.wordCaptions} has only ${cues.length} cue(s)`);
+    for (let i = 0; i < cues.length; i++) {
+      if (cues[i].start < -0.001 || cues[i].end > total + 0.05) E("captions", `${paths.relative.wordCaptions} cue ${i + 1} falls outside 0-${total}s`);
+      if (i && cues[i].start < cues[i - 1].end - 0.001) E("captions", `${paths.relative.wordCaptions} cue ${i + 1} overlaps its predecessor`);
+    }
+  }
+  const project = readJson(path.join(projectRoot, "project.json"));
+  const deliverable = project.deliverables && project.deliverables[locale];
+  if (!deliverable) E("deliverable", `project.json.deliverables.${locale} missing`);
+  else {
+    const expected = {
+      entry: paths.relative.entry,
+      measuredAudio: paths.relative.durations,
+      timeline: paths.relative.timeline,
+      renderOutput: paths.relative.renderOutput,
+    };
+    for (const [key, value] of Object.entries(expected)) if (deliverable[key] !== value) E("deliverable", `${key} is ${JSON.stringify(deliverable[key])}; expected ${JSON.stringify(value)}`);
+    if (Math.abs(Number(deliverable.durationSeconds) - total) > 0.05) E("deliverable", `durationSeconds does not match ${total}s`);
+    if (!deliverable.review || !["pending", "passed", "failed"].includes(deliverable.review.status)) E("deliverable", `review status must be pending|passed|failed`);
+  }
   return findings;
 }
 
@@ -1646,9 +1950,33 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fo
 `;
 
 function reviewHtml(meta, slides, opts = {}) {
-  const data = JSON.stringify({ meta, slides }).replace(/</g, "\\u003c");
+  const english = String(meta.locale || "").toLowerCase().startsWith("en");
+  const copy = english
+    ? {
+        narration: "Narration", passed: "passed", playAll: "▶ Play full cut", copy: "Copy review summary",
+        lede: `This is the <b>${esc(meta.project)}</b> human review kit: one real frame, narration clip, caption, and timing margin per slide. Check <b>pronunciation</b>, <b>pacing</b>, and <b>readability</b>. When every slide passes, copy the summary into the work session or <code>docs/retrospective.md</code>. Verdicts stay only in this browser.`,
+        footer: `Generated by <code>hf review</code> at ${esc(meta.generatedAt)} · deliverable status <code>${esc(meta.status)}</code> · A passed locale may proceed to render; keep the MP4 in GitHub Releases, not Git.`,
+        prev: "◀ Previous", pause: "Pause", next: "Next ▶", exit: "Exit (Esc)", gates: [["p", "Pronunciation"], ["r", "Pacing"], ["l", "Readability"]],
+        noAudio: "No audio", margin: "Margin", noFrame: "No frame (snapshot failed during hf review)", subtitle: "Caption: ", noNarration: "(No narration script)",
+        start: "Start", page: "Slide", note: "What should change? (included in the review summary)",
+        summaryTitle: "## Human preview review — ", project: "- Project: ", generated: "- Generated: ", length: " · length ", conclusion: "- Verdict: ",
+        passConclusion: "**passed** — render/publication may proceed", failConclusion: "**not passed** — fixes remain below", missing: " — missing: ",
+        copied: "Copied ✓", prompt: "Copy this text:", play: "Play",
+      }
+    : {
+        narration: "旁白", passed: "已通過", playAll: "▶ 連續播放", copy: "複製審核結論",
+        lede: `這是 <b>${esc(meta.project)}</b> 的人工審核包：每頁一張實際畫格、真實旁白音檔、字幕與時間餘裕。請確認三件事 —— <b>發音</b>（中英混讀是否自然）、<b>節奏</b>（旁白與頁面長度是否舒服）、<b>可讀性</b>（字幕與畫面文字是否看得清）。全部通過後按「複製審核結論」，把結果貼回工作階段或 <code>docs/retrospective.md</code>。勾選只存在你這台裝置的瀏覽器裡。`,
+        footer: `由 <code>hf review</code> 產生於 ${esc(meta.generatedAt)} · 專案狀態 <code>${esc(meta.status)}</code> · 通過後才可 render，成片放到 GitHub Releases（不要進 git）。`,
+        prev: "◀ 上一頁", pause: "暫停", next: "下一頁 ▶", exit: "結束（Esc）", gates: [["p", "發音"], ["r", "節奏"], ["l", "可讀性"]],
+        noAudio: "無音檔", margin: "餘裕", noFrame: "沒有畫格（跑 hf review 時 snapshot 失敗）", subtitle: "字幕：", noNarration: "（無旁白稿）",
+        start: "起", page: "頁面", note: "需要修的地方（會出現在審核結論裡）",
+        summaryTitle: "## 人工 preview 審核 — ", project: "- 專案：", generated: "- 產生：", length: " · 長度 ", conclusion: "- 結論：",
+        passConclusion: "**通過**，可以 render / 發布", failConclusion: "**未通過**，見下方待修項", missing: " — 未通過：",
+        copied: "已複製 ✓", prompt: "複製這段：", play: "播放",
+      };
+  const data = JSON.stringify({ meta, slides, copy }).replace(/</g, "\\u003c");
   const head = `<title>${esc(meta.title)}</title>\n<style>${REVIEW_CSS}</style>`;
-  const compositionId = `${meta.id}-review`;
+  const compositionId = `${meta.id}${meta.locale && meta.locale !== "zh-Hant" ? `-${meta.locale}` : ""}-review`;
   const body = `<div id="review-root" data-composition-id="${esc(compositionId)}" data-start="0" data-duration="${Number(meta.total) || 0}" data-width="1920" data-height="1080" data-no-timeline>
 <header class="top">
   <div class="top-in">
@@ -1656,28 +1984,20 @@ function reviewHtml(meta, slides, opts = {}) {
     <div class="chips">
       <span class="chip accent">${esc(meta.workflow)}</span>
       <span class="chip">${meta.total}s</span>
-      <span class="chip">旁白 ${meta.narration}s</span>
+      <span class="chip">${copy.narration} ${meta.narration}s</span>
       ${meta.voice ? `<span class="chip">${esc(meta.voice)}</span>` : ""}
-      <span class="chip" id="tally">0 / ${slides.length} 已通過</span>
+      <span class="chip" id="tally">0 / ${slides.length} ${copy.passed}</span>
     </div>
     <span class="spacer"></span>
-    <button id="play">▶ 連續播放</button>
-    <button id="copy" class="primary">複製審核結論</button>
+    <button id="play">${copy.playAll}</button>
+    <button id="copy" class="primary">${copy.copy}</button>
   </div>
 </header>
 
 <div class="wrap">
-  <p class="lede">
-    這是 <b>${esc(meta.project)}</b> 的人工審核包：每頁一張實際畫格、真實旁白音檔、字幕與時間餘裕。
-    請確認三件事 —— <b>發音</b>（中英混讀是否自然）、<b>節奏</b>（旁白與頁面長度是否舒服）、
-    <b>可讀性</b>（字幕與畫面文字是否看得清）。全部通過後按「複製審核結論」，把結果貼回工作階段或
-    <code>docs/retrospective.md</code>。勾選只存在你這台裝置的瀏覽器裡。
-  </p>
+  <p class="lede">${copy.lede}</p>
   <div id="list"></div>
-  <footer>
-    由 <code>hf review</code> 產生於 ${esc(meta.generatedAt)} · 專案狀態 <code>${esc(meta.status)}</code> ·
-    通過後把 <code>project.json.status</code> 改為 <code>rendered</code>，並把成片放到 GitHub Releases（不要進 git）。
-  </footer>
+  <footer>${copy.footer}</footer>
 </div>
 
 <div id="cinema">
@@ -1685,32 +2005,32 @@ function reviewHtml(meta, slides, opts = {}) {
   <div>
     <div class="bar"><i id="c-bar"></i></div>
     <div class="ctl">
-      <button id="c-prev">◀ 上一頁</button>
-      <button id="c-toggle" class="primary">暫停</button>
-      <button id="c-next">下一頁 ▶</button>
+      <button id="c-prev">${copy.prev}</button>
+      <button id="c-toggle" class="primary">${copy.pause}</button>
+      <button id="c-next">${copy.next}</button>
       <span class="chip" id="c-meta"></span>
       <span class="spacer"></span>
-      <button id="c-exit">結束（Esc）</button>
+      <button id="c-exit">${copy.exit}</button>
     </div>
   </div>
 </div>
 
 <script>
 var D = ${data};
-var KEY = "hf-review:" + D.meta.id;
+var KEY = "hf-review:" + D.meta.id + ":" + (D.meta.locale || "zh-Hant");
 var state = {};
 try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { state = {}; }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
 function st(id) { if (!state[id]) state[id] = { p: false, r: false, l: false, note: "" }; return state[id]; }
 function passed(id) { var s = st(id); return s.p && s.r && s.l; }
 function fmt(n) { return (Math.round(n * 100) / 100).toFixed(2); }
-var GATES = [["p", "發音"], ["r", "節奏"], ["l", "可讀性"]];
+var GATES = D.copy.gates;
 
 function marginChip(s) {
-  if (s.mp3 == null) return '<span class="chip warn">無音檔</span>';
+  if (s.mp3 == null) return '<span class="chip warn">' + D.copy.noAudio + '</span>';
   var m = s.duration - s.mp3;
   var cls = m < 0 ? "bad" : m < 0.3 ? "warn" : "ok";
-  return '<span class="chip ' + cls + '">餘裕 ' + fmt(m) + 's</span>';
+  return '<span class="chip ' + cls + '">' + D.copy.margin + ' ' + fmt(m) + 's</span>';
 }
 function render() {
   var list = document.getElementById("list");
@@ -1719,7 +2039,7 @@ function render() {
     var el = document.createElement("article");
     el.className = "card" + (passed(s.id) ? " done" : "");
     el.id = "card-" + s.id;
-    var shot = s.img ? '<img src="' + s.img + '" alt="">' : '<div class="noimg">沒有畫格（跑 hf review 時 snapshot 失敗）</div>';
+    var shot = s.img ? '<img src="' + s.img + '" alt="">' : '<div class="noimg">' + D.copy.noFrame + '</div>';
     var gates = GATES.map(function (g) {
       var on = st(s.id)[g[0]];
       return '<label class="gate' + (on ? " on" : "") + '" data-slide="' + s.id + '" data-gate="' + g[0] + '">' +
@@ -1731,14 +2051,14 @@ function render() {
         '<div class="eyebrow">' + (s.chapter ? "<span>" + s.chapter + "</span>" : "") +
           '<span class="num">' + String(s.n).padStart(2, "0") + " / " + String(D.slides.length).padStart(2, "0") + "</span></div>" +
         "<h2>" + s.title + "</h2>" +
-        (s.subtitle ? '<div class="sub">字幕：' + s.subtitle + "</div>" : "") +
-        '<div class="narr">' + (s.narration || "（無旁白稿）") + "</div>" +
+        (s.subtitle ? '<div class="sub">' + D.copy.subtitle + s.subtitle + "</div>" : "") +
+        '<div class="narr">' + (s.narration || D.copy.noNarration) + "</div>" +
         (s.audio ? '<audio controls preload="none" src="' + s.audio + '"></audio>' : "") +
-        '<div class="chips"><span class="chip">起 ' + fmt(s.start) + "s</span>" +
-          '<span class="chip">頁面 ' + fmt(s.duration) + "s</span>" +
-          '<span class="chip">旁白 ' + (s.mp3 == null ? "—" : fmt(s.mp3) + "s") + "</span>" + marginChip(s) + "</div>" +
+        '<div class="chips"><span class="chip">' + D.copy.start + ' ' + fmt(s.start) + "s</span>" +
+          '<span class="chip">' + D.copy.page + ' ' + fmt(s.duration) + "s</span>" +
+          '<span class="chip">' + D.copy.narration + ' ' + (s.mp3 == null ? "—" : fmt(s.mp3) + "s") + "</span>" + marginChip(s) + "</div>" +
         '<div class="gates">' + gates + "</div>" +
-        '<textarea class="note" data-slide="' + s.id + '" placeholder="需要修的地方（會出現在審核結論裡）">' + (st(s.id).note || "") + "</textarea>" +
+        '<textarea class="note" data-slide="' + s.id + '" placeholder="' + D.copy.note + '">' + (st(s.id).note || "") + "</textarea>" +
       "</div>";
     list.appendChild(el);
   });
@@ -1747,7 +2067,7 @@ function render() {
 function tally() {
   var n = D.slides.filter(function (s) { return passed(s.id); }).length;
   var t = document.getElementById("tally");
-  t.textContent = n + " / " + D.slides.length + " 已通過";
+  t.textContent = n + " / " + D.slides.length + " " + D.copy.passed;
   t.className = "chip " + (n === D.slides.length ? "ok" : n ? "warn" : "");
 }
 document.addEventListener("click", function (e) {
@@ -1771,19 +2091,19 @@ document.addEventListener("input", function (e) {
 
 document.getElementById("copy").addEventListener("click", function () {
   var all = D.slides.every(function (s) { return passed(s.id); });
-  var lines = ["## 人工 preview 審核 — " + D.meta.title, "", "- 專案：\`" + D.meta.project + "\`",
-    "- 產生：" + D.meta.generatedAt + " · 長度 " + D.meta.total + "s（旁白 " + D.meta.narration + "s）",
-    "- 結論：" + (all ? "**通過**，可以 render / 發布" : "**未通過**，見下方待修項"), ""];
+  var lines = [D.copy.summaryTitle + D.meta.title, "", D.copy.project + "\`" + D.meta.project + "\`",
+    D.copy.generated + D.meta.generatedAt + D.copy.length + D.meta.total + "s (" + D.copy.narration + " " + D.meta.narration + "s)",
+    D.copy.conclusion + (all ? D.copy.passConclusion : D.copy.failConclusion), ""];
   D.slides.forEach(function (s) {
     var v = st(s.id);
     var miss = GATES.filter(function (g) { return !v[g[0]]; }).map(function (g) { return g[1]; });
     lines.push("- [" + (miss.length ? " " : "x") + "] " + s.id + " " + s.title +
-      (miss.length ? " — 未通過：" + miss.join("、") : "") + (v.note ? " — " + v.note : ""));
+      (miss.length ? D.copy.missing + miss.join(", ") : "") + (v.note ? " — " + v.note : ""));
   });
   var text = lines.join("\\n");
-  var done = function () { var b = document.getElementById("copy"); b.textContent = "已複製 ✓"; setTimeout(function () { b.textContent = "複製審核結論"; }, 1800); };
-  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () { window.prompt("複製這段：", text); });
-  else window.prompt("複製這段：", text);
+  var done = function () { var b = document.getElementById("copy"); b.textContent = D.copy.copied; setTimeout(function () { b.textContent = D.copy.copy; }, 1800); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () { window.prompt(D.copy.prompt, text); });
+  else window.prompt(D.copy.prompt, text);
 });
 
 /* cinema — plays the real narration in order, so pacing can be judged without a render */
@@ -1808,14 +2128,14 @@ function show(i) {
   } else timer = setTimeout(next, s.duration * 1000);
 }
 function next() { if (ci >= D.slides.length - 1) { stop(); return; } show(ci + 1); }
-function stop() { playing = false; au.pause(); clearTimeout(timer); document.getElementById("c-toggle").textContent = "播放"; }
-document.getElementById("play").addEventListener("click", function () { cin.classList.add("on"); playing = true; document.getElementById("c-toggle").textContent = "暫停"; show(0); });
+function stop() { playing = false; au.pause(); clearTimeout(timer); document.getElementById("c-toggle").textContent = D.copy.play; }
+document.getElementById("play").addEventListener("click", function () { cin.classList.add("on"); playing = true; document.getElementById("c-toggle").textContent = D.copy.pause; show(0); });
 document.getElementById("c-exit").addEventListener("click", function () { stop(); cin.classList.remove("on"); });
 document.getElementById("c-next").addEventListener("click", function () { show(ci + 1); });
 document.getElementById("c-prev").addEventListener("click", function () { show(ci - 1); });
 document.getElementById("c-toggle").addEventListener("click", function () {
   playing = !playing;
-  document.getElementById("c-toggle").textContent = playing ? "暫停" : "播放";
+  document.getElementById("c-toggle").textContent = playing ? D.copy.pause : D.copy.play;
   if (playing) show(ci); else stop();
 });
 document.addEventListener("keydown", function (e) {
@@ -1827,7 +2147,7 @@ document.addEventListener("keydown", function (e) {
 render();
 </script>
 </div>`;
-  return `<!DOCTYPE html>\n<html lang="zh-Hant">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n${head}\n</head>\n<body>\n${body}\n</body>\n</html>\n`;
+  return `<!DOCTYPE html>\n<html lang="${esc(meta.locale || "zh-Hant")}">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n${head}\n</head>\n<body>\n${body}\n</body>\n</html>\n`;
 }
 
 // ---------------------------------------------------------------------------
@@ -1849,7 +2169,7 @@ function hfPin(projectRoot) {
     const m = /hyperframes@([0-9][\w.-]*)/.exec(JSON.stringify(pkg.scripts || {}));
     if (m) return m[1];
   }
-  return "0.8.11";
+  return "0.8.16";
 }
 function dataUri(file, mime) {
   return `data:${mime};base64,${fs.readFileSync(file).toString("base64")}`;
@@ -1864,22 +2184,53 @@ function forwardedHyperframesArgs() {
   const tail = process.argv.slice(3);
   const forwarded = [];
   for (let i = 0; i < tail.length; i++) {
-    if (tail[i] === "--project") {
+    if (tail[i] === "--project" || tail[i] === "--locale") {
       i++;
       continue;
     }
-    if (tail[i].startsWith("--project=")) continue;
+    if (tail[i].startsWith("--project=") || tail[i].startsWith("--locale=") || tail[i] === "--all-locales") continue;
     forwarded.push(tail[i]);
   }
   return forwarded;
 }
 function cmdHyperframes(command) {
   const projectRoot = findProjectRoot();
-  const r = runNpx(
-    ["--yes", `hyperframes@${hfPin(projectRoot)}`, command, ...forwardedHyperframesArgs()],
-    { cwd: projectRoot, stdio: "inherit" }
-  );
+  const sb = loadStoryboard(projectRoot, FLAGS.locale);
+  const paths = localePaths(projectRoot, sb);
+  const forwarded = forwardedHyperframesArgs();
+  const hasComposition = forwarded.some((arg) => arg === "--composition" || arg.startsWith("--composition="));
+  if (command === "render" && !hasComposition) forwarded.push("--composition", paths.relative.entry);
+  const isolate = ["lint", "snapshot", "doctor"].includes(command) || (command === "preview" && !sb.isCanonical);
+  let cwd = projectRoot;
+  let r;
+  try {
+    if (isolate) cwd = variantWorkspace(projectRoot, sb, paths);
+    r = runNpx(
+      ["--yes", `hyperframes@${hfPin(projectRoot)}`, command, ...forwarded],
+      { cwd, stdio: "inherit" }
+    );
+  } finally {
+    if (isolate) cleanVariantWorkspace(projectRoot, sb);
+  }
   if (!r.ok) process.exit(r.status || 1);
+}
+function variantWorkspace(projectRoot, sb, paths) {
+  const root = path.join(projectRoot, ".hf-locale-work", sb.locale);
+  fs.rmSync(root, { recursive: true, force: true });
+  fs.mkdirSync(root, { recursive: true });
+  fs.copyFileSync(paths.entry, path.join(root, "index.html"));
+  for (const dir of ["assets", "vendor", "compositions"]) {
+    const source = path.join(projectRoot, dir);
+    if (exists(source)) fs.cpSync(source, path.join(root, dir), { recursive: true });
+  }
+  for (const file of ["hyperframes.json", "index.motion.json"]) {
+    const source = path.join(projectRoot, file);
+    if (exists(source)) fs.copyFileSync(source, path.join(root, file));
+  }
+  return root;
+}
+function cleanVariantWorkspace(projectRoot, sb) {
+  fs.rmSync(path.join(projectRoot, ".hf-locale-work", sb.locale), { recursive: true, force: true });
 }
 function takeSnapshots(projectRoot, times) {
   const r = runNpx(["--yes", `hyperframes@${hfPin(projectRoot)}`, "snapshot", "--at", times.map((t) => String(t)).join(",")], { cwd: projectRoot });
@@ -1897,74 +2248,81 @@ function collectFrames(projectRoot) {
 }
 function cmdReview(projectRoot = findProjectRoot()) {
   const repo = repoRootOrDie(projectRoot);
-  const sb = loadStoryboard(projectRoot);
+  const sb = loadStoryboard(projectRoot, FLAGS.locale);
+  const paths = localePaths(projectRoot, sb);
   const project = readJson(path.join(projectRoot, "project.json"));
-  const tlPath = path.join(projectRoot, "data", "timeline.json");
-  const timeline = exists(tlPath) ? readJson(tlPath).slides : provisionalTimeline(projectRoot, sb);
+  const timeline = exists(paths.timeline) ? readJson(paths.timeline).slides : provisionalTimeline(projectRoot, sb, paths);
   const byId = Object.fromEntries(sb.slides.map((s) => [s.id, s]));
+  let captureRoot = projectRoot;
 
   // one frame per slide, taken after the entrance animation has settled
   const times = timeline.map((t) => Math.round((t.start + Math.min(2.4, Math.max(0.8, t.duration * 0.3))) * 10) / 10);
-  if (!FLAGS["no-snapshot"]) {
-    log(`review: capturing ${times.length} frame(s) at ${times.join(", ")}s …`);
-    takeSnapshots(projectRoot, times);
-  }
-  const frames = collectFrames(projectRoot);
-  const tmp = path.join(projectRoot, ".hf-review-tmp");
-  fs.mkdirSync(tmp, { recursive: true });
-
-  let bytes = 0;
-  const slides = timeline.map((t, i) => {
-    const s = byId[t.id] || {};
-    const frame = frames.find((f) => f.t >= t.start && f.t < t.start + t.duration) || frames[i];
-    let img = null;
-    if (frame && exists(frame.file)) {
-      const jpg = path.join(tmp, `${t.id}.jpg`);
-      const r = run("ffmpeg", ["-y", "-loglevel", "error", "-i", frame.file, "-vf", "scale=1180:-1", "-q:v", "5", jpg]);
-      if (r.ok && exists(jpg)) img = dataUri(jpg, "image/jpeg");
-    }
-    const mp3 = path.join(projectRoot, "assets", "audio", `${t.id}.mp3`);
-    const audio = exists(mp3) ? dataUri(mp3, "audio/mpeg") : null;
-    const displayPath = path.join(projectRoot, "assets", "audio", `${t.id}.display.txt`);
-    bytes += (img ? img.length : 0) + (audio ? audio.length : 0);
-    return {
-      id: t.id,
-      n: i + 1,
-      chapter: s.chapter || "",
-      title: s.title || t.id,
-      subtitle: s.subtitle || "",
-      narration: exists(displayPath) ? readText(displayPath).trim() : s.narration || "",
-      start: t.start,
-      duration: t.duration,
-      mp3: t.mp3Duration ?? t.mp3 ?? null,
-      img,
-      audio,
-    };
-  });
   try {
-    fs.rmSync(tmp, { recursive: true, force: true });
-  } catch {}
+    if (!FLAGS["no-snapshot"]) {
+      captureRoot = variantWorkspace(projectRoot, sb, paths);
+      log(`review${sb.isCanonical ? "" : ` (${sb.locale})`}: capturing ${times.length} frame(s) at ${times.join(", ")}s …`);
+      takeSnapshots(captureRoot, times);
+    }
+    const frames = collectFrames(captureRoot);
+    const tmp = path.join(projectRoot, ".hf-review-tmp");
+    fs.mkdirSync(tmp, { recursive: true });
 
-  const total = timeline.length ? round1(timeline[timeline.length - 1].start + timeline[timeline.length - 1].duration) : 0;
-  const meta = {
-    id: project.id || path.basename(projectRoot),
-    title: project.title || sb.title || project.id,
-    workflow: project.workflow || "",
-    status: project.status || "",
-    total,
-    narration: Math.round(slides.reduce((a, s) => a + (s.mp3 || 0), 0) * 10) / 10,
-    voice: (sb.voice && sb.voice.voice) || "",
-    generatedAt: nowIso().slice(0, 19).replace("T", " ") + "Z",
-    project: rel(repo, projectRoot),
-  };
-  const outDir = path.resolve(projectRoot, String(FLAGS.out || "review"));
-  const outFile = path.join(outDir, FLAGS.artifact ? "review.artifact.html" : "index.html");
-  writeText(outFile, reviewHtml(meta, slides, { artifact: !!FLAGS.artifact }));
-  const mb = fs.statSync(outFile).size / 1048576;
-  log(`review: ${outFile}`);
-  log(`  ${slides.length} slide(s), ${slides.filter((s) => s.img).length} frame(s), ${slides.filter((s) => s.audio).length} clip(s), ${mb.toFixed(1)} MB self-contained`);
-  if (mb > 14) warn("  ! over 14 MB — too large to publish as an Artifact; re-run with fewer slides or smaller frames");
-  log(`  open it, run 連續播放 (cinema), tick the three gates per slide, then press 複製審核結論.`);
+    let bytes = 0;
+    const slides = timeline.map((t, i) => {
+      const s = byId[t.id] || {};
+      const frame = frames.find((f) => f.t >= t.start && f.t < t.start + t.duration) || frames[i];
+      let img = null;
+      if (frame && exists(frame.file)) {
+        const jpg = path.join(tmp, `${sb.locale}-${t.id}.jpg`);
+        const r = run("ffmpeg", ["-y", "-loglevel", "error", "-i", frame.file, "-vf", "scale=1180:-1", "-q:v", "5", jpg]);
+        if (r.ok && exists(jpg)) img = dataUri(jpg, "image/jpeg");
+      }
+      const mp3 = path.join(paths.audioDir, `${t.id}.mp3`);
+      const audio = exists(mp3) ? dataUri(mp3, "audio/mpeg") : null;
+      const displayPath = path.join(paths.audioDir, `${t.id}.display.txt`);
+      bytes += (img ? img.length : 0) + (audio ? audio.length : 0);
+      return {
+        id: t.id,
+        n: i + 1,
+        chapter: s.chapter || "",
+        title: s.title || t.id,
+        subtitle: s.subtitle || "",
+        narration: exists(displayPath) ? readText(displayPath).trim() : s.narration || "",
+        start: t.start,
+        duration: t.duration,
+        mp3: t.mp3Duration ?? t.mp3 ?? null,
+        img,
+        audio,
+      };
+    });
+    try {
+      fs.rmSync(tmp, { recursive: true, force: true });
+    } catch {}
+
+    const total = timeline.length ? round1(timeline[timeline.length - 1].start + timeline[timeline.length - 1].duration) : 0;
+    const meta = {
+      id: project.id || path.basename(projectRoot),
+      title: sb.title || project.title || project.id,
+      locale: sb.locale,
+      workflow: project.workflow || "",
+      status: project.status || "",
+      total,
+      narration: Math.round(slides.reduce((a, s) => a + (s.mp3 || 0), 0) * 10) / 10,
+      voice: (sb.voice && sb.voice.voice) || "",
+      generatedAt: nowIso().slice(0, 19).replace("T", " ") + "Z",
+      project: rel(repo, projectRoot),
+    };
+    const outDir = path.resolve(projectRoot, String(FLAGS.out || paths.relative.review));
+    const outFile = path.join(outDir, FLAGS.artifact ? "review.artifact.html" : "index.html");
+    writeText(outFile, reviewHtml(meta, slides, { artifact: !!FLAGS.artifact }));
+    const mb = fs.statSync(outFile).size / 1048576;
+    log(`review: ${outFile}`);
+    log(`  ${slides.length} slide(s), ${slides.filter((s) => s.img).length} frame(s), ${slides.filter((s) => s.audio).length} clip(s), ${mb.toFixed(1)} MB self-contained`);
+    if (mb > 14) warn("  ! over 14 MB — too large to publish as an Artifact; re-run with fewer slides or smaller frames");
+    log(sb.locale.toLowerCase().startsWith("en") ? "  open it, play the full cinema pass, tick all three gates per slide, then copy the review summary." : "  open it, run 連續播放 (cinema), tick the three gates per slide, then press 複製審核結論.");
+  } finally {
+    cleanVariantWorkspace(projectRoot, sb);
+  }
 }
 
 // --- the blind A/B listening kit (same self-contained pattern as the review kit) ---
@@ -2384,6 +2742,10 @@ function cmdPipeline() {
 // Keep the required static -> browser gate behind the same hidden subprocess
 // boundary as ffprobe/TTS. This prevents npm/npx/Chrome helper consoles from
 // flashing across the user's desktop during a non-interactive verification run.
+function checkLocaleIds(sb, { allLocales = false, locale = null } = {}) {
+  if (allLocales && locale) throw new Error("--locale and --all-locales are mutually exclusive");
+  return allLocales ? sb.locales : [locale || sb.canonicalLocale];
+}
 function cmdCheck() {
   const projectRoot = findProjectRoot();
   const repo = repoRootOrDie(projectRoot);
@@ -2391,11 +2753,30 @@ function cmdCheck() {
   const errors = printFindings(rel(repo, projectRoot), findings);
   if (errors) process.exit(1);
 
-  // Forward HyperFrames check flags while consuming hf's own project selector.
-  const r = runNpx(["--yes", `hyperframes@${hfPin(projectRoot)}`, "check", ...forwardedHyperframesArgs()], { cwd: projectRoot });
-  if (r.stdout) process.stdout.write(r.stdout);
-  if (r.stderr) process.stderr.write(r.stderr);
-  if (!r.ok) process.exit(r.status || 1);
+  // Forward HyperFrames check flags while consuming hf's own project/locale selectors.
+  const declared = loadStoryboard(projectRoot);
+  let locales;
+  try {
+    locales = checkLocaleIds(declared, { allLocales: !!FLAGS["all-locales"], locale: FLAGS.locale || null });
+  } catch (error) {
+    die(error.message);
+  }
+  for (const locale of locales) {
+    const sb = loadStoryboard(projectRoot, locale);
+    const paths = localePaths(projectRoot, sb);
+    let checkRoot = projectRoot;
+    let r;
+    log(`check: browser gate ${locale}${locales.length > 1 ? ` (${locales.indexOf(locale) + 1}/${locales.length})` : ""}`);
+    try {
+      checkRoot = variantWorkspace(projectRoot, sb, paths);
+      r = runNpx(["--yes", `hyperframes@${hfPin(projectRoot)}`, "check", ...forwardedHyperframesArgs()], { cwd: checkRoot });
+    } finally {
+      cleanVariantWorkspace(projectRoot, sb);
+    }
+    if (r.stdout) process.stdout.write(r.stdout);
+    if (r.stderr) process.stderr.write(r.stderr);
+    if (!r.ok) process.exit(r.status || 1);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -2443,4 +2824,4 @@ if (IS_MAIN) {
 
 // Small, pure seams for zero-dependency regression tests. The CLI remains one file;
 // exporting these does not introduce a package or change its command-line contract.
-export { buildWordCues, childProcessOptions, computeTimeline, patchGsapStartArray, renderAudioRegion, renderBlocks, renderChart, renderSlidesRegion, reviewHtml, splitDisplayCues, validateSchema };
+export { buildSrt, buildWordCues, checkLocaleIds, childProcessOptions, cleanVariantWorkspace, computeTimeline, localePaths, normalizeRegion, patchCompositionLocale, patchGsapStartArray, renderAudioRegion, renderBlocks, renderChart, renderSlidesRegion, renderSrt, resolveStoryboard, reviewHtml, splitDisplayCues, ttsSourceFingerprint, validateSchema, variantWorkspace };

@@ -1,0 +1,1 @@
+Before, every regenerated voice meant editing index dot H T M L, captions, manifests, and project metadata separately. If one M P 3 ran longer than its slide, the final video cut the narration short.

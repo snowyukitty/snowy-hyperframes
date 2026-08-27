@@ -4,7 +4,7 @@
   "title": "從分鏡到影片：Snowy HyperFrames 工作流 v2",
   "workflow": "claude",
   "createdAt": "2026-08-21T18:15:00.000Z",
-  "updatedAt": "2026-08-23T21:15:21.735Z",
+  "updatedAt": "2026-08-27T12:47:02.268Z",
   "status": "ready-to-preview",
   "format": "hyperframes-demo",
   "language": "zh-Hant",
@@ -13,7 +13,7 @@
   "tools": [
     "claude-code",
     "shared/tools/hf.mjs",
-    "hyperframes@0.8.11",
+    "hyperframes@0.8.16",
     "edge-tts",
     "ffprobe"
   ],
@@ -41,8 +41,42 @@
   },
   "checks": {
     "hfAudit": "pass",
-    "hyperframesCheck": "pass (0.8.11 strict: lint 0/0, runtime 0/0, layout 0, motion 0, contrast 18/18)",
+    "hyperframesCheck": "pass (0.8.16 strict: zh-Hant and en each lint 0/0, runtime 0/0, layout 0, motion 0, contrast 18/18)",
     "render": "smoke render pass (77.2s, 6.9 MB, unreviewed)",
-    "humanPreview": "pending"
+    "humanPreview": "pending independently for zh-Hant and en"
+  },
+  "deliverables": {
+    "en": {
+      "locale": "en",
+      "durationSeconds": 77,
+      "entry": "index.en.html",
+      "measuredAudio": "data/audio-durations.en.json",
+      "timeline": "data/timeline.en.json",
+      "captions": {
+        "slide": "captions/narration.en.srt",
+        "word": "captions/narration.en.word.srt"
+      },
+      "renderOutput": "renders/storyboard-to-video-pipeline-demo.en.mp4",
+      "review": {
+        "kit": "review/en/index.html",
+        "status": "pending"
+      }
+    },
+    "zh-Hant": {
+      "locale": "zh-Hant",
+      "durationSeconds": 77.2,
+      "entry": "index.html",
+      "measuredAudio": "data/audio-durations.json",
+      "timeline": "data/timeline.json",
+      "captions": {
+        "slide": "captions/narration.srt",
+        "word": "captions/narration.word.srt"
+      },
+      "renderOutput": "renders/storyboard-to-video-pipeline-demo.mp4",
+      "review": {
+        "kit": "review/index.html",
+        "status": "pending"
+      }
+    }
   }
 }

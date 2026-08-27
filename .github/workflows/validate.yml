@@ -40,7 +40,7 @@ jobs:
             # Audio-research projects (e.g. a TTS bakeoff) have no composition to check.
             if [ -f "$p/project.json" ] && [ -f "$p/index.html" ]; then
               echo "::group::hyperframes check $p"
-              (cd "$p" && npm run check -- --strict)
+              (cd "$p" && npm run check -- --strict --all-locales)
               echo "::endgroup::"
             else
               echo "skip (no composition): $p"

@@ -17,7 +17,7 @@ cd <workflow>/projects/<project-name>
 #     與 data/pronunciation-map.json；研究型專案同時填 data/research.json、docs/references.md
 npm run html        #  2. storyboard -> index.html 的 slide/audio 區塊（CSS/JS 在標記外，可自由改）
 npm run pipeline    #  3. prepare-tts -> tts (Edge-TTS) -> measure (ffprobe) -> sync -> audit
-npm run check       #  4. hidden-window hf audit + hyperframes@0.8.11 check
+npm run check       #  4. hidden-window hf audit + hyperframes@0.8.16 check
 npm run review      #  5. 人工 gate：產生 review/index.html（畫格 + 真實旁白 + 餘裕 + 逐項勾選）
 npm run render      #  6. renders/<project>.mp4（不進 git；要分享放 GitHub Releases）
 ```
@@ -63,7 +63,7 @@ npm run render      #  6. renders/<project>.mp4（不進 git；要分享放 GitH
 index.html                 可直接 check/render 的合成骨架：CJK @font-face(local)、full-bleed 背景、
                            lower-third 字幕、chapter eyebrow、進度標籤、無圖片時的漸層 + 進度環、
                            以 DOM data-start 驅動的 GSAP 入場動畫（沒有第二份時間陣列會漂移）
-package.json               所有 script 都指向 shared/tools/hf.mjs 與 hyperframes@0.8.11
+package.json               all scripts route through shared/tools/hf.mjs and pinned hyperframes@0.8.16
 hyperframes.json           HyperFrames 自己的設定（registry / paths）；Snowy 的時間軸在 data/timeline.json
 project.json               專案索引（shared/schemas/project.schema.json）
 data/storyboard.json       唯一的意圖來源

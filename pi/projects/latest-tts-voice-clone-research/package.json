@@ -2,7 +2,7 @@
   "name": "latest-tts-voice-clone-research",
   "version": "1.0.0",
   "private": true,
-  "hyperframesVersion": "0.8.11",
+  "hyperframesVersion": "0.8.16",
   "scripts": {
     "check": "node ../../../shared/tools/hf.mjs check",
     "dev": "node ../../../shared/tools/hf.mjs preview . --port 3002",

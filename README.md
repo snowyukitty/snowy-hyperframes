@@ -2,18 +2,20 @@
 
 [![validate](https://github.com/snowyukitty/snowy-hyperframes/actions/workflows/validate.yml/badge.svg)](https://github.com/snowyukitty/snowy-hyperframes/actions/workflows/validate.yml)
 
-這個根目錄用來管理多條 HyperFrames 產製工作流。每條 workflow 都有自己的 `projects/`，每個具體影片或簡報專案都放在對應 workflow 的 `projects/<project-name>/`。
+Snowy HyperFrames is a public, research-grade production system for reproducible research videos on
+[HyperFrames](https://github.com/heygen-com/hyperframes). Four agent workflows share one zero-dependency
+toolkit that turns a storyboard into measured audio, deterministic timelines, captions, browser-verified
+compositions, and offline human-review kits.
 
-> **2026-08-24 — Workflow v4 foundation.** 共用工具鏈 `shared/tools/hf.mjs`（storyboard → TTS → 量測 → 同步 → 檢查）現在有
-> zero-dependency regression tests、hidden-window `hf check`、semantic audio groups，以及全部專案實測通過的 HyperFrames 0.8.11 baseline。
-> 待辦看板：[`TODO.md`](TODO.md)；設計文件（下一個里程碑的規格與驗收）：`shared/docs/design-v4.md`；
-> 架構契約：`shared/docs/design-v2.md` §1；接續點：`shared/docs/phase-summary-2026-08-24.md`；
-> 升級實測：`shared/docs/hyperframes-0.8-upgrade-notes.md`。
+> **2026-08-27 — Milestone K: one storyboard, independently reviewable languages.** A project can now keep
+> one canonical storyboard while each locale owns its voice, pronunciation map, measured audio, timeline,
+> captions, generated entry, render target, and human verdict. The first fixture ships complete `zh-Hant`
+> (`77.2s`) and English (`77.0s`) deliverables without copying the project. Both pass strict HyperFrames
+> `0.8.16`; both human listening gates remain honestly pending.
 >
-> **English summary.** A public, research-grade record of AI-assisted research-to-video production on
-> [HyperFrames](https://github.com/heygen-com/hyperframes): four agent workflows (`codex`, `codex-pi`, `pi`, `claude`),
-> one shared zero-dependency toolkit (`shared/tools/hf.mjs`) that turns a storyboard into a timed, captioned,
-> Edge-TTS-narrated Traditional-Chinese video, shared schemas/templates, and reviewed demo projects. Agent contract: `AGENTS.md`.
+> Start with [`TODO.md`](TODO.md), the [design of record](shared/docs/design-v4.md), the
+> [production playbook](shared/docs/hyperframes-production-playbook.md), and the
+> [Milestone K checkpoint](shared/docs/phase-summary-2026-08-27-milestone-k.md). Agent contract: [`AGENTS.md`](AGENTS.md).
 
 ## Workflow Layout
 
@@ -86,8 +88,10 @@ claude/projects/storyboard-to-video-pipeline-demo  管線自述 demo
 claude/projects/tts-bakeoff-2026-08                盲測 harness 與量測（16 段音檔可重生，未進 git）
 ```
 
-完成狀態：七個 composition 的 `hyperframes@0.8.11 check --strict` 皆通過（文字對比度全數通過 WCAG AA）；三支 modern 影片皆已 smoke render；
-**人工 preview 待做**（`ready-to-preview`）。TTS 盲測聽測包已產生，自然度結論待人工聽測。
+Current verification: eight deliverable entries pass `hyperframes@0.8.16 check --strict` with
+`410/410` WCAG AA contrast checks. Three modern videos have smoke renders; human preview remains
+pending where `project.json` says so. The TTS bakeoff also remains pending human listening—measurements
+do not decide naturalness.
 
 ## Naming Convention
 
@@ -112,8 +116,21 @@ node shared/tools/hf.mjs audit --all                      # 所有專案的結�
 node shared/tools/hf.mjs repo-check                       # 發布守門（allowlist / secret / 檔案大小）
 ```
 
-專案內：`npm run html` → `npm run pipeline` → `npm run check` → `npm run preview`（人工）→ `npm run render`。
-原則：**一份 storyboard、一個時間真相**——`data/storyboard.json` + `data/audio-durations.json` → `data/timeline.json` → 其他檔案都是產物。
+Inside a project: `npm run html` → `npm run pipeline` → `npm run check` → `npm run review` (human) → `npm run render`.
+The canonical locale keeps the original filenames. A variant adds `--locale <id>` and receives its own
+audio directory, measured durations, timeline, captions, entry, review kit, and render target:
+
+```powershell
+npm run html:en
+npm run pipeline:en
+npm run check -- --strict --all-locales
+npm run review:en
+# npm run render:en only after the English review verdict passes
+```
+
+The invariant is **one storyboard, independent measured timing truths**. Languages never share
+`data-start` merely to look synchronized, and one locale's human approval never approves another.
+The repository CI uses `--all-locales`, so every declared deliverable receives the same strict browser gate.
 
 ## Required Project Metadata
 
@@ -222,7 +239,7 @@ claude/projects/tts-bakeoff-2026-08
 
 ## Recommended Project Checks
 
-在任一具體 HyperFrames 專案內（`check` = hidden-window `hf audit` + `hyperframes@0.8.11 check`，含音訊截斷風險檢查）：
+In any HyperFrames project (`check` = hidden-window `hf audit` + pinned `hyperframes@0.8.16 check`, including audio cut-risk checks):
 
 ```powershell
 npm run check

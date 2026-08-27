@@ -1,0 +1,1 @@
+Now there is one pipeline. The storyboard produces the script, Edge TTS creates each MP3, ffprobe measures its real length, and sync updates the page, captions, and metadata together.

@@ -5,8 +5,8 @@
 ## 0. 環境
 
 - Node ≥ 22、FFmpeg/ffprobe、`pip install --user edge-tts`。
-- `npx hyperframes@0.8.6 doctor` 應該回報 FFmpeg / FFprobe / Chrome Headless Shell OK
-  （第一次 render 前：`npx hyperframes@0.8.6 browser ensure`）。
+- `npm run doctor` should report FFmpeg, FFprobe, and the browser runtime ready. Every script
+  resolves the explicit `hyperframesVersion` pin from `package.json` (currently `0.8.16`).
 
 ## 1. Storyboard（意圖）
 
@@ -36,8 +36,8 @@ npm run pipeline
 ## 4. Gate
 
 ```powershell
-npm run check      # hf audit + npx hyperframes@0.8.6 check：要 0 error
-npm run preview    # 人工：節奏、發音、字幕可讀性
+npm run check -- --strict  # hf audit + pinned HyperFrames browser gate: zero findings
+npm run review             # human: pacing, pronunciation, and readability
 ```
 
 ## 5. Render
@@ -47,6 +47,22 @@ npm run render     # renders/storyboard-to-video-pipeline-demo.mp4
 ffprobe -v error -show_entries format=duration,size -of compact renders/storyboard-to-video-pipeline-demo.mp4
 ffmpeg -y -i renders/storyboard-to-video-pipeline-demo.mp4 -vf "fps=1/13,scale=640:-1,tile=3x2" -frames:v 1 renders/contact-sheet.jpg
 ```
+
+## 6. English deliverable
+
+The English edition is not a second project. Its commands resolve the localized fields in the same
+storyboard and write only namespaced outputs:
+
+```powershell
+npm run html:en
+npm run pipeline:en
+npm run check -- --strict --all-locales
+npm run review:en
+# npm run render:en only after the English human review passes
+```
+
+Canonical approval does not approve English. Record verdicts independently under
+`project.json.deliverables.<locale>.review`.
 
 ## 2026-08-22 實測
 

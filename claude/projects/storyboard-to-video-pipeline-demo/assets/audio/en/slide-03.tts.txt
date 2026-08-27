@@ -1,0 +1,1 @@
+Now there is one pipeline. The storyboard produces the script, Edge TTS creates each M P 3, F F probe measures its real length, and sync updates the page, captions, and metadata together.

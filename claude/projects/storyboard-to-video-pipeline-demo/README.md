@@ -1,36 +1,59 @@
 # storyboard-to-video-pipeline-demo
 
-從分鏡到影片：Snowy HyperFrames 工作流 v2 的自我描述 demo。
+A self-describing Snowy HyperFrames Workflow v2 demo and the first Milestone K fixture:
+one canonical storyboard produces two independently timed and reviewable language deliverables.
 
-- 6 頁、77.2 秒、1920×1080 30fps、zh-Hant 旁白（Edge-TTS `zh-TW-HsiaoChenNeural`）。
-- **沒有任何 bitmap 圖片**：背景是 template 內建的漸層 + 進度環（純 CSS/SVG），所以這個專案可以在
-  沒有任何圖片生成 auth 的機器上從零重跑。
-- 所有時間軸都由 `shared/tools/hf.mjs` 從 `data/storyboard.json` 與量測到的 MP3 長度產生，
-  `index.html` 的 slide / audio 區塊是生成的（`<!-- hf:* -->` 標記之間），不要手改。
+| Locale | Voice | Duration | Entry | Review |
+| --- | --- | ---: | --- | --- |
+| `zh-Hant` | `zh-TW-HsiaoChenNeural` | 77.2s | `index.html` | pending |
+| `en` | `en-US-JennyNeural` | 77.0s | `index.en.html` | pending |
 
-## 重跑
+The composition uses no bitmap source art. Its gradient field and progress ring are deterministic
+CSS/SVG, so the project rebuilds without image-generation credentials. Every timing surface comes from
+`data/storyboard.json` plus measured MP3 durations; generated regions between `<!-- hf:* -->` markers
+must not be edited by hand.
+
+## Rebuild the canonical deliverable
 
 ```powershell
-npm run html        # 從 storyboard 重建 index.html 的 slide/audio 區塊（CSS/JS 不動）
-npm run pipeline    # prepare-tts -> tts -> measure -> sync -> audit
-npm run check       # hf audit + npx hyperframes@0.8.6 check
-npm run preview     # 人工 gate
-npm run render      # renders/storyboard-to-video-pipeline-demo.mp4（不進 git）
+npm run html
+npm run pipeline
+npm run check -- --strict
+npm run review
+# npm run render only after the zh-Hant human verdict passes
 ```
 
-Render 不進 git（`**/renders/*.mp4` 已忽略）；需要分享成片時放 GitHub Releases。
+## Rebuild the English deliverable
 
-## 檔案
+```powershell
+npm run html:en
+npm run pipeline:en
+npm run check -- --strict --all-locales
+npm run review:en
+# npm run render:en only after the English human verdict passes
+```
+
+Each variant owns its voice, pronunciation map, audio and word-boundary files, measured duration,
+timeline, slide- and word-level captions, HTML entry, render output, and review verdict. Missing variant
+narration or subtitle text is an error; no command silently machine-translates it. Passing one review
+never passes the other.
+
+## Artifact map
 
 ```text
-data/storyboard.json        分鏡、旁白、字幕、目標秒數（意圖）
-data/pronunciation-map.json 顯示字幕 -> TTS 朗讀稿 的替換規則
-data/audio-durations.json   ffprobe 量到的每段 MP3 長度（量測）
-data/timeline.json          sync 產生的時間軸（結果，hf 的 manifest of record）
-assets/audio/slide-NN.*     display.txt / tts.txt / mp3
-captions/narration.srt      由 sync 產生，cue 長度 = 旁白實際長度
-hyperframes.json            HyperFrames 自己的專案設定（registry / paths），不是 Snowy manifest
-vendor/gsap.min.js          由 hf vendor 放入，render 不依賴 CDN
+data/storyboard.json             canonical intent + explicit localized fields
+data/pronunciation-map.json      canonical display-to-spoken substitutions
+data/pronunciation-map.en.json   English display-to-spoken substitutions
+data/audio-durations*.json       ffprobe measurements per deliverable
+data/timeline*.json              generated timing truth per deliverable
+assets/audio/slide-NN.*          canonical display, TTS, MP3, and word boundaries
+assets/audio/en/slide-NN.*       English display, TTS, MP3, and word boundaries
+captions/narration*.srt          slide- and word-level captions per deliverable
+index.html / index.en.html       generated entry regions over shared hand-authored CSS/JS
+review/ / review/en/             ignored, self-contained human gate kits
+project.json.deliverables        generated per-locale delivery receipts
+vendor/gsap.min.js               vendored runtime; render does not depend on a CDN
 ```
 
-詳細：`docs/runbook.md`、`docs/retrospective.md`。
+New MP4s are ignored by Git and belong in GitHub Releases when a human-approved master needs sharing.
+See `docs/runbook.md` and `docs/retrospective.md` for the operating history.

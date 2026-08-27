@@ -1,10 +1,32 @@
-# HyperFrames 0.6.64 → 0.8.6 Upgrade Notes
+# HyperFrames 0.6.64 → 0.8.16 Upgrade Notes
 
-更新日期：2026-08-22 · 實測機器：Windows 11、Node 24、FFmpeg 8.1.2、RTX 4090
+Updated: 2026-08-27 · verified on Windows 11, Node 24, FFmpeg 8.1.2, RTX 4090
 
 2026-06 的四個 demo 都 pin 在 `hyperframes@0.6.64`。上游在 2026-08-17 發布 0.8.0，2026-08-21 發布 0.8.6，
 並且改成「skills 優先、agent 驅動」的產品形態。這份筆記記錄我們實際升級時看到的每一件事，
 以及為什麼 `shared/tools/hf.mjs` 長成現在這樣。
+
+## 0. Current baseline: 0.8.16
+
+The repository moved from the proven 0.8.11 foundation to 0.8.16 only after an explicit compatibility
+probe and a full strict run. Seven canonical compositions plus the first English locale deliverable pass
+with zero lint, runtime, layout, or motion findings and 410/410 WCAG AA contrast checks.
+
+Releases 0.8.12–0.8.16 matter here because they strengthen grouped audio behavior, preview lifecycle,
+the lint/contract surface, deterministic font localization, render-stall handling, AAC muxing, phrase
+cues, media `<source>` handling, and long-sequence/audio caching. The empirical gate—not the release
+notes alone—is the reason 0.8.16 is now pinned.
+
+Primary release records: [0.8.12](https://github.com/heygen-com/hyperframes/releases/tag/v0.8.12),
+[0.8.13](https://github.com/heygen-com/hyperframes/releases/tag/v0.8.13),
+[0.8.14](https://github.com/heygen-com/hyperframes/releases/tag/v0.8.14),
+[0.8.15](https://github.com/heygen-com/hyperframes/releases/tag/v0.8.15), and
+[0.8.16](https://github.com/heygen-com/hyperframes/releases/tag/v0.8.16).
+
+Milestone K also exposed a new 0.8.16 contract: two root HTML files with composition IDs in one project
+directory trigger `multiple_root_compositions`. `hf check` therefore projects exactly one locale entry
+into an ignored temporary directory before launching the browser gate. Locale composition IDs and
+`window.__timelines` keys are patched together; both behaviors have regression tests.
 
 ## 1. 結論先講
 

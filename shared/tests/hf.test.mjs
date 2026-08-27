@@ -1,18 +1,52 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import test from "node:test";
 
 import {
+  buildSrt,
   buildWordCues,
+  checkLocaleIds,
   childProcessOptions,
+  cleanVariantWorkspace,
   computeTimeline,
+  localePaths,
+  normalizeRegion,
+  patchCompositionLocale,
   patchGsapStartArray,
   renderAudioRegion,
   renderChart,
   renderSlidesRegion,
+  renderSrt,
+  resolveStoryboard,
   reviewHtml,
   splitDisplayCues,
+  ttsSourceFingerprint,
   validateSchema,
+  variantWorkspace,
 } from "../tools/hf.mjs";
+
+test("generated SRT accepts persisted timing and has no whitespace-only final line", () => {
+  const timeline = [{ id: "slide-01", start: 0, duration: 2, mp3Duration: 1.5 }];
+  const slide = buildSrt(timeline, { "slide-01": "Caption" });
+  const word = renderSrt([{ start: 0.1, end: 0.8, text: "Caption" }]);
+
+  for (const output of [slide, word]) {
+    assert.match(output, /Caption\n$/);
+    assert.doesNotMatch(output, /\n\n$/);
+  }
+  assert.match(slide, /00:00:01,500\nCaption/);
+});
+
+test("CI locale selection checks every declared deliverable", () => {
+  const storyboard = { canonicalLocale: "zh-Hant", locales: ["zh-Hant", "en"] };
+
+  assert.deepEqual(checkLocaleIds(storyboard), ["zh-Hant"]);
+  assert.deepEqual(checkLocaleIds(storyboard, { locale: "en" }), ["en"]);
+  assert.deepEqual(checkLocaleIds(storyboard, { allLocales: true }), ["zh-Hant", "en"]);
+  assert.throws(() => checkLocaleIds(storyboard, { allLocales: true, locale: "en" }), /mutually exclusive/);
+});
 
 test("audio timing never cuts measured narration", () => {
   const storyboard = {
@@ -50,6 +84,16 @@ test("legacy GSAP arrays refresh starts without changing durations", () => {
 
   assert.equal(result.count, 2);
   assert.equal(result.html, 'const slides = [["#slide-01",0,12],["#slide-02",12.5,29]];');
+});
+
+test("locale entries rename the composition and its timeline registration together", () => {
+  const source = '<div data-composition-id="main"></div><script>window.__timelines["main"] = tl;</script>';
+  const result = patchCompositionLocale(source, "en");
+
+  assert.equal(result.id, "main-en");
+  assert.match(result.html, /data-composition-id="main-en"/);
+  assert.match(result.html, /window\.__timelines\["main-en"\] = tl/);
+  assert.doesNotMatch(result.html, /window\.__timelines\["main"\]/);
 });
 
 test("caption packing keeps technical identifiers intact and inside the slide", () => {
@@ -109,6 +153,94 @@ test("generated slide wrappers stay compact without changing the DOM contract", 
   assert(html.split("\n").length <= 8);
 });
 
+test("stale-region comparison ignores HyperFrames editor ids", () => {
+  const source = '<section data-hf-id="hf-a1b2" id="slide-01" data-start="0" data-duration="4"><h1 data-hf-id="hf-c3d4">Title</h1></section>';
+  const generated = '<section id="slide-01" data-start="9" data-duration="8"><h1>Title</h1></section>';
+
+  assert.equal(normalizeRegion(source), normalizeRegion(generated));
+});
+
+test("string-only storyboards keep canonical generated semantics", () => {
+  const raw = {
+    title: "Canonical title",
+    language: "zh-Hant",
+    voice: { voice: "zh-TW-HsiaoChenNeural" },
+    slides: [{ id: "slide-01", title: "標題", chapter: "intro", durationTarget: 5, image: "", subtitle: "字幕", narration: "旁白" }],
+  };
+  const resolved = resolveStoryboard(raw);
+
+  assert.equal(resolved.locale, "zh-Hant");
+  assert.equal(resolved.title, raw.title);
+  assert.deepEqual(
+    resolved.slides.map(({ id, title, chapter, durationTarget, image, subtitle, narration }) => ({ id, title, chapter, durationTarget, image, subtitle, narration })),
+    raw.slides
+  );
+  assert.deepEqual(resolved.resolutionWarnings, []);
+});
+
+test("a locale variant requires its own spoken copy and reports visual fallback", () => {
+  const raw = {
+    title: { "zh-Hant": "一份分鏡", en: "One storyboard" },
+    language: "zh-Hant",
+    voice: { voice: "zh-TW-HsiaoChenNeural" },
+    locales: { "zh-Hant": { default: true }, en: { voice: { name: "en-US-JennyNeural" } } },
+    slides: [{
+      id: "slide-01",
+      title: "共用標題",
+      chapter: { "zh-Hant": "開場", en: "Intro" },
+      durationTarget: 5,
+      image: "",
+      subtitle: { "zh-Hant": "字幕", en: "Caption" },
+      narration: { "zh-Hant": "旁白", en: "Narration" },
+    }],
+  };
+  const resolved = resolveStoryboard(raw, "en");
+
+  assert.equal(resolved.voice.voice, "en-US-JennyNeural");
+  assert.equal(resolved.slides[0].narration, "Narration");
+  assert.deepEqual(resolved.resolutionWarnings, ['slides.slide-01.title: "en" falls back to canonical "zh-Hant"']);
+  assert.throws(
+    () => resolveStoryboard({ ...raw, slides: [{ ...raw.slides[0], narration: "只有中文" }] }, "en"),
+    /must be localized for "en"/
+  );
+});
+
+test("TTS cache identity includes voice and synthesis parameters", () => {
+  const base = ttsSourceFingerprint("Same script\n", "en-US-JennyNeural", "+5%", "-3Hz", "+0%");
+  assert.equal(base, ttsSourceFingerprint("Same script\n", "en-US-JennyNeural", "+5%", "-3Hz", "+0%"));
+  assert.notEqual(base, ttsSourceFingerprint("Same script\n", "en-US-AriaNeural", "+5%", "-3Hz", "+0%"));
+  assert.notEqual(base, ttsSourceFingerprint("Same script\n", "en-US-JennyNeural", "+10%", "-3Hz", "+0%"));
+});
+
+test("browser gates stage exactly one locale entry", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "hf-locale-gate-"));
+  try {
+    fs.writeFileSync(path.join(root, "project.json"), '{"id":"locale-gate"}\n');
+    fs.writeFileSync(path.join(root, "index.html"), "canonical");
+    fs.writeFileSync(path.join(root, "index.en.html"), "english");
+    const raw = {
+      title: { "zh-Hant": "正體中文", en: "English" },
+      language: "zh-Hant",
+      voice: {},
+      locales: { "zh-Hant": { default: true }, en: {} },
+      slides: [],
+    };
+    const canonical = resolveStoryboard(raw, "zh-Hant");
+    const canonicalWork = variantWorkspace(root, canonical, localePaths(root, canonical));
+    assert.equal(fs.readFileSync(path.join(canonicalWork, "index.html"), "utf8"), "canonical");
+    assert.equal(fs.existsSync(path.join(canonicalWork, "index.en.html")), false);
+    cleanVariantWorkspace(root, canonical);
+
+    const english = resolveStoryboard(raw, "en");
+    const englishWork = variantWorkspace(root, english, localePaths(root, english));
+    assert.equal(fs.readFileSync(path.join(englishWork, "index.html"), "utf8"), "english");
+    assert.equal(fs.existsSync(path.join(englishWork, "index.en.html")), false);
+    cleanVariantWorkspace(root, english);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test("self-contained review artifacts declare UTF-8 before non-ASCII copy", () => {
   const html = reviewHtml(
     {
@@ -138,6 +270,30 @@ test("self-contained review artifacts declare UTF-8 before non-ASCII copy", () =
   }
 });
 
+test("review kits isolate locale verdicts and localize the English gate", () => {
+  const html = reviewHtml(
+    {
+      id: "pipeline-demo",
+      title: "One storyboard, every language",
+      locale: "en",
+      project: "claude/projects/pipeline-demo",
+      workflow: "claude",
+      total: 12,
+      narration: 10,
+      voice: "en-US-JennyNeural",
+      generatedAt: "2026-08-27T00:00:00Z",
+      status: "ready-to-preview",
+    },
+    []
+  );
+
+  assert.match(html, /^<!DOCTYPE html>\n<html lang="en">/);
+  assert.match(html, /data-composition-id="pipeline-demo-en-review"/);
+  assert.match(html, /human review kit/);
+  assert.match(html, /hf-review:" \+ D\.meta\.id \+ ":"/);
+  assert.doesNotMatch(html, /這是 <b>/);
+});
+
 test("child processes hide Windows helper consoles by default", () => {
   assert.equal(childProcessOptions().windowsHide, true);
   assert.equal(childProcessOptions({ stdio: "inherit" }).windowsHide, true);
@@ -157,4 +313,14 @@ test("minimal schema validation rejects unexpected properties when requested", (
     "$.id: does not match /^[a-z]+$/",
     '$: unexpected property "extra"',
   ]);
+});
+
+test("minimal schema validation applies additional-property schemas", () => {
+  const schema = {
+    type: "object",
+    additionalProperties: { type: "object", required: ["voice"] },
+  };
+
+  assert.deepEqual(validateSchema(schema, { en: { voice: {} } }), []);
+  assert.deepEqual(validateSchema(schema, { en: {} }), ['$.en: missing required "voice"']);
 });

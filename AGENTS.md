@@ -67,7 +67,7 @@ snowy-hyperframes/
 ```powershell
 npm run html          # (re)generate index.html slide/audio regions from the storyboard
 npm run pipeline      # prepare-tts -> tts (Edge-TTS) -> measure (ffprobe) -> sync -> audit
-npm run check         # hidden-window hf audit + hyperframes@0.8.11 check
+npm run check         # hidden-window hf audit + hyperframes@0.8.16 check
 npm run review        # build the human gate kit (frames + narration, offline, shareable)
 npm run render        # only after a human has actually passed the gate
 ```
@@ -80,7 +80,8 @@ I/O, but must not create extra foreground console windows.
 Toolkit reference: `node shared/tools/hf.mjs help`. Commands: `new`, `html`,
 `prepare-tts`, `tts`, `measure`, `sync`, `captions`, `fit-audio`, `vendor`, `review`, `check`, `audit [--all]`,
 `lint`, `snapshot`, `doctor`, `preview`, `render`, `publish`, `repo-check`, `pipeline`. Run `hf audit --all` and `hf repo-check` from the repo root
-before committing; CI also runs the zero-dependency regression tests and `hyperframes check --strict` per project.
+before committing; CI also runs the zero-dependency regression tests and `hf check --strict --all-locales`
+per composition project, so every declared deliverable receives the browser gate.
 
 ## Slide content
 
@@ -105,7 +106,7 @@ nothing about timing truth.
 
 - Pin the CLI per project with `"hyperframesVersion": "<version>"` in `package.json`;
   package scripts call the shared `hf` proxy, which resolves that pin before invoking
-  `npx`. The verified baseline is **0.8.11** (`check` replaced
+  `npx`. The verified baseline is **0.8.16** (`check` replaced
   `validate`/`inspect`/`layout`, which are deprecated aliases — do not use them in new scripts).
 - `hyperframes.json` belongs to HyperFrames (registry/paths config). Snowy's slide
   manifest lives in `data/timeline.json` (generated) — never in `hyperframes.json`.
@@ -125,6 +126,10 @@ nothing about timing truth.
   the TTS token stream — the tokens carry no punctuation and spell what is *heard*
   (`版本二`), not what should be *read* (`v2`).
 - Default voice `zh-TW-HsiaoChenNeural`, rate `+5%`, pitch `-3Hz` (see playbook §4.5).
+- A locale variant is selected explicitly with `--locale <id>`. It owns namespaced audio,
+  durations, timeline, captions, entry HTML, render target, and review verdict. Never copy a
+  project to translate it, never machine-translate a missing spoken field, and never reuse one
+  locale's human verdict for another. See `shared/docs/design-v4.md` §2.
 - Generated regions in `index.html` sit between `<!-- hf:audio:start/end -->` and
   `<!-- hf:slides:start/end -->`; edit the storyboard, not those regions. Everything
   outside the markers (CSS, timeline JS) is hand-authored and yours to improve.

@@ -65,6 +65,51 @@
       "type": "number",
       "minimum": 1
     },
+    "deliverables": {
+      "type": "object",
+      "description": "Generated per-locale delivery receipts. Root status and duration remain canonical.",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "locale",
+          "durationSeconds",
+          "entry",
+          "measuredAudio",
+          "timeline",
+          "captions",
+          "renderOutput",
+          "review"
+        ],
+        "properties": {
+          "locale": {
+            "type": "string"
+          },
+          "durationSeconds": {
+            "type": "number",
+            "minimum": 1
+          },
+          "entry": {
+            "type": "string"
+          },
+          "measuredAudio": {
+            "type": "string"
+          },
+          "timeline": {
+            "type": "string"
+          },
+          "captions": {
+            "type": "object"
+          },
+          "renderOutput": {
+            "type": "string"
+          },
+          "review": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
     "tools": {
       "type": "array",
       "items": {

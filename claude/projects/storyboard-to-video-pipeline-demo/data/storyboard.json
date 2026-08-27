@@ -1,5 +1,8 @@
 {
-  "title": "從分鏡到影片：Snowy HyperFrames 工作流 v2",
+  "title": {
+    "zh-Hant": "從分鏡到影片：Snowy HyperFrames 工作流 v2",
+    "en": "From Storyboard to Video: Snowy HyperFrames Workflow v2"
+  },
   "targetDurationSeconds": 80,
   "language": "zh-Hant",
   "voice": {
@@ -12,61 +15,148 @@
     "displayTextPattern": "assets/audio/slide-XX.display.txt",
     "ttsTextPattern": "assets/audio/slide-XX.tts.txt"
   },
+  "locales": {
+    "zh-Hant": {
+      "default": true
+    },
+    "en": {
+      "voice": {
+        "tool": "edge-tts",
+        "voice": "en-US-JennyNeural",
+        "rate": "+5%",
+        "pitch": "-3Hz",
+        "volume": "+0%",
+        "pronunciationMap": "data/pronunciation-map.en.json"
+      }
+    }
+  },
   "timingPolicy": "audio",
   "slides": [
     {
       "id": "slide-01",
-      "title": "一份分鏡，一個時間真相",
-      "chapter": "intro",
+      "title": {
+        "zh-Hant": "一份分鏡，一個時間真相",
+        "en": "One storyboard, one timing truth"
+      },
+      "chapter": {
+        "zh-Hant": "intro",
+        "en": "intro"
+      },
       "durationTarget": 12,
       "image": "",
-      "subtitle": "這支影片的每一個時間點，都來自 storyboard 與實際量測的旁白長度。",
-      "narration": "這支影片本身就是一個示範。它的每一個時間點，都不是人手估的，而是來自一份 storyboard，加上實際量測出來的旁白長度。"
+      "subtitle": {
+        "zh-Hant": "這支影片的每一個時間點，都來自 storyboard 與實際量測的旁白長度。",
+        "en": "Every timestamp comes from the storyboard and measured narration—not guesswork."
+      },
+      "narration": {
+        "zh-Hant": "這支影片本身就是一個示範。它的每一個時間點，都不是人手估的，而是來自一份 storyboard，加上實際量測出來的旁白長度。",
+        "en": "This film is also its own demonstration. Every timestamp comes from one storyboard and the measured duration of the real narration, never from a hand estimate."
+      }
     },
     {
       "id": "slide-02",
-      "title": "過去：六個檔案手動同步",
-      "chapter": "problem",
+      "title": {
+        "zh-Hant": "過去：六個檔案手動同步",
+        "en": "Before: six files synchronized by hand"
+      },
+      "chapter": {
+        "zh-Hant": "problem",
+        "en": "problem"
+      },
       "durationTarget": 14,
       "image": "",
-      "subtitle": "index.html、字幕、manifest、project.json 各有一份時間軸；MP3 比頁面長，旁白就被切掉。",
-      "narration": "過去每次重新生成旁白，index.html、字幕、manifest 和 project.json 都要分別手動修改。只要某一段 MP3 比頁面長，旁白就會在成片裡被硬生生切斷。"
+      "subtitle": {
+        "zh-Hant": "index.html、字幕、manifest、project.json 各有一份時間軸；MP3 比頁面長，旁白就被切掉。",
+        "en": "Six timing copies could drift; when an MP3 ran long, the narration was cut short."
+      },
+      "narration": {
+        "zh-Hant": "過去每次重新生成旁白，index.html、字幕、manifest 和 project.json 都要分別手動修改。只要某一段 MP3 比頁面長，旁白就會在成片裡被硬生生切斷。",
+        "en": "Before, every regenerated voice meant editing index dot HTML, captions, manifests, and project metadata separately. If one MP3 ran longer than its slide, the final video cut the narration short."
+      }
     },
     {
       "id": "slide-03",
-      "title": "現在：一條可重跑的管線",
-      "chapter": "pipeline",
+      "title": {
+        "zh-Hant": "現在：一條可重跑的管線",
+        "en": "Now: one rerunnable pipeline"
+      },
+      "chapter": {
+        "zh-Hant": "pipeline",
+        "en": "pipeline"
+      },
       "durationTarget": 14,
       "image": "",
-      "subtitle": "prepare-tts → tts → measure → sync：storyboard 產生朗讀稿，量測 MP3，回寫所有時間軸。",
-      "narration": "現在流程只有一條。storyboard 產生朗讀稿，Edge-TTS 生成 MP3，ffprobe 量出實際長度，然後 sync 把時間軸一次寫回頁面、字幕與 metadata。"
+      "subtitle": {
+        "zh-Hant": "prepare-tts → tts → measure → sync：storyboard 產生朗讀稿，量測 MP3，回寫所有時間軸。",
+        "en": "prepare-tts → tts → measure → sync turns one storyboard into every timing surface."
+      },
+      "narration": {
+        "zh-Hant": "現在流程只有一條。storyboard 產生朗讀稿，Edge-TTS 生成 MP3，ffprobe 量出實際長度，然後 sync 把時間軸一次寫回頁面、字幕與 metadata。",
+        "en": "Now there is one pipeline. The storyboard produces the script, Edge TTS creates each MP3, ffprobe measures its real length, and sync updates the page, captions, and metadata together."
+      }
     },
     {
       "id": "slide-04",
-      "title": "Render 之前的兩道門",
-      "chapter": "gate",
+      "title": {
+        "zh-Hant": "Render 之前的兩道門",
+        "en": "Two gates before render"
+      },
+      "chapter": {
+        "zh-Hant": "gate",
+        "en": "gate"
+      },
       "durationTarget": 14,
       "image": "",
-      "subtitle": "hf audit 檢查結構、schema 與音訊截斷風險；hyperframes check 檢查 runtime、版面與對比度。",
-      "narration": "render 之前要先過兩道門。hf audit 檢查專案結構、schema，以及音訊截斷風險；hyperframes check 則檢查 runtime、版面與文字對比度。"
+      "subtitle": {
+        "zh-Hant": "hf audit 檢查結構、schema 與音訊截斷風險；hyperframes check 檢查 runtime、版面與對比度。",
+        "en": "hf audit verifies the contract; HyperFrames check verifies the browser result."
+      },
+      "narration": {
+        "zh-Hant": "render 之前要先過兩道門。hf audit 檢查專案結構、schema，以及音訊截斷風險；hyperframes check 則檢查 runtime、版面與文字對比度。",
+        "en": "Render waits behind two gates. H F audit checks project structure, schema, and audio cut risk. HyperFrames check then verifies runtime behavior, layout, motion, and text contrast."
+      }
     },
     {
       "id": "slide-05",
-      "title": "人工 preview 仍是最後一關",
-      "chapter": "gate",
+      "title": {
+        "zh-Hant": "人工 preview 仍是最後一關",
+        "en": "Human preview remains the final gate"
+      },
+      "chapter": {
+        "zh-Hant": "gate",
+        "en": "gate"
+      },
       "durationTarget": 12,
       "image": "",
-      "subtitle": "節奏、發音、圖文可讀性，要在瀏覽器裡聽過看過，才按下 render。",
-      "narration": "自動檢查不取代人工。節奏、發音和圖文可讀性，仍然要在瀏覽器 preview 裡聽過、看過，才按下 render。"
+      "subtitle": {
+        "zh-Hant": "節奏、發音、圖文可讀性，要在瀏覽器裡聽過看過，才按下 render。",
+        "en": "A person must still hear the pacing and pronunciation and see the typography."
+      },
+      "narration": {
+        "zh-Hant": "自動檢查不取代人工。節奏、發音和圖文可讀性，仍然要在瀏覽器 preview 裡聽過、看過，才按下 render。",
+        "en": "Automation does not replace a person. Someone still has to hear the pacing and pronunciation, inspect readability, and approve that specific language before render."
+      }
     },
     {
       "id": "slide-06",
-      "title": "從分鏡到影片",
-      "chapter": "outro",
+      "title": {
+        "zh-Hant": "從分鏡到影片",
+        "en": "From storyboard to video"
+      },
+      "chapter": {
+        "zh-Hant": "outro",
+        "en": "outro"
+      },
       "durationTarget": 10,
       "image": "",
-      "subtitle": "一條可重跑的管線。Snowy HyperFrames 工作流 v2。",
-      "narration": "從分鏡到影片，一條可重跑的管線。這就是 Snowy HyperFrames 工作流 v2。"
+      "subtitle": {
+        "zh-Hant": "一條可重跑的管線。Snowy HyperFrames 工作流 v2。",
+        "en": "One rerunnable pipeline. Snowy HyperFrames Workflow v2."
+      },
+      "narration": {
+        "zh-Hant": "從分鏡到影片，一條可重跑的管線。這就是 Snowy HyperFrames 工作流 v2。",
+        "en": "From storyboard to video through one rerunnable pipeline. This is Snowy HyperFrames Workflow version two."
+      }
     }
   ]
 }

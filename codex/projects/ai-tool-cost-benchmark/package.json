@@ -2,7 +2,7 @@
   "name": "ai-tool-cost-benchmark",
   "private": true,
   "type": "module",
-  "hyperframesVersion": "0.8.11",
+  "hyperframesVersion": "0.8.16",
   "scripts": {
     "dev": "node ../../../shared/tools/hf.mjs preview",
     "check": "node ../../../shared/tools/hf.mjs check",

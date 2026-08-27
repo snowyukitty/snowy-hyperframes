@@ -46,3 +46,22 @@
 - Regenerated slide/audio regions; every narration clip now belongs to the stable `voiceover` audio group.
 - Verification: `hf audit` 0 errors / 0 warnings; `hyperframes check --strict` passed with lint, runtime, layout, and motion at 0 findings and 18/18 contrast checks passing.
 - No render or human listening gate was performed; status remains `ready-to-preview`.
+
+## 2026-08-27 — Milestone K language variants
+
+- The project became the first two-locale fixture without being copied. Localizable storyboard fields
+  now carry explicit `zh-Hant` and `en` values; English uses `en-US-JennyNeural` and its own pronunciation map.
+- English synthesis produced six MP3s with engine word boundaries. ffprobe measured 67.73 seconds of
+  narration; audio-driven sync produced a 77.0-second composition. Canonical timing remained 77.2 seconds.
+  Each English clip now has a provider receipt binding text and voice parameters to SHA-256 hashes of the
+  MP3 and word-boundary JSON.
+- Each locale now owns audio, measured durations, timeline, slide and word captions, entry HTML, render
+  target, offline review kit, and `project.json.deliverables` receipt.
+- HyperFrames 0.8.16 caught two implementation defects before delivery: multiple root entries cannot be
+  checked in one directory, and a renamed composition root must rename its `window.__timelines` key.
+  Locale checks now use a one-entry ephemeral projection, and both failures have regression tests.
+- Strict browser checks pass independently for both entries: zero lint/runtime/layout/motion findings and
+  18/18 WCAG AA contrast checks each. Desktop and 390×844 mobile review-kit inspection found six frames,
+  six audio controls, no horizontal overflow, and no browser console warnings.
+- No render was produced. Both human gates remain `pending`; a verdict for one locale must never be copied
+  to the other.

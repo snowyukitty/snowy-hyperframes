@@ -1,26 +1,29 @@
 # TODO — Snowy HyperFrames
 
-Checkpoint: **2026-08-24**. Everything below is either waiting on a person, or specified well enough
+Checkpoint: **2026-08-27**. Everything below is either waiting on a person, or specified well enough
 for any agent to start cold. Specs live in `shared/docs/design-v4.md`; the rules live in `AGENTS.md`.
 
 Repo health at this checkpoint: 8 projects · `hf audit --all` **0 errors / 0 warnings** · `hf repo-check` clean ·
-all 7 compositions pass `hyperframes@0.8.11 check --strict` locally (392/392 contrast checks pass WCAG AA) ·
-8 zero-dependency toolkit regression tests pass. CI runs the same strict browser gates and passed remotely on
-2026-08-24 with zero annotations ([run #32680262467](https://github.com/snowyukitty/snowy-hyperframes/actions/runs/32680262467)).
+8 deliverable entries pass `hyperframes@0.8.16 check --strict` locally (410/410 contrast checks pass WCAG AA) ·
+18 zero-dependency toolkit regression tests pass. Milestone K is locally complete; the pushed CI run must
+be terminal green before the checkpoint is handed off.
 
-The 2026-08-24 review delivered the v4 foundation: HyperFrames 0.8.11, hidden-window checks,
-semantic audio groups, explicit toolkit tests, strict browser gates in CI, and six visual/contract fixes found by the new gate.
-Details: `shared/docs/phase-summary-2026-08-24.md`.
+Milestone K adds explicit locale resolution around the existing pipeline. The canonical and English
+`storyboard-to-video-pipeline-demo` deliverables have independent audio, timings, captions, entries,
+review kits, and pending human verdicts. Details: `shared/docs/phase-summary-2026-08-27-milestone-k.md`.
 
 ---
 
 ## Waiting on Snowy （約 10 分鐘一件，都已經是可以直接打開的網頁）
 
-- [ ] **看過管線 demo，決定是否通過** — 六頁、77 秒。
+- [ ] **Review the canonical pipeline demo** — 6 slides, 77.2 seconds, `zh-Hant`.
       審核包（畫格＋真實旁白＋連續播放）：<https://claude.ai/code/artifact/3e8ebf69-9f40-4616-ac53-24da32d97624>
       本機同一份（離線可開，直接雙擊）：`claude/projects/storyboard-to-video-pipeline-demo/review/index.html`
-      通過後：`claude/projects/storyboard-to-video-pipeline-demo/project.json` 的 `status` 改 `rendered`、
-      `checks.humanPreview` 填日期，`npm run render` 的成片放 GitHub Release（**不要進 git**）。
+      Passing this gate updates root `status` and `deliverables.zh-Hant.review`; it does **not** pass English.
+- [ ] **Review the English pipeline demo** — 6 slides, 77.0 seconds, English.
+      Offline kit: `claude/projects/storyboard-to-video-pipeline-demo/review/en/index.html`.
+      Passing this gate updates only `deliverables.en.review`; then `npm run render:en` may produce the
+      English master for GitHub Releases (**never commit the MP4**).
 - [ ] **看過研究影片，決定是否通過** — 十頁、210.5 秒。
       審核包：<https://claude.ai/code/artifact/650ec078-5f03-4e5c-aa51-4f95f7e79bfd>
       本機同一份：`claude/projects/measurable-vs-audible-tts/review/index.html`
@@ -67,8 +70,9 @@ cd claude/projects/tts-bakeoff-2026-08 ; npm run bakeoff   # 聽測包
       seek-safety 以「每頁起點 +0.4 秒」逐頁驗證。見 `design-v3.md` §2J。
 - [x] ~~**M · trustworthy verification baseline**~~ — 2026-08-24 完成：0.8.11 pins、hidden-window
       `hf check`、semantic audio groups、8 個 core tests、CI strict browser gates，以及 upgrade 發現的 layout fixes。
-- [ ] **K · language variants** — one storyboard produces independently timed, captioned, and reviewed
-      language deliverables without copying the project. This is the next primary milestone; see `design-v4.md` §2.
+- [x] ~~**K · language variants**~~ — 2026-08-27 delivered: one storyboard produces independently timed,
+      captioned, browser-verified, and reviewable `zh-Hant` and English deliverables without copying the project.
+      Human verdicts remain pending by design; see `design-v4.md` §2.
 - [ ] **G · Atlas registry 更新** — **另一個 repo，要另開 scope**：現在是 4 條 workflow、8 個 tracked
       專案、port 3002 仍為 preview；另外 GitHub 的 repo description 已於 2026-08-22 更新
       （見 `docs-github-update.md`），Atlas registry 的 `summary` 尚未跟上。

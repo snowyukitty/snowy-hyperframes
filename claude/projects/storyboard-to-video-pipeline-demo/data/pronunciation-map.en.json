@@ -1,0 +1,34 @@
+{
+  "$schema": "../../../../shared/schemas/pronunciation-map.schema.json",
+  "version": 1,
+  "strategy": "display-text-and-tts-text-separated",
+  "notes": "The display copy keeps exact product and file names; the spoken copy expands ambiguous technical tokens.",
+  "defaultVoice": "en-US-JennyNeural",
+  "candidateVoices": [
+    "en-US-JennyNeural",
+    "en-US-AriaNeural",
+    "en-GB-SoniaNeural"
+  ],
+  "entries": [
+    {
+      "match": "index dot HTML",
+      "tts": "index dot H T M L",
+      "reason": "Spell the file extension."
+    },
+    {
+      "match": "MP3",
+      "tts": "M P 3",
+      "reason": "Spell the audio format."
+    },
+    {
+      "match": "ffprobe",
+      "tts": "F F probe",
+      "reason": "Read the tool name clearly."
+    },
+    {
+      "match": "H F audit",
+      "tts": "H F audit",
+      "reason": "Keep the toolkit command spelled out."
+    }
+  ]
+}
