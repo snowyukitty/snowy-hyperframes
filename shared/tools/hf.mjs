@@ -1796,7 +1796,6 @@ document.addEventListener("keydown", function (e) {
 });
 render();
 </script>`;
-  if (opts.artifact) return `${head}\n${body}\n`;
   return `<!DOCTYPE html>\n<html lang="zh-Hant">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n${head}\n</head>\n<body>\n${body}\n</body>\n</html>\n`;
 }
 
@@ -2393,4 +2392,4 @@ if (IS_MAIN) {
 
 // Small, pure seams for zero-dependency regression tests. The CLI remains one file;
 // exporting these does not introduce a package or change its command-line contract.
-export { buildWordCues, computeTimeline, patchGsapStartArray, renderAudioRegion, renderBlocks, renderChart, renderSlidesRegion, splitDisplayCues, validateSchema };
+export { buildWordCues, computeTimeline, patchGsapStartArray, renderAudioRegion, renderBlocks, renderChart, renderSlidesRegion, reviewHtml, splitDisplayCues, validateSchema };

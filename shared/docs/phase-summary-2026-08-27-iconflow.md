@@ -18,13 +18,21 @@ output family ships to every target surface.
 - Rewrote the three beats to `One SVG enters` → `Prove it at 16px` →
   `Ship every surface` and regenerated the storyboard-owned HTML region.
 - Removed the superseded abstract Coral Gate bitmap from the private project.
+- Fixed `hf review --artifact` to emit the same complete UTF-8 document shell
+  as the ordinary review path. The previous fragment-only artifact rendered
+  Traditional Chinese review instructions as mojibake in Chrome; a unit test
+  now fails if the doctype or early charset declaration disappears.
 
 ## What was verified
 
 - Flow winner: H.264 1280×720 at 24 fps, AAC stereo at 48 kHz, exactly 8.0 s.
 - `npm run check`: 0 audit errors / warnings; 0 lint, runtime, layout, or motion
   findings; 9 layout samples; 21/21 contrast checks pass WCAG AA.
-- `npm run review -- --artifact`: three-frame self-contained review kit built.
+- `npm run review -- --artifact`: three-frame self-contained review kit built;
+  the rebuilt artifact is SHA-256
+  `e4761a862db040e872ec9332a342c45dc54e42a6dccda241afd4210add25245a`.
+- `node --test shared/tests/hf.test.mjs`: 9/9 pass; repo-wide audit reports all
+  11 projects at 0 errors and the IconFlow project at 0 warnings.
 - Additional snapshots at 0.5, 2.8, 3.7, 5.8, and 11.5 seconds were visually
   inspected; the exact icon is centered inside the stopped physical frame.
 

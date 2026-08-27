@@ -8,6 +8,7 @@ import {
   renderAudioRegion,
   renderChart,
   renderSlidesRegion,
+  reviewHtml,
   splitDisplayCues,
   validateSchema,
 } from "../tools/hf.mjs";
@@ -105,6 +106,29 @@ test("generated slide wrappers stay compact without changing the DOM contract", 
   assert.match(html, /<div class="content">.*<h1>A title<\/h1>/s);
   assert.match(html, /<div class="caption">A caption<\/div>/);
   assert(html.split("\n").length <= 8);
+});
+
+test("self-contained review artifacts declare UTF-8 before non-ASCII copy", () => {
+  const html = reviewHtml(
+    {
+      id: "iconflow-film",
+      title: "IconFlow — One Source, Every Surface",
+      project: "codex/projects/iconflow-film",
+      workflow: "codex",
+      total: 15,
+      narration: 0,
+      voice: "",
+      generatedAt: "2026-08-27T00:00:00Z",
+      status: "ready-to-preview",
+    },
+    [],
+    { artifact: true }
+  );
+
+  assert.match(html, /^<!DOCTYPE html>\n<html lang="zh-Hant">/);
+  assert.match(html, /<meta charset="UTF-8">/);
+  assert.match(html, /IconFlow — One Source, Every Surface/);
+  assert.match(html, /人工審核包/);
 });
 
 test("minimal schema validation rejects unexpected properties when requested", () => {
