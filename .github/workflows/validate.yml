@@ -21,8 +21,18 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install ffmpeg (ffprobe measures narration MP3 lengths)
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+      - name: Ensure ffprobe is available (measures narration MP3 lengths)
+        shell: bash
+        run: |
+          if command -v ffprobe >/dev/null 2>&1; then
+            ffprobe -version | sed -n '1p'
+            exit 0
+          fi
+
+          # Hosted images normally include ffprobe. Keep the fallback bounded
+          # so an unhealthy package mirror cannot consume the whole job.
+          timeout 180s sudo apt-get update -qq
+          timeout 180s sudo apt-get install -y -qq ffmpeg
 
       - name: Toolkit regression contracts (zero dependencies)
         run: node --test shared/tests/hf.test.mjs
