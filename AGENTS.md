@@ -9,7 +9,7 @@ project is more specific than this file for that project only.
 [`shared/docs/design-v4.md`](shared/docs/design-v4.md) — the current milestone, spec'd with acceptance
 criteria · [`shared/docs/design-v2.md`](shared/docs/design-v2.md) §1 — the architecture contract
 (truth vs generated, timing policy, toolkit API, template DOM), still binding ·
-[`shared/docs/phase-summary-2026-08-24.md`](shared/docs/phase-summary-2026-08-24.md) — what the last
+[`shared/docs/phase-summary-2026-08-28.md`](shared/docs/phase-summary-2026-08-28.md) — what the last
 session built and verified.
 
 ## What this repository is
@@ -75,7 +75,13 @@ npm run render        # only after a human has actually passed the gate
 All project `lint`, `check`, `snapshot`, `doctor`, `preview`, `render`, and
 `publish` scripts route the pinned HyperFrames CLI through `hf`. On Windows the
 wrapper sets `windowsHide: true`; interactive commands still inherit terminal
-I/O, but must not create extra foreground console windows.
+I/O, but must not create extra foreground console windows. The wrapper also sets
+`HYPERFRAMES_NO_TELEMETRY=1` on every `npx` child: the CLI's exit-time telemetry
+uploader is a detached child without `windowsHide`, so with telemetry on, every
+invocation flashes a visible console on Windows. Known residual: `hyperframes
+preview` from a non-TTY shell picks background mode and its detached server
+opens one persistent console window (upstream issue; run preview from a real
+terminal or tolerate that single window).
 
 Toolkit reference: `node shared/tools/hf.mjs help`. Commands: `new`, `html`,
 `prepare-tts`, `tts`, `measure`, `sync`, `captions`, `fit-audio`, `vendor`, `review`, `check`, `audit [--all]`,

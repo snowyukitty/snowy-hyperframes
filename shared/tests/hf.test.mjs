@@ -13,6 +13,7 @@ import {
   computeTimeline,
   localePaths,
   normalizeRegion,
+  npxEnv,
   patchCompositionLocale,
   patchGsapStartArray,
   renderAudioRegion,
@@ -298,6 +299,20 @@ test("child processes hide Windows helper consoles by default", () => {
   assert.equal(childProcessOptions().windowsHide, true);
   assert.equal(childProcessOptions({ stdio: "inherit" }).windowsHide, true);
   assert.equal(childProcessOptions({ windowsHide: false }).windowsHide, false);
+});
+
+test("npx children opt out of HyperFrames telemetry so its detached uploader never spawns", () => {
+  const saved = process.env.HYPERFRAMES_NO_TELEMETRY;
+  try {
+    delete process.env.HYPERFRAMES_NO_TELEMETRY;
+    assert.equal(npxEnv().HYPERFRAMES_NO_TELEMETRY, "1");
+    process.env.HYPERFRAMES_NO_TELEMETRY = "0";
+    assert.equal(npxEnv().HYPERFRAMES_NO_TELEMETRY, "0");
+    assert.equal(npxEnv({ env: { HYPERFRAMES_NO_TELEMETRY: "on" } }).HYPERFRAMES_NO_TELEMETRY, "on");
+  } finally {
+    if (saved === undefined) delete process.env.HYPERFRAMES_NO_TELEMETRY;
+    else process.env.HYPERFRAMES_NO_TELEMETRY = saved;
+  }
 });
 
 test("minimal schema validation rejects unexpected properties when requested", () => {

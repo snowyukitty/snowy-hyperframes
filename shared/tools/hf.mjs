@@ -2174,11 +2174,19 @@ function hfPin(projectRoot) {
 function dataUri(file, mime) {
   return `data:${mime};base64,${fs.readFileSync(file).toString("base64")}`;
 }
+// The HyperFrames CLI flushes telemetry on exit by spawning a detached `node -e fetch(...)`
+// child without windowsHide, so on Windows every invocation flashes a visible console for
+// up to 5 s — a pipeline run flashes dozens. Opt out through the CLI's documented switch
+// (an explicit HYPERFRAMES_NO_TELEMETRY in the caller's environment still wins).
+function npxEnv(opts = {}) {
+  return { HYPERFRAMES_NO_TELEMETRY: "1", ...process.env, ...(opts.env || {}) };
+}
 // Node >=20 refuses to spawn .cmd/.bat without a shell (EINVAL), so npx needs shell:true on Windows.
 function runNpx(args, opts = {}) {
   const win = process.platform === "win32";
+  const env = npxEnv(opts);
   // with shell:true Node warns about un-escaped arg arrays, so pass one command string instead
-  return win ? run(["npx.cmd", ...args].join(" "), undefined, { ...opts, shell: true }) : run("npx", args, opts);
+  return win ? run(["npx.cmd", ...args].join(" "), undefined, { ...opts, shell: true, env }) : run("npx", args, { ...opts, env });
 }
 function forwardedHyperframesArgs() {
   const tail = process.argv.slice(3);
@@ -2824,4 +2832,4 @@ if (IS_MAIN) {
 
 // Small, pure seams for zero-dependency regression tests. The CLI remains one file;
 // exporting these does not introduce a package or change its command-line contract.
-export { buildSrt, buildWordCues, checkLocaleIds, childProcessOptions, cleanVariantWorkspace, computeTimeline, localePaths, normalizeRegion, patchCompositionLocale, patchGsapStartArray, renderAudioRegion, renderBlocks, renderChart, renderSlidesRegion, renderSrt, resolveStoryboard, reviewHtml, splitDisplayCues, ttsSourceFingerprint, validateSchema, variantWorkspace };
+export { buildSrt, buildWordCues, checkLocaleIds, childProcessOptions, npxEnv, cleanVariantWorkspace, computeTimeline, localePaths, normalizeRegion, patchCompositionLocale, patchGsapStartArray, renderAudioRegion, renderBlocks, renderChart, renderSlidesRegion, renderSrt, resolveStoryboard, reviewHtml, splitDisplayCues, ttsSourceFingerprint, validateSchema, variantWorkspace };

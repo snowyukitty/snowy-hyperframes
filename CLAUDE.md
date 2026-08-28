@@ -14,4 +14,4 @@ node shared/tools/hf.mjs repo-check    # publication guard
 
 Open board: `TODO.md` · Current design of record: `shared/docs/design-v4.md` ·
 Architecture contract: `shared/docs/design-v2.md` §1 · Latest phase summary:
-`shared/docs/phase-summary-2026-08-24.md`.
+`shared/docs/phase-summary-2026-08-28.md`.
