@@ -16,7 +16,8 @@
  *                           measured audio -> data/timeline.json, index.html timing attrs,
  *                           captions/narration.srt, project.json durationSeconds, legacy manifests
  *   captions [--mode word|slide|both] [--max-chars 18]
- *                           word-level captions from the TTS engine's own WordBoundary timings
+ *                           narration captions plus every declared subtitle-only language track;
+ *                           all track timings come from the canonical voice's WordBoundary stream
  *   fit-audio               keep slide windows, set each narration clip's data-duration to its MP3 length
  *                           (HyperFrames >=0.8 clip_media_fit) and fix the root data-duration — for legacy demos
  *   vendor                  copy shared/vendor/gsap.min.js into ./vendor and point index.html at it (no CDN at render)
@@ -285,6 +286,85 @@ function localePaths(projectRoot, sb) {
     renderOutput: `renders/${projectId}${suffix}.mp4`,
   };
   return { relative, ...Object.fromEntries(Object.entries(relative).map(([key, value]) => [key, path.join(projectRoot, ...value.split("/"))])) };
+}
+
+// Subtitle tracks are translations of one spoken master, not spoken locale
+// variants. They share the canonical narration's measured timeline and word
+// boundaries, and therefore never create audio/, timeline, entry, or render
+// variants of their own.
+function subtitleTrackDefinition(sb) {
+  const raw = sb.raw && sb.raw.subtitleTracks;
+  if (!raw || !sb.isCanonical) return null;
+  const sourceLocale = String(raw.sourceLocale || sb.locale);
+  const defaultLocale = String(raw.default || sourceLocale);
+  const entries = Object.entries(raw.tracks || {});
+  if (sourceLocale !== sb.locale) {
+    throw new Error(`subtitleTracks.sourceLocale must match canonical spoken locale ${JSON.stringify(sb.locale)}`);
+  }
+  if (!entries.length) throw new Error("subtitleTracks.tracks must declare at least one track");
+  const tracks = entries.map(([locale, config]) => {
+    if (!/^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/.test(locale)) {
+      throw new Error(`invalid subtitle track locale ${JSON.stringify(locale)}`);
+    }
+    const label = String(config && config.label || locale).trim();
+    const maxChars = Number(config && config.maxChars || 0);
+    if (!label) throw new Error(`subtitleTracks.tracks.${locale}.label must not be empty`);
+    if (!Number.isSafeInteger(maxChars) || maxChars < 8 || maxChars > 160) {
+      throw new Error(`subtitleTracks.tracks.${locale}.maxChars must be an integer from 8 to 160`);
+    }
+    return { locale, label, maxChars, default: locale === defaultLocale };
+  });
+  if (!tracks.some((track) => track.locale === sourceLocale)) {
+    throw new Error(`subtitleTracks must include its source locale ${JSON.stringify(sourceLocale)}`);
+  }
+  if (!tracks.some((track) => track.locale === defaultLocale)) {
+    throw new Error(`subtitleTracks.default ${JSON.stringify(defaultLocale)} is not declared in tracks`);
+  }
+  return { sourceLocale, defaultLocale, tracks };
+}
+
+function subtitleTrackPaths(projectRoot, locale) {
+  const base = `captions/subtitles.${locale}`;
+  return {
+    relative: { srt: `${base}.srt`, vtt: `${base}.vtt` },
+    srt: path.join(projectRoot, ...`${base}.srt`.split("/")),
+    vtt: path.join(projectRoot, ...`${base}.vtt`.split("/")),
+  };
+}
+
+function transcriptKey(value) {
+  return String(value || "").normalize("NFKC").replace(/\s+/g, "");
+}
+
+function subtitleCuePlan(sb) {
+  const definition = subtitleTrackDefinition(sb);
+  if (!definition) return null;
+  const ids = new Set();
+  const slides = sb.slides.map((slide) => {
+    const cues = Array.isArray(slide.raw && slide.raw.captionCues) ? slide.raw.captionCues : [];
+    if (!cues.length) throw new Error(`${slide.id}: captionCues must declare the multilingual transcript`);
+    const normalized = cues.map((cue, index) => {
+      const id = String(cue && cue.id || "").trim();
+      if (!/^[a-z0-9][a-z0-9-]*$/.test(id)) throw new Error(`${slide.id}: captionCues[${index}].id must be kebab-case`);
+      if (ids.has(id)) throw new Error(`${slide.id}: duplicate caption cue id ${JSON.stringify(id)}`);
+      ids.add(id);
+      const text = {};
+      for (const track of definition.tracks) {
+        const value = cue && cue.text && cue.text[track.locale];
+        if (typeof value !== "string" || !value.trim()) {
+          throw new Error(`${slide.id}.${id}: missing subtitle text for ${JSON.stringify(track.locale)}`);
+        }
+        text[track.locale] = value.trim();
+      }
+      return { id, slideId: slide.id, text };
+    });
+    const transcript = normalized.map((cue) => cue.text[definition.sourceLocale]).join(" ");
+    if (transcriptKey(transcript) !== transcriptKey(slide.narration)) {
+      throw new Error(`${slide.id}: source subtitle cues must exactly partition the displayed narration`);
+    }
+    return { id: slide.id, cues: normalized };
+  });
+  return { ...definition, slides };
 }
 const padId = (n) => `slide-${String(n).padStart(2, "0")}`;
 
@@ -561,6 +641,121 @@ function buildWordCues(displayText, words, maxChars, offset, limit) {
 function renderSrt(cues) {
   return cues.map((c, i) => `${i + 1}\n${srtTime(c.start)} --> ${srtTime(c.end)}\n${c.text.trim()}`).join("\n\n") + "\n";
 }
+
+function vttTime(sec) {
+  return srtTime(sec).replace(",", ".");
+}
+
+function renderVtt(cues) {
+  const body = cues
+    .map((cue) => `${cue.id || ""}\n${vttTime(cue.start)} --> ${vttTime(cue.end)}\n${cue.text.trim()}`)
+    .join("\n\n");
+  return `WEBVTT\n\n${body}\n`;
+}
+
+function buildTimedCaptionSegments(segments, words, offset, limit) {
+  const usable = (words || []).filter((word) => String(word.w || "").trim());
+  if (!usable.length) throw new Error("subtitle tracks require canonical TTS word boundaries");
+  const totals = { each: usable.map((word) => weightOf(word.w) || 0.5), total: 0 };
+  totals.total = totals.each.reduce((sum, value) => sum + value, 0) || 1;
+  const weights = segments.map((segment) => Math.max(weightOf(segment.text), 0.2));
+  const sum = weights.reduce((total, value) => total + value, 0) || 1;
+  const speechStart = usable[0].t;
+  const speechEnd = usable[usable.length - 1].t + usable[usable.length - 1].d;
+  let consumed = 0;
+  const cues = segments.map((segment, index) => {
+    const r0 = consumed / sum;
+    consumed += weights[index];
+    const r1 = consumed / sum;
+    const start = index === 0 ? speechStart : timeAtRatio(usable, r0, totals);
+    let end = index === segments.length - 1 ? speechEnd : timeAtRatio(usable, r1, totals);
+    if (end <= start) end = start + 0.35;
+    return {
+      id: segment.id,
+      slideId: segment.slideId,
+      start: offset + start,
+      end: Math.min(offset + end, limit),
+      text: segment.text,
+    };
+  });
+  for (let i = 0; i < cues.length - 1; i++) cues[i].end = Math.min(cues[i].end, cues[i + 1].start);
+  return cues.filter((cue) => cue.end > cue.start && cue.text.trim());
+}
+
+function buildSubtitleTracks(sb, timeline, wordsBySlide) {
+  const plan = subtitleCuePlan(sb);
+  if (!plan) return null;
+  const rows = new Map((timeline || []).map((row) => [row.id, row]));
+  const sourceCues = [];
+  for (const slide of plan.slides) {
+    const row = rows.get(slide.id);
+    if (!row) throw new Error(`${slide.id}: missing from the canonical timeline`);
+    const words = wordsBySlide instanceof Map ? wordsBySlide.get(slide.id) : wordsBySlide && wordsBySlide[slide.id];
+    const segments = slide.cues.map((cue) => ({ ...cue, text: cue.text[plan.sourceLocale] }));
+    sourceCues.push(...buildTimedCaptionSegments(segments, words, row.start, row.start + row.duration));
+  }
+  const sourceById = new Map(sourceCues.map((cue) => [cue.id, cue]));
+  const tracks = {};
+  for (const track of plan.tracks) {
+    const cues = [];
+    for (const slide of plan.slides) {
+      for (const planned of slide.cues) {
+        const timing = sourceById.get(planned.id);
+        if (!timing) throw new Error(`${planned.id}: canonical cue timing was not generated`);
+        cues.push({ ...timing, text: planned.text[track.locale] });
+      }
+    }
+    tracks[track.locale] = { ...track, cues };
+  }
+  return {
+    sourceLocale: plan.sourceLocale,
+    defaultLocale: plan.defaultLocale,
+    cueCount: sourceCues.length,
+    tracks,
+  };
+}
+
+function loadWordsBySlide(paths, slides) {
+  const words = new Map();
+  for (const slide of slides) {
+    const file = path.join(paths.audioDir, `${slide.id}.words.json`);
+    if (!exists(file)) throw new Error(`${rel(path.dirname(paths.audioDir), file)} missing; subtitle tracks require TTS word boundaries`);
+    words.set(slide.id, readJson(file).words || []);
+  }
+  return words;
+}
+
+function writeSubtitleTracks(projectRoot, sb, timeline, { quiet = false, paths = localePaths(projectRoot, sb) } = {}) {
+  const definition = subtitleTrackDefinition(sb);
+  if (!definition) return null;
+  const built = buildSubtitleTracks(sb, timeline, loadWordsBySlide(paths, sb.slides));
+  const receipts = {};
+  for (const [locale, track] of Object.entries(built.tracks)) {
+    const target = subtitleTrackPaths(projectRoot, locale);
+    const srt = renderSrt(track.cues);
+    const vtt = renderVtt(track.cues);
+    writeText(target.srt, srt);
+    writeText(target.vtt, vtt);
+    receipts[locale] = {
+      locale,
+      label: track.label,
+      default: track.default,
+      maxChars: track.maxChars,
+      cueCount: track.cues.length,
+      srt: target.relative.srt,
+      vtt: target.relative.vtt,
+      sha256: { srt: sha256(srt), vtt: sha256(vtt) },
+    };
+    if (!quiet) log(`  ${target.relative.srt} + ${target.relative.vtt}: ${track.cues.length} shared-timing cues`);
+  }
+  return {
+    sourceLocale: built.sourceLocale,
+    defaultLocale: built.defaultLocale,
+    cueCount: built.cueCount,
+    tracks: receipts,
+    built,
+  };
+}
 function wordCuesFor(projectRoot, timeline, paths = localePaths(projectRoot, loadStoryboard(projectRoot))) {
   const maxChars = Number(FLAGS["max-chars"] || 18);
   const out = [];
@@ -604,6 +799,7 @@ function cmdCaptions(projectRoot = findProjectRoot()) {
     log(`  ${paths.relative.captions}: ${timeline.length} cues (one per slide)`);
   }
   if (mode === "word" || mode === "both") writeWordCaptions(projectRoot, timeline, { paths });
+  writeSubtitleTracks(projectRoot, sb, timeline, { paths });
 }
 
 // ---------------------------------------------------------------------------
@@ -1183,6 +1379,7 @@ function cmdSync(projectRoot = findProjectRoot()) {
   writeText(paths.captions, buildSrt(timeline, textById));
   log(`  ${paths.relative.captions}: ${timeline.length} cues`);
   writeWordCaptions(projectRoot, timeline, { quiet: true, paths }) && log(`  ${paths.relative.wordCaptions}: refreshed from word timings`);
+  const subtitleReceipt = writeSubtitleTracks(projectRoot, sb, timeline, { quiet: false, paths });
 
   // 4. project.json
   const pjPath = path.join(projectRoot, "project.json");
@@ -1194,7 +1391,7 @@ function cmdSync(projectRoot = findProjectRoot()) {
   }
   const existing = (pj.deliverables && pj.deliverables[sb.locale]) || {};
   pj.deliverables = pj.deliverables || {};
-  pj.deliverables[sb.locale] = {
+  const deliverable = {
     locale: sb.locale,
     durationSeconds: total,
     entry: paths.relative.entry,
@@ -1204,6 +1401,24 @@ function cmdSync(projectRoot = findProjectRoot()) {
     renderOutput: paths.relative.renderOutput,
     review: { kit: `${paths.relative.review}/index.html`, status: existing.review?.status || "pending" },
   };
+  if (subtitleReceipt) {
+    const tracks = {};
+    for (const [locale, receipt] of Object.entries(subtitleReceipt.tracks)) {
+      tracks[locale] = {
+        ...receipt,
+        review: {
+          status: existing.subtitleTracks?.tracks?.[locale]?.review?.status || "pending",
+        },
+      };
+    }
+    deliverable.subtitleTracks = {
+      sourceLocale: subtitleReceipt.sourceLocale,
+      defaultLocale: subtitleReceipt.defaultLocale,
+      cueCount: subtitleReceipt.cueCount,
+      tracks,
+    };
+  }
+  pj.deliverables[sb.locale] = deliverable;
   writeJson(pjPath, pj);
 
   // 5. legacy Snowy manifests (meta.json / hyperframes.json with slides[] / slidesData[])
@@ -1468,6 +1683,7 @@ function auditProject(projectRoot, repo) {
     if (out) E("captions", `narration.word.srt: ${out} cue(s) fall outside the composition (0-${fmt(end)}s)`);
     if (overlap) W("captions", `narration.word.srt: ${overlap} overlapping cue(s)`);
   }
+  findings.push(...auditSubtitleTracks(projectRoot, sb, project));
 
   // hyperframes.json collision + deprecated CLI usage
   if (exists(P("hyperframes.json"))) {
@@ -1485,6 +1701,86 @@ function auditProject(projectRoot, repo) {
   if (project.status === "rendered" && renderOut && !exists(P(renderOut))) I("render", `status=rendered but ${renderOut} not present locally (fine if renders live in Releases)`);
   for (const locale of sb.locales.filter((id) => id !== sb.canonicalLocale)) {
     findings.push(...auditLocaleVariant(projectRoot, locale));
+  }
+  return findings;
+}
+
+// A subtitle-only track translates one canonical spoken master. Every language
+// must have the same cue ids and timestamps; exact generated-file comparison is
+// the strongest drift check and also covers overlap/out-of-bounds regressions.
+function auditSubtitleTracks(projectRoot, sb, project) {
+  const findings = [];
+  const add = (level, code, msg) => findings.push({ level, code, msg: `subtitle tracks: ${msg}` });
+  const E = (code, msg) => add("error", code, msg);
+  let definition;
+  try {
+    definition = subtitleTrackDefinition(sb);
+  } catch (error) {
+    E("subtitle-config", String(error.message || error));
+    return findings;
+  }
+  if (!definition) return findings;
+  const paths = localePaths(projectRoot, sb);
+  if (!exists(paths.timeline)) {
+    E("subtitle-timing", `${paths.relative.timeline} missing`);
+    return findings;
+  }
+  let built;
+  try {
+    const timeline = readJson(paths.timeline).slides || [];
+    built = buildSubtitleTracks(sb, timeline, loadWordsBySlide(paths, sb.slides));
+  } catch (error) {
+    E("subtitle-contract", String(error.message || error));
+    return findings;
+  }
+  const receipt = project.deliverables?.[sb.locale]?.subtitleTracks;
+  if (!receipt) E("subtitle-receipt", `project.json.deliverables.${sb.locale}.subtitleTracks missing`);
+  else {
+    if (receipt.sourceLocale !== built.sourceLocale) E("subtitle-receipt", `sourceLocale must be ${JSON.stringify(built.sourceLocale)}`);
+    if (receipt.defaultLocale !== built.defaultLocale) E("subtitle-receipt", `defaultLocale must be ${JSON.stringify(built.defaultLocale)}`);
+    if (receipt.cueCount !== built.cueCount) E("subtitle-receipt", `cueCount must be ${built.cueCount}`);
+  }
+  const expectedLocales = Object.keys(built.tracks);
+  const receiptLocales = Object.keys(receipt?.tracks || {});
+  for (const extra of receiptLocales.filter((locale) => !expectedLocales.includes(locale))) {
+    E("subtitle-receipt", `undeclared track ${JSON.stringify(extra)} remains in project.json`);
+  }
+  for (const [locale, track] of Object.entries(built.tracks)) {
+    const target = subtitleTrackPaths(projectRoot, locale);
+    const expectedSrt = renderSrt(track.cues);
+    const expectedVtt = renderVtt(track.cues);
+    for (const [format, file, expected] of [["srt", target.srt, expectedSrt], ["vtt", target.vtt, expectedVtt]]) {
+      if (!exists(file)) E("missing-subtitle-track", `${target.relative[format]} missing`);
+      else if (readText(file) !== expected) E("subtitle-drift", `${target.relative[format]} does not match the canonical cue plan`);
+    }
+    for (const cue of track.cues) {
+      const length = [...cue.text].length;
+      if (length > track.maxChars) {
+        E("subtitle-density", `${locale} ${cue.id} is ${length} characters; declared maximum is ${track.maxChars}`);
+      }
+    }
+    const got = receipt?.tracks?.[locale];
+    if (!got) {
+      E("subtitle-receipt", `${locale} receipt missing`);
+      continue;
+    }
+    const expectedReceipt = {
+      label: track.label,
+      default: track.default,
+      maxChars: track.maxChars,
+      cueCount: track.cues.length,
+      srt: target.relative.srt,
+      vtt: target.relative.vtt,
+    };
+    for (const [key, value] of Object.entries(expectedReceipt)) {
+      if (got[key] !== value) E("subtitle-receipt", `${locale}.${key} is ${JSON.stringify(got[key])}; expected ${JSON.stringify(value)}`);
+    }
+    if (got.sha256?.srt !== sha256(expectedSrt) || got.sha256?.vtt !== sha256(expectedVtt)) {
+      E("subtitle-receipt", `${locale} hashes do not match generated subtitle bytes`);
+    }
+    if (!got.review || !["pending", "passed", "failed"].includes(got.review.status)) {
+      E("subtitle-receipt", `${locale}.review.status must be pending|passed|failed`);
+    }
   }
   return findings;
 }
@@ -1894,6 +2190,11 @@ button {
 button:hover { border-color: var(--accent); color: var(--accent); }
 button.primary { background: var(--accent); color: #06231f; border-color: var(--accent); }
 button.primary:hover { filter: brightness(1.08); color: #06231f; }
+.track-select {
+  min-height: 34px; padding: 5px 30px 5px 11px; border: 1px solid var(--line);
+  border-radius: 999px; background: var(--panel-2); color: var(--ink);
+  font: inherit; font-size: 12px; font-weight: 750;
+}
 .lede { padding: 26px 0 6px; color: var(--ink-dim); font-size: 14px; max-width: 74ch; }
 .lede b { color: var(--ink); }
 .card {
@@ -1914,6 +2215,12 @@ h2 { font-size: 22px; font-weight: 800; line-height: 1.25; }
   background: var(--panel-2); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0;
   padding: 12px 14px; font-size: 15px; color: var(--ink);
 }
+.track-copy {
+  min-height: 54px; padding: 10px 12px; border: 1px solid rgba(148,240,231,.24);
+  border-radius: 8px; background: rgba(148,240,231,.05); color: var(--ink);
+  font-size: 14px; line-height: 1.55;
+}
+.track-copy b { display: block; margin-bottom: 3px; color: var(--accent); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
 audio { width: 100%; height: 34px; }
 .gates { display: flex; gap: 8px; flex-wrap: wrap; }
 .gate {
@@ -1951,6 +2258,7 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fo
 
 function reviewHtml(meta, slides, opts = {}) {
   const english = String(meta.locale || "").toLowerCase().startsWith("en");
+  const subtitleTracks = Array.isArray(meta.subtitleTracks) ? meta.subtitleTracks : [];
   const copy = english
     ? {
         narration: "Narration", passed: "passed", playAll: "▶ Play full cut", copy: "Copy review summary",
@@ -1961,7 +2269,7 @@ function reviewHtml(meta, slides, opts = {}) {
         start: "Start", page: "Slide", note: "What should change? (included in the review summary)",
         summaryTitle: "## Human preview review — ", project: "- Project: ", generated: "- Generated: ", length: " · length ", conclusion: "- Verdict: ",
         passConclusion: "**passed** — render/publication may proceed", failConclusion: "**not passed** — fixes remain below", missing: " — missing: ",
-        copied: "Copied ✓", prompt: "Copy this text:", play: "Play",
+        copied: "Copied ✓", prompt: "Copy this text:", play: "Play", subtitleTrack: "Subtitle", noSubtitleCue: "(No cue at this moment)",
       }
     : {
         narration: "旁白", passed: "已通過", playAll: "▶ 連續播放", copy: "複製審核結論",
@@ -1972,8 +2280,13 @@ function reviewHtml(meta, slides, opts = {}) {
         start: "起", page: "頁面", note: "需要修的地方（會出現在審核結論裡）",
         summaryTitle: "## 人工 preview 審核 — ", project: "- 專案：", generated: "- 產生：", length: " · 長度 ", conclusion: "- 結論：",
         passConclusion: "**通過**，可以 render / 發布", failConclusion: "**未通過**，見下方待修項", missing: " — 未通過：",
-        copied: "已複製 ✓", prompt: "複製這段：", play: "播放",
+        copied: "已複製 ✓", prompt: "複製這段：", play: "播放", subtitleTrack: "字幕軌", noSubtitleCue: "（此刻沒有字幕）",
       };
+  if (subtitleTracks.length) {
+    copy.lede += english
+      ? ` This master also carries <b>${subtitleTracks.length} subtitle-only tracks</b>. Select each language and pass its per-slide translation/readability gate; all tracks share the English voice's measured cue timing.`
+      : ` 這個母版另有 <b>${subtitleTracks.length} 條字幕軌</b>；請逐一切換並通過每頁的翻譯／可讀性 gate。`;
+  }
   const data = JSON.stringify({ meta, slides, copy }).replace(/</g, "\\u003c");
   const head = `<title>${esc(meta.title)}</title>\n<style>${REVIEW_CSS}</style>`;
   const compositionId = `${meta.id}${meta.locale && meta.locale !== "zh-Hant" ? `-${meta.locale}` : ""}-review`;
@@ -1989,6 +2302,7 @@ function reviewHtml(meta, slides, opts = {}) {
       <span class="chip" id="tally">0 / ${slides.length} ${copy.passed}</span>
     </div>
     <span class="spacer"></span>
+    ${subtitleTracks.length ? `<label><span class="chip">${copy.subtitleTrack}</span> <select class="track-select" id="track-select">${subtitleTracks.map((track) => `<option value="${esc(track.locale)}"${track.default ? " selected" : ""}>${esc(track.label)}</option>`).join("")}</select></label>` : ""}
     <button id="play">${copy.playAll}</button>
     <button id="copy" class="primary">${copy.copy}</button>
   </div>
@@ -2010,6 +2324,7 @@ function reviewHtml(meta, slides, opts = {}) {
       <button id="c-next">${copy.next}</button>
       <span class="chip" id="c-meta"></span>
       <span class="spacer"></span>
+      ${subtitleTracks.length ? `<select class="track-select" id="c-track-select">${subtitleTracks.map((track) => `<option value="${esc(track.locale)}"${track.default ? " selected" : ""}>${esc(track.label)}</option>`).join("")}</select>` : ""}
       <button id="c-exit">${copy.exit}</button>
     </div>
   </div>
@@ -2021,10 +2336,30 @@ var KEY = "hf-review:" + D.meta.id + ":" + (D.meta.locale || "zh-Hant");
 var state = {};
 try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { state = {}; }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
-function st(id) { if (!state[id]) state[id] = { p: false, r: false, l: false, note: "" }; return state[id]; }
-function passed(id) { var s = st(id); return s.p && s.r && s.l; }
+var TRACKS = D.meta.subtitleTracks || [];
+var ACTIVE_TRACK = state.__activeTrack || ((TRACKS.filter(function (t) { return t.default; })[0] || TRACKS[0] || {}).locale || "");
+function st(id) {
+  if (!state[id]) state[id] = { p: false, r: false, l: false, tracks: {}, note: "" };
+  if (!state[id].tracks) state[id].tracks = {};
+  return state[id];
+}
+function passed(id) {
+  var s = st(id);
+  return s.p && s.r && s.l && TRACKS.every(function (track) { return !!s.tracks[track.locale]; });
+}
 function fmt(n) { return (Math.round(n * 100) / 100).toFixed(2); }
 var GATES = D.copy.gates;
+
+function trackLabel(locale) {
+  var track = TRACKS.filter(function (item) { return item.locale === locale; })[0];
+  return track ? track.label : locale;
+}
+function trackCues(slide, locale) { return (slide.captionTracks && slide.captionTracks[locale]) || []; }
+function trackPreview(slide) {
+  if (!TRACKS.length) return "";
+  var text = trackCues(slide, ACTIVE_TRACK).map(function (cue) { return cue.text; }).join("  ·  ");
+  return '<div class="track-copy"><b>' + D.copy.subtitleTrack + ' · ' + trackLabel(ACTIVE_TRACK) + '</b>' + (text || D.copy.noSubtitleCue) + '</div>';
+}
 
 function marginChip(s) {
   if (s.mp3 == null) return '<span class="chip warn">' + D.copy.noAudio + '</span>';
@@ -2044,6 +2379,10 @@ function render() {
       var on = st(s.id)[g[0]];
       return '<label class="gate' + (on ? " on" : "") + '" data-slide="' + s.id + '" data-gate="' + g[0] + '">' +
         '<input type="checkbox"' + (on ? " checked" : "") + '><span class="box">✓</span>' + g[1] + "</label>";
+    }).join("") + TRACKS.map(function (track) {
+      var on = !!st(s.id).tracks[track.locale];
+      return '<label class="gate' + (on ? " on" : "") + '" data-slide="' + s.id + '" data-track="' + track.locale + '">' +
+        '<input type="checkbox"' + (on ? " checked" : "") + '><span class="box">✓</span>' + track.label + ' subtitles</label>';
     }).join("");
     el.innerHTML =
       '<div class="shot">' + shot + "</div>" +
@@ -2053,6 +2392,7 @@ function render() {
         "<h2>" + s.title + "</h2>" +
         (s.subtitle ? '<div class="sub">' + D.copy.subtitle + s.subtitle + "</div>" : "") +
         '<div class="narr">' + (s.narration || D.copy.noNarration) + "</div>" +
+        trackPreview(s) +
         (s.audio ? '<audio controls preload="none" src="' + s.audio + '"></audio>' : "") +
         '<div class="chips"><span class="chip">' + D.copy.start + ' ' + fmt(s.start) + "s</span>" +
           '<span class="chip">' + D.copy.page + ' ' + fmt(s.duration) + "s</span>" +
@@ -2062,6 +2402,8 @@ function render() {
       "</div>";
     list.appendChild(el);
   });
+  var select = document.getElementById("track-select");
+  if (select) select.value = ACTIVE_TRACK;
   tally();
 }
 function tally() {
@@ -2075,10 +2417,12 @@ document.addEventListener("click", function (e) {
   if (!g) return;
   e.preventDefault();
   var s = st(g.dataset.slide);
-  s[g.dataset.gate] = !s[g.dataset.gate];
+  if (g.dataset.track) s.tracks[g.dataset.track] = !s.tracks[g.dataset.track];
+  else s[g.dataset.gate] = !s[g.dataset.gate];
   save();
-  g.classList.toggle("on", s[g.dataset.gate]);
-  g.querySelector("input").checked = s[g.dataset.gate];
+  var on = g.dataset.track ? !!s.tracks[g.dataset.track] : !!s[g.dataset.gate];
+  g.classList.toggle("on", on);
+  g.querySelector("input").checked = on;
   var card = document.getElementById("card-" + g.dataset.slide);
   if (card) card.classList.toggle("done", passed(g.dataset.slide));
   tally();
@@ -2088,6 +2432,21 @@ document.addEventListener("input", function (e) {
   st(e.target.dataset.slide).note = e.target.value;
   save();
 });
+function selectTrack(locale) {
+  if (!TRACKS.some(function (track) { return track.locale === locale; })) return;
+  ACTIVE_TRACK = locale;
+  state.__activeTrack = locale;
+  save();
+  var main = document.getElementById("track-select"), cinema = document.getElementById("c-track-select");
+  if (main) main.value = locale;
+  if (cinema) cinema.value = locale;
+  render();
+  renderCinemaCaption();
+}
+var mainTrackSelect = document.getElementById("track-select");
+if (mainTrackSelect) mainTrackSelect.addEventListener("change", function (e) { selectTrack(e.target.value); });
+var cinemaTrackSelect = document.getElementById("c-track-select");
+if (cinemaTrackSelect) cinemaTrackSelect.addEventListener("change", function (e) { selectTrack(e.target.value); });
 
 document.getElementById("copy").addEventListener("click", function () {
   var all = D.slides.every(function (s) { return passed(s.id); });
@@ -2097,6 +2456,7 @@ document.getElementById("copy").addEventListener("click", function () {
   D.slides.forEach(function (s) {
     var v = st(s.id);
     var miss = GATES.filter(function (g) { return !v[g[0]]; }).map(function (g) { return g[1]; });
+    TRACKS.forEach(function (track) { if (!v.tracks[track.locale]) miss.push(track.label + " subtitles"); });
     lines.push("- [" + (miss.length ? " " : "x") + "] " + s.id + " " + s.title +
       (miss.length ? D.copy.missing + miss.join(", ") : "") + (v.note ? " — " + v.note : ""));
   });
@@ -2109,20 +2469,29 @@ document.getElementById("copy").addEventListener("click", function () {
 /* cinema — plays the real narration in order, so pacing can be judged without a render */
 var cin = document.getElementById("cinema"), ci = 0, timer = null, playing = false;
 var au = new Audio();
+function renderCinemaCaption() {
+  if (!D.slides.length) return;
+  var s = D.slides[ci], cues = trackCues(s, ACTIVE_TRACK), at = s.start + (Number(au.currentTime) || 0);
+  var cue = cues.filter(function (item) { return at >= item.start && at < item.end; })[0];
+  if (!cue && cues.length && at < cues[0].start) cue = cues[0];
+  document.getElementById("c-cap").textContent = TRACKS.length ? (cue ? cue.text : "") : (s.subtitle || s.narration || "");
+}
+au.ontimeupdate = renderCinemaCaption;
 function show(i) {
   ci = Math.max(0, Math.min(D.slides.length - 1, i));
   var s = D.slides[ci];
   document.getElementById("c-img").src = s.img || "";
-  document.getElementById("c-cap").textContent = s.subtitle || s.narration || "";
+  renderCinemaCaption();
   document.getElementById("c-hud").textContent = String(s.n).padStart(2, "0") + " / " + String(D.slides.length).padStart(2, "0");
   document.getElementById("c-meta").textContent = s.title;
   document.getElementById("c-bar").style.width = ((ci + 1) / D.slides.length * 100) + "%";
   clearTimeout(timer);
   au.pause();
+  au.currentTime = 0;
+  renderCinemaCaption();
   if (!playing) return;
   if (s.audio) {
     au.src = s.audio;
-    au.currentTime = 0;
     au.play().catch(function () {});
     au.onended = function () { timer = setTimeout(next, Math.max(0, (s.duration - (s.mp3 || 0)) * 1000)); };
   } else timer = setTimeout(next, s.duration * 1000);
@@ -2261,6 +2630,9 @@ function cmdReview(projectRoot = findProjectRoot()) {
   const project = readJson(path.join(projectRoot, "project.json"));
   const timeline = exists(paths.timeline) ? readJson(paths.timeline).slides : provisionalTimeline(projectRoot, sb, paths);
   const byId = Object.fromEntries(sb.slides.map((s) => [s.id, s]));
+  const subtitleBuild = subtitleTrackDefinition(sb)
+    ? buildSubtitleTracks(sb, timeline, loadWordsBySlide(paths, sb.slides))
+    : null;
   let captureRoot = projectRoot;
 
   // one frame per slide, taken after the entrance animation has settled
@@ -2288,6 +2660,12 @@ function cmdReview(projectRoot = findProjectRoot()) {
       const mp3 = path.join(paths.audioDir, `${t.id}.mp3`);
       const audio = exists(mp3) ? dataUri(mp3, "audio/mpeg") : null;
       const displayPath = path.join(paths.audioDir, `${t.id}.display.txt`);
+      const captionTracks = subtitleBuild
+        ? Object.fromEntries(Object.entries(subtitleBuild.tracks).map(([locale, track]) => [
+            locale,
+            track.cues.filter((cue) => cue.slideId === t.id).map(({ id, start, end, text }) => ({ id, start, end, text })),
+          ]))
+        : {};
       bytes += (img ? img.length : 0) + (audio ? audio.length : 0);
       return {
         id: t.id,
@@ -2301,6 +2679,7 @@ function cmdReview(projectRoot = findProjectRoot()) {
         mp3: t.mp3Duration ?? t.mp3 ?? null,
         img,
         audio,
+        captionTracks,
       };
     });
     try {
@@ -2319,6 +2698,11 @@ function cmdReview(projectRoot = findProjectRoot()) {
       voice: (sb.voice && sb.voice.voice) || "",
       generatedAt: nowIso().slice(0, 19).replace("T", " ") + "Z",
       project: rel(repo, projectRoot),
+      subtitleTracks: subtitleBuild
+        ? Object.values(subtitleBuild.tracks).map(({ locale, label, maxChars, default: isDefault, cues }) => ({
+            locale, label, maxChars, default: isDefault, cueCount: cues.length,
+          }))
+        : [],
     };
     const outDir = path.resolve(projectRoot, String(FLAGS.out || paths.relative.review));
     const outFile = path.join(outDir, FLAGS.artifact ? "review.artifact.html" : "index.html");
@@ -2832,4 +3216,4 @@ if (IS_MAIN) {
 
 // Small, pure seams for zero-dependency regression tests. The CLI remains one file;
 // exporting these does not introduce a package or change its command-line contract.
-export { buildSrt, buildWordCues, checkLocaleIds, childProcessOptions, npxEnv, cleanVariantWorkspace, computeTimeline, localePaths, normalizeRegion, patchCompositionLocale, patchGsapStartArray, renderAudioRegion, renderBlocks, renderChart, renderSlidesRegion, renderSrt, resolveStoryboard, reviewHtml, splitDisplayCues, ttsSourceFingerprint, validateSchema, variantWorkspace };
+export { buildSrt, buildSubtitleTracks, buildWordCues, checkLocaleIds, childProcessOptions, npxEnv, cleanVariantWorkspace, computeTimeline, localePaths, normalizeRegion, patchCompositionLocale, patchGsapStartArray, renderAudioRegion, renderBlocks, renderChart, renderSlidesRegion, renderSrt, renderVtt, resolveStoryboard, reviewHtml, splitDisplayCues, subtitleCuePlan, subtitleTrackDefinition, subtitleTrackPaths, ttsSourceFingerprint, validateSchema, variantWorkspace };

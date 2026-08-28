@@ -13,6 +13,12 @@ compositions, and offline human-review kits.
 > (`77.2s`) and English (`77.0s`) deliverables without copying the project. Both pass strict HyperFrames
 > `0.8.16`; both human listening gates remain honestly pending.
 >
+> **2026-08-28 — one voice, selectable subtitle tracks.** A canonical spoken master can also declare
+> stable semantic cues for English, Japanese, and Traditional Chinese sidecars. `hf sync` generates
+> shared-timing SRT/VTT plus hashes and review receipts; `hf audit` blocks drift and density failures;
+> the offline review kit makes every track a human gate. This is deliberately different from a spoken
+> locale variant: it creates no extra audio, entry, or render.
+>
 > Start with [`TODO.md`](TODO.md), the [design of record](shared/docs/design-v4.md), the
 > [production playbook](shared/docs/hyperframes-production-playbook.md), and the
 > [Milestone K checkpoint](shared/docs/phase-summary-2026-08-27-milestone-k.md). Agent contract: [`AGENTS.md`](AGENTS.md).
@@ -131,6 +137,11 @@ npm run review:en
 The invariant is **one storyboard, independent measured timing truths**. Languages never share
 `data-start` merely to look synchronized, and one locale's human approval never approves another.
 The repository CI uses `--all-locales`, so every declared deliverable receives the same strict browser gate.
+
+For one spoken master with translated sidecars, use `subtitleTracks` instead. The source cue text exactly
+partitions the canonical narration; every language shares those cue IDs and canonical word-boundary
+timestamps. `hf captions`/`hf sync` produce `captions/subtitles.<locale>.{srt,vtt}`, and the review kit
+requires a per-slide gate for every declared track.
 
 ## Required Project Metadata
 

@@ -100,6 +100,72 @@
           "captions": {
             "type": "object"
           },
+          "subtitleTracks": {
+            "type": "object",
+            "required": [
+              "sourceLocale",
+              "defaultLocale",
+              "cueCount",
+              "tracks"
+            ],
+            "properties": {
+              "sourceLocale": {
+                "type": "string"
+              },
+              "defaultLocale": {
+                "type": "string"
+              },
+              "cueCount": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "tracks": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object",
+                  "required": [
+                    "locale",
+                    "label",
+                    "default",
+                    "maxChars",
+                    "cueCount",
+                    "srt",
+                    "vtt",
+                    "sha256",
+                    "review"
+                  ],
+                  "properties": {
+                    "locale": { "type": "string" },
+                    "label": { "type": "string" },
+                    "default": { "type": "boolean" },
+                    "maxChars": { "type": "integer", "minimum": 8 },
+                    "cueCount": { "type": "integer", "minimum": 1 },
+                    "srt": { "type": "string" },
+                    "vtt": { "type": "string" },
+                    "sha256": {
+                      "type": "object",
+                      "required": ["srt", "vtt"],
+                      "properties": {
+                        "srt": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+                        "vtt": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+                      },
+                      "additionalProperties": false
+                    },
+                    "review": {
+                      "type": "object",
+                      "required": ["status"],
+                      "properties": {
+                        "status": { "enum": ["pending", "passed", "failed"] }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false
+          },
           "renderOutput": {
             "type": "string"
           },

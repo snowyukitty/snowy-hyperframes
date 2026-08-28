@@ -131,15 +131,25 @@ nothing about timing truth.
   word-timed (`hf captions`). Cue **text** always comes from the display script, never from
   the TTS token stream — the tokens carry no punctuation and spell what is *heard*
   (`版本二`), not what should be *read* (`v2`).
-- Default voice `zh-TW-HsiaoChenNeural`, rate `+5%`, pitch `-3Hz` (see playbook §4.5).
+- Subtitle-only translations use top-level `subtitleTracks` plus stable per-slide
+  `captionCues`. Their source text must exactly partition the canonical narration; every
+  declared language is required. `hf captions`/`hf sync` emit
+  `captions/subtitles.<locale>.{srt,vtt}` from the canonical TTS word boundaries, so all
+  languages share cue IDs and timestamps without creating extra audio or render variants.
+  Each track has its own density limit and human review gate.
+- Default zh-Hant voice `zh-TW-HsiaoChenNeural`, rate `+5%`, pitch `-3Hz` (see playbook
+  §4.5). A project's declared canonical language owns its voice; English masters do not
+  synthesize with the zh-Hant default.
 - A locale variant is selected explicitly with `--locale <id>`. It owns namespaced audio,
   durations, timeline, captions, entry HTML, render target, and review verdict. Never copy a
   project to translate it, never machine-translate a missing spoken field, and never reuse one
-  locale's human verdict for another. See `shared/docs/design-v4.md` §2.
+  locale's human verdict for another. This is distinct from subtitle-only tracks, which keep
+  one spoken master and one render. See `shared/docs/design-v4.md` §2.
 - Generated regions in `index.html` sit between `<!-- hf:audio:start/end -->` and
   `<!-- hf:slides:start/end -->`; edit the storyboard, not those regions. Everything
   outside the markers (CSS, timeline JS) is hand-authored and yours to improve.
-- Chinese (zh-Hant) is the narrative language of the demos; docs may be zh-Hant or English.
+- The canonical narrative language is explicit in each storyboard; docs may be zh-Hant or
+  English.
   Keep `README.md` of a public project readable for someone who has never seen this repo.
 
 ## When you finish a work session

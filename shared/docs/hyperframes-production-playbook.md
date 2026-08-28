@@ -241,6 +241,34 @@ edge-tts --voice zh-TW-HsiaoChenNeural --rate=+8% --pitch=-2Hz --text "..." --wr
 
 不要依賴 Edge-TTS 自訂 SSML 來處理 `<phoneme>`、`<say-as>` 或 lexicon。若需要精準 phoneme、alias、語言標籤與發音 QA，改用 Azure Speech 或其他完整 SSML provider。
 
+#### 4.5.1 一條語音母版，多條可選字幕
+
+若交付要求是「英語聲音，英語預設字幕，另附日語與繁中」，不要建立三個 spoken locale
+variant，也不要把英語字幕烤進畫面。使用 `subtitleTracks`：
+
+1. canonical `language` 與 `subtitleTracks.sourceLocale` 都設為英語；只生成這條語音。
+2. 每頁的 `captionCues` 用穩定 cue ID，把英語旁白完整切段；同一 cue 內附日語與繁中。
+3. `hf pipeline` 只從英語 word boundaries 建一次時間碼，再寫出每語言的 SRT/VTT。
+4. `hf audit` 會阻擋缺譯、原文漂移、手改時間碼、hash/receipt 漂移與超出語言密度上限。
+5. `hf review` 逐語言切換；除了英語發音、節奏、整體可讀性，每頁的每條字幕都必須通過。
+
+```jsonc
+"subtitleTracks": {
+  "sourceLocale": "en",
+  "default": "en",
+  "tracks": {
+    "en":      { "label": "English", "maxChars": 96 },
+    "ja":      { "label": "日本語", "maxChars": 60 },
+    "zh-Hant": { "label": "繁體中文", "maxChars": 48 }
+  }
+}
+```
+
+產物是 `captions/subtitles.<locale>.srt` 與 `.vtt`。發布時保留乾淨 MP4，將三語 sidecar
+一併放 GitHub Release；網站用 `<track kind="subtitles" srclang="…">` 提供選擇。需要單檔可攜
+版本時，可在人工 gate 後另做 MKV（多軌最可靠）或 MP4 `mov_text` mux，但 mux 不是來源真相，
+也不能取代 sidecar 與 review receipt。
+
 ### 4.6 測量音訊與同步時間線
 
 **硬規則：不要用預估 storyboard 秒數直接 render。** 生成 MP3 後，必須先用 `ffprobe` 量實際秒數，再決定是縮短旁白、加速 TTS，還是延長 slide。否則 HyperFrames 會依 `data-duration` 強制停止音軌，造成突兀截斷。

@@ -42,6 +42,47 @@
         "additionalProperties": true
       }
     },
+    "subtitleTracks": {
+      "type": "object",
+      "description": "Subtitle-only translations of the canonical spoken master. Tracks share one canonical word-boundary timeline and never create audio or render variants.",
+      "required": [
+        "sourceLocale",
+        "default",
+        "tracks"
+      ],
+      "properties": {
+        "sourceLocale": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$"
+        },
+        "default": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$"
+        },
+        "tracks": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": [
+              "label",
+              "maxChars"
+            ],
+            "properties": {
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "maxChars": {
+                "type": "integer",
+                "minimum": 8
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
     "slides": {
       "type": "array",
       "items": {
@@ -94,6 +135,31 @@
               "string",
               "object"
             ]
+          },
+          "captionCues": {
+            "type": "array",
+            "description": "Stable semantic cue ids with exact source transcript partitions and subtitle-only translations.",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "text"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9][a-z0-9-]*$"
+                },
+                "text": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
           },
           "blocks": {
             "type": "array",
@@ -181,5 +247,5 @@
     }
   },
   "additionalProperties": true,
-  "description": "Storyboard is the single source of intent. Localizable fields may be canonical strings or explicit locale maps; spoken variant narration and subtitles never fall back silently. Measured timing results live in data/timeline.json for canonical output and data/timeline.<locale>.json for variants."
+  "description": "Storyboard is the single source of intent. Localizable fields may be canonical strings or explicit locale maps; spoken variants own independent audio and timing. subtitleTracks are different: they translate one canonical spoken master and share its generated cue timeline."
 }

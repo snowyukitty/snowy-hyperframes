@@ -1,11 +1,11 @@
 # TODO — Snowy HyperFrames
 
-Checkpoint: **2026-08-27**. Everything below is either waiting on a person, or specified well enough
+Checkpoint: **2026-08-28**. Everything below is either waiting on a person, or specified well enough
 for any agent to start cold. Specs live in `shared/docs/design-v4.md`; the rules live in `AGENTS.md`.
 
-Repo health at this checkpoint: 8 projects · `hf audit --all` **0 errors / 0 warnings** · `hf repo-check` clean ·
-8 deliverable entries pass `hyperframes@0.8.16 check --strict` locally (410/410 contrast checks pass WCAG AA) ·
-18 zero-dependency toolkit regression tests pass. Milestone K is locally complete; the pushed CI run must
+Repo health at this checkpoint: 8 tracked / 11 local projects · `hf audit --all` **0 errors** · `hf repo-check` clean ·
+all local composition entries pass `hyperframes@0.8.16 check --strict --all-locales` (including the two ignored promos) ·
+24 zero-dependency toolkit regression tests pass. Milestone K is locally complete; the pushed CI run must
 be terminal green before the checkpoint is handed off.
 
 Milestone K adds explicit locale resolution around the existing pipeline. The canonical and English
@@ -15,6 +15,16 @@ review kits, and pending human verdicts. Details: `shared/docs/phase-summary-202
 ---
 
 ## Waiting on Snowy （約 10 分鐘一件，都已經是可以直接打開的網頁）
+
+- [ ] **Review the Agent Orchestrator product overview** — 6 slides, 89.7 seconds, English voice;
+      selectable English / Japanese / Traditional Chinese subtitles. Offline kit:
+      `claude/projects/agent-orchestrator-overview-promo/review/index.html`.
+      Pass English pronunciation, pacing, and readability plus every per-slide language gate. The
+      project remains ignored production work; approval authorizes render, not publication or Release.
+- [ ] **Review the five-hour pre-warm explainer** — 6 slides, 87.8 seconds, same trilingual contract.
+      Offline kit: `claude/projects/agent-orchestrator-5h-window-explainer/review/index.html`.
+      Provider caveats are both spoken and on screen. After approval, render the clean English master
+      and ship all SRT/VTT sidecars; do not bake a single-language subtitle into the only MP4.
 
 - [ ] **Review the canonical pipeline demo** — 6 slides, 77.2 seconds, `zh-Hant`.
       審核包（畫格＋真實旁白＋連續播放）：<https://claude.ai/code/artifact/3e8ebf69-9f40-4616-ac53-24da32d97624>
@@ -73,6 +83,9 @@ cd claude/projects/tts-bakeoff-2026-08 ; npm run bakeoff   # 聽測包
 - [x] ~~**K · language variants**~~ — 2026-08-27 delivered: one storyboard produces independently timed,
       captioned, browser-verified, and reviewable `zh-Hant` and English deliverables without copying the project.
       Human verdicts remain pending by design; see `design-v4.md` §2.
+- [x] ~~**K7 · subtitle-only language tracks**~~ — 2026-08-28 delivered: one spoken master produces
+      exact, shared-timing SRT/VTT tracks with stable cue IDs, density blockers, hashes/receipts, and
+      per-track human gates. It is deliberately distinct from spoken locale variants; see `design-v4.md` §2 K7.
 - [ ] **G · Atlas registry 更新** — **另一個 repo，要另開 scope**：現在是 4 條 workflow、8 個 tracked
       專案、port 3002 仍為 preview；另外 GitHub 的 repo description 已於 2026-08-22 更新
       （見 `docs-github-update.md`），Atlas registry 的 `summary` 尚未跟上。

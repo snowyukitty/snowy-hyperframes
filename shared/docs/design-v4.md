@@ -176,6 +176,54 @@ Use `storyboard-to-video-pipeline-demo` as the first two-locale fixture.
   checks pass with 18/18 contrast checks; both offline review kits contain six real frames and six real
   narration clips, use locale-specific localStorage keys, and remain `pending`.
 
+### K7. Subtitle-only tracks on one spoken master ✅ delivered 2026-08-28
+
+A spoken locale variant and a subtitle translation are different products. A variant owns another
+voice, measured timeline, entry, render, and pronunciation/pacing verdict. A subtitle-only track owns
+translated cue text on the canonical master's timing and must not silently create any of those
+artifacts. The storyboard declares the distinction explicitly:
+
+```jsonc
+{
+  "language": "en",
+  "subtitleTracks": {
+    "sourceLocale": "en",
+    "default": "en",
+    "tracks": {
+      "en":      { "label": "English", "maxChars": 96 },
+      "ja":      { "label": "日本語", "maxChars": 60 },
+      "zh-Hant": { "label": "繁體中文", "maxChars": 48 }
+    }
+  },
+  "slides": [{
+    "narration": "One spoken master. Three subtitle tracks.",
+    "captionCues": [
+      { "id": "master", "text": { "en": "One spoken master.", "ja": "音声マスターは一つ。", "zh-Hant": "只有一條語音母版。" } },
+      { "id": "tracks", "text": { "en": "Three subtitle tracks.", "ja": "字幕は三言語。", "zh-Hant": "配上三語字幕。" } }
+    ]
+  }]
+}
+```
+
+The source cue text must exactly partition the display narration after Unicode normalization and
+whitespace removal. Cue IDs are globally unique and every declared translation is required. Timing is
+derived once from canonical TTS word boundaries, then copied byte-for-byte across cue IDs in every
+track. `hf captions` and `hf sync` write both SRT and WebVTT; `project.json` records their paths,
+hashes, density limits, cue counts, default/source locales, and independent review states.
+
+`hf audit` rebuilds the expected tracks and compares exact bytes, receipts, hashes, cue counts, density,
+and declared locales. Missing word boundaries, transcript drift, missing translations, a wrong source
+locale, hand-edited timestamps, and over-dense cues are release blockers. The offline review kit adds a
+language selector, real-time cue playback, and a per-slide gate for every track; a slide cannot pass on
+pronunciation/pacing/readability alone.
+
+The two Agent Orchestrator production candidates prove the contract locally: one English voice each,
+three subtitle tracks each, no baked lower-third subtitles, and no additional locale render. Their
+measured cuts are 89.7 seconds (19 shared-timing cues) and 87.8 seconds (22 cues). Both strict browser
+checks pass with zero errors or warnings; every human verdict remains `pending`, so neither was
+rendered or published. These projects remain ignored production work until the publication allowlist
+review is explicitly completed.
+
 ## 3. Deliberately deferred
 
 - **Full-frame registry data composition (I):** useful for a deliberate visual moment, but it does not

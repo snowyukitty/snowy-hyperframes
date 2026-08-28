@@ -6,6 +6,7 @@ import test from "node:test";
 
 import {
   buildSrt,
+  buildSubtitleTracks,
   buildWordCues,
   checkLocaleIds,
   childProcessOptions,
@@ -20,9 +21,11 @@ import {
   renderChart,
   renderSlidesRegion,
   renderSrt,
+  renderVtt,
   resolveStoryboard,
   reviewHtml,
   splitDisplayCues,
+  subtitleCuePlan,
   ttsSourceFingerprint,
   validateSchema,
   variantWorkspace,
@@ -111,6 +114,89 @@ test("caption packing keeps technical identifiers intact and inside the slide", 
   assert(cues.length > 1);
   assert(cues.every((cue) => cue.start >= 10 && cue.end <= 13.4 && cue.end > cue.start));
   assert.equal(cues.map((cue) => cue.text).join(""), display);
+});
+
+test("subtitle-only tracks share canonical English word timing without creating spoken locales", () => {
+  const raw = {
+    title: "One voice, three subtitle tracks",
+    language: "en",
+    voice: { voice: "en-US-JennyNeural" },
+    subtitleTracks: {
+      sourceLocale: "en",
+      default: "en",
+      tracks: {
+        en: { label: "English", maxChars: 84 },
+        ja: { label: "日本語", maxChars: 42 },
+        "zh-Hant": { label: "繁體中文", maxChars: 38 },
+      },
+    },
+    slides: [{
+      id: "slide-01",
+      title: "Shared timing",
+      chapter: "contract",
+      durationTarget: 6,
+      image: "",
+      subtitle: "",
+      narration: "One spoken master. Three honest subtitle tracks.",
+      captionCues: [
+        { id: "s01-master", text: { en: "One spoken master.", ja: "音声マスターは一つ。", "zh-Hant": "只有一條語音母版。" } },
+        { id: "s01-tracks", text: { en: "Three honest subtitle tracks.", ja: "字幕は正直な三言語。", "zh-Hant": "配上誠實的三語字幕。" } },
+      ],
+    }],
+  };
+  const sb = resolveStoryboard(raw);
+  const built = buildSubtitleTracks(sb, [{ id: "slide-01", start: 2, duration: 5 }], {
+    "slide-01": [
+      { w: "One", t: 0.1, d: 0.2 },
+      { w: "spoken", t: 0.4, d: 0.4 },
+      { w: "master", t: 0.9, d: 0.4 },
+      { w: "Three", t: 1.6, d: 0.3 },
+      { w: "honest", t: 2.0, d: 0.4 },
+      { w: "subtitle", t: 2.5, d: 0.4 },
+      { w: "tracks", t: 3.0, d: 0.3 },
+    ],
+  });
+
+  assert.deepEqual(Object.keys(built.tracks), ["en", "ja", "zh-Hant"]);
+  assert.deepEqual(
+    built.tracks.en.cues.map(({ id, start, end }) => ({ id, start, end })),
+    built.tracks.ja.cues.map(({ id, start, end }) => ({ id, start, end }))
+  );
+  assert.equal(built.tracks["zh-Hant"].cues[1].text, "配上誠實的三語字幕。");
+  assert.match(renderVtt(built.tracks.en.cues), /^WEBVTT\n\ns01-master\n00:00:02\.100 --> /);
+  assert.match(renderSrt(built.tracks.ja.cues), /音声マスターは一つ。/);
+  assert.equal(sb.locales.length, 1);
+});
+
+test("subtitle track plans fail closed on drift, omissions, and wrong source authority", () => {
+  const base = {
+    title: "Tracked",
+    language: "en",
+    voice: {},
+    subtitleTracks: {
+      sourceLocale: "en",
+      default: "en",
+      tracks: { en: { label: "English", maxChars: 84 }, ja: { label: "日本語", maxChars: 42 } },
+    },
+    slides: [{
+      id: "slide-01", title: "T", chapter: "", durationTarget: 4, image: "", subtitle: "",
+      narration: "Exact transcript.",
+      captionCues: [{ id: "s01-a", text: { en: "Exact transcript.", ja: "正確な字幕。" } }],
+    }],
+  };
+  assert.equal(subtitleCuePlan(resolveStoryboard(base)).slides[0].cues.length, 1);
+  assert.throws(
+    () => subtitleCuePlan(resolveStoryboard({ ...base, slides: [{ ...base.slides[0], narration: "Changed transcript." }] })),
+    /exactly partition/
+  );
+  assert.throws(
+    () => subtitleCuePlan(resolveStoryboard({ ...base, slides: [{ ...base.slides[0], captionCues: [{ id: "s01-a", text: { en: "Exact transcript." } }] }] })),
+    /missing subtitle text for "ja"/
+  );
+  assert.throws(
+    () => subtitleCuePlan(resolveStoryboard({ ...base, subtitleTracks: { ...base.subtitleTracks, sourceLocale: "ja" } })),
+    /sourceLocale must match canonical spoken locale/
+  );
 });
 
 test("line charts keep endpoint dots inside the SVG viewport", () => {
@@ -293,6 +379,44 @@ test("review kits isolate locale verdicts and localize the English gate", () => 
   assert.match(html, /human review kit/);
   assert.match(html, /hf-review:" \+ D\.meta\.id \+ ":"/);
   assert.doesNotMatch(html, /這是 <b>/);
+});
+
+test("review kits make every subtitle-only track a timed human gate", () => {
+  const html = reviewHtml(
+    {
+      id: "tracked-master",
+      title: "One voice, three tracks",
+      locale: "en",
+      project: "claude/projects/tracked-master",
+      workflow: "claude",
+      total: 6,
+      narration: 5,
+      voice: "en-US-JennyNeural",
+      generatedAt: "2026-08-28T00:00:00Z",
+      status: "ready-to-preview",
+      subtitleTracks: [
+        { locale: "en", label: "English", default: true, maxChars: 84, cueCount: 1 },
+        { locale: "ja", label: "日本語", default: false, maxChars: 42, cueCount: 1 },
+        { locale: "zh-Hant", label: "繁體中文", default: false, maxChars: 38, cueCount: 1 },
+      ],
+    },
+    [{
+      id: "slide-01", n: 1, chapter: "contract", title: "Shared timing", subtitle: "",
+      narration: "One spoken master.", start: 0, duration: 6, mp3: 5, img: null, audio: null,
+      captionTracks: {
+        en: [{ id: "s01-a", start: 0.2, end: 4.8, text: "One spoken master." }],
+        ja: [{ id: "s01-a", start: 0.2, end: 4.8, text: "音声マスターは一つ。" }],
+        "zh-Hant": [{ id: "s01-a", start: 0.2, end: 4.8, text: "只有一條語音母版。" }],
+      },
+    }]
+  );
+
+  assert.match(html, /id="track-select"/);
+  assert.match(html, /value="zh-Hant"/);
+  assert.match(html, /data-track=.*track\.locale/);
+  assert.match(html, /TRACKS\.every/);
+  assert.match(html, /au\.ontimeupdate = renderCinemaCaption/);
+  assert.match(html, /音声マスターは一つ。/);
 });
 
 test("child processes hide Windows helper consoles by default", () => {
