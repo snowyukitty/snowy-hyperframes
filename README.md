@@ -20,8 +20,10 @@ compositions, and offline human-review kits.
 > locale variant: it creates no extra audio, entry, or render.
 >
 > Start with [`TODO.md`](TODO.md), the [design of record](shared/docs/design-v4.md), the
-> [production playbook](shared/docs/hyperframes-production-playbook.md), and the
-> [Milestone K checkpoint](shared/docs/phase-summary-2026-08-27-milestone-k.md). Agent contract: [`AGENTS.md`](AGENTS.md).
+> [production playbook](shared/docs/hyperframes-production-playbook.md), the
+> [product-proof video standard](shared/docs/product-proof-video-standard.md),
+> and the [latest checkpoint](shared/docs/phase-summary-2026-08-29-functional-promo.md).
+> Agent contract: [`AGENTS.md`](AGENTS.md).
 
 ## Workflow Layout
 

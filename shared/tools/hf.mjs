@@ -2586,6 +2586,9 @@ function cmdHyperframes(command) {
       ["--yes", `hyperframes@${hfPin(projectRoot)}`, command, ...forwarded],
       { cwd, stdio: "inherit" }
     );
+    if (command === "snapshot" && isolate && r.ok) {
+      persistSnapshotArtifacts(projectRoot, sb, cwd);
+    }
   } finally {
     if (isolate) cleanVariantWorkspace(projectRoot, sb);
   }
@@ -2608,6 +2611,28 @@ function variantWorkspace(projectRoot, sb, paths) {
 }
 function cleanVariantWorkspace(projectRoot, sb) {
   fs.rmSync(path.join(projectRoot, ".hf-locale-work", sb.locale), { recursive: true, force: true });
+}
+function persistSnapshotArtifacts(projectRoot, sb, workspaceRoot) {
+  const source = path.join(workspaceRoot, "snapshots");
+  if (!exists(source)) {
+    throw new Error(`HyperFrames snapshot succeeded without producing ${rel(projectRoot, source)}`);
+  }
+
+  const root = path.join(projectRoot, "snapshots");
+  const destination = sb.isCanonical ? root : path.join(root, sb.locale);
+  if (sb.isCanonical) {
+    fs.mkdirSync(destination, { recursive: true });
+    for (const entry of fs.readdirSync(destination, { withFileTypes: true })) {
+      if (entry.isFile() && (/^frame-.*\.png$/i.test(entry.name) || entry.name === "contact-sheet.jpg")) {
+        fs.rmSync(path.join(destination, entry.name), { force: true });
+      }
+    }
+  } else {
+    fs.rmSync(destination, { recursive: true, force: true });
+  }
+  fs.mkdirSync(path.dirname(destination), { recursive: true });
+  fs.cpSync(source, destination, { recursive: true });
+  return fs.readdirSync(destination).sort();
 }
 function takeSnapshots(projectRoot, times) {
   const r = runNpx(["--yes", `hyperframes@${hfPin(projectRoot)}`, "snapshot", "--at", times.map((t) => String(t)).join(",")], { cwd: projectRoot });
@@ -3216,4 +3241,4 @@ if (IS_MAIN) {
 
 // Small, pure seams for zero-dependency regression tests. The CLI remains one file;
 // exporting these does not introduce a package or change its command-line contract.
-export { buildSrt, buildSubtitleTracks, buildWordCues, checkLocaleIds, childProcessOptions, npxEnv, cleanVariantWorkspace, computeTimeline, localePaths, normalizeRegion, patchCompositionLocale, patchGsapStartArray, renderAudioRegion, renderBlocks, renderChart, renderSlidesRegion, renderSrt, renderVtt, resolveStoryboard, reviewHtml, splitDisplayCues, subtitleCuePlan, subtitleTrackDefinition, subtitleTrackPaths, ttsSourceFingerprint, validateSchema, variantWorkspace };
+export { buildSrt, buildSubtitleTracks, buildWordCues, checkLocaleIds, childProcessOptions, npxEnv, cleanVariantWorkspace, computeTimeline, localePaths, normalizeRegion, patchCompositionLocale, patchGsapStartArray, persistSnapshotArtifacts, renderAudioRegion, renderBlocks, renderChart, renderSlidesRegion, renderSrt, renderVtt, resolveStoryboard, reviewHtml, splitDisplayCues, subtitleCuePlan, subtitleTrackDefinition, subtitleTrackPaths, ttsSourceFingerprint, validateSchema, variantWorkspace };

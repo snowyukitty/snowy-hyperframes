@@ -1,12 +1,13 @@
 # TODO — Snowy HyperFrames
 
-Checkpoint: **2026-08-28**. Everything below is either waiting on a person, or specified well enough
+Checkpoint: **2026-08-29**. Everything below is either waiting on a person, or specified well enough
 for any agent to start cold. Specs live in `shared/docs/design-v4.md`; the rules live in `AGENTS.md`.
 
-Repo health at this checkpoint: 8 tracked / 11 local projects · `hf audit --all` **0 errors** · `hf repo-check` clean ·
-all local composition entries pass `hyperframes@0.8.16 check --strict --all-locales` (including the two ignored promos) ·
-24 zero-dependency toolkit regression tests pass. Milestone K is locally complete; the pushed CI run must
-be terminal green before the checkpoint is handed off.
+Repo health at this checkpoint: 8 tracked / 12 local projects · `hf audit
+--all` **0 errors** · `hf repo-check` clean · all 11 local composition entries
+pass `hyperframes@0.8.16 check --strict --all-locales` · 25 zero-dependency
+toolkit tests pass. The new functional hero remains ignored production work;
+no render or publication is authorized.
 
 Milestone K adds explicit locale resolution around the existing pipeline. The canonical and English
 `storyboard-to-video-pipeline-demo` deliverables have independent audio, timings, captions, entries,
@@ -16,6 +17,14 @@ review kits, and pending human verdicts. Details: `shared/docs/phase-summary-202
 
 ## Waiting on Snowy （約 10 分鐘一件，都已經是可以直接打開的網頁）
 
+- [ ] **Review the Agent Orchestrator functional hero** — 4 product-proof
+      slides, 50.6 seconds, English voice; selectable English / Japanese /
+      Traditional Chinese subtitles. Offline kit:
+      `claude/projects/agent-orchestrator-functional-hero/review/index.html`.
+      It uses real renderer captures from an inert fixture: editor → `2 / 3`
+      Join → `3 / 3` explicit handoff → protected journal. The rejected
+      `2026-08-27-agent-orchestrator-hero-30s-1088p.mp4` is superseded and must
+      not be published. Approval authorizes render, not Release publication.
 - [ ] **Review the Agent Orchestrator product overview** — 6 slides, 89.7 seconds, English voice;
       selectable English / Japanese / Traditional Chinese subtitles. Offline kit:
       `claude/projects/agent-orchestrator-overview-promo/review/index.html`.

@@ -17,6 +17,7 @@ import {
   npxEnv,
   patchCompositionLocale,
   patchGsapStartArray,
+  persistSnapshotArtifacts,
   renderAudioRegion,
   renderChart,
   renderSlidesRegion,
@@ -323,6 +324,39 @@ test("browser gates stage exactly one locale entry", () => {
     assert.equal(fs.readFileSync(path.join(englishWork, "index.html"), "utf8"), "english");
     assert.equal(fs.existsSync(path.join(englishWork, "index.en.html")), false);
     cleanVariantWorkspace(root, english);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("snapshot artifacts survive locale-workspace cleanup without erasing other locales", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "hf-snapshot-persist-"));
+  try {
+    const canonicalWork = path.join(root, ".hf-locale-work", "zh-Hant");
+    const canonicalSource = path.join(canonicalWork, "snapshots");
+    fs.mkdirSync(canonicalSource, { recursive: true });
+    fs.writeFileSync(path.join(canonicalSource, "frame-00-at-0s.png"), "canonical");
+    fs.writeFileSync(path.join(canonicalSource, "contact-sheet.jpg"), "sheet");
+    fs.mkdirSync(path.join(root, "snapshots", "en"), { recursive: true });
+    fs.writeFileSync(path.join(root, "snapshots", "frame-stale.png"), "stale");
+    fs.writeFileSync(path.join(root, "snapshots", "en", "keep.txt"), "english");
+
+    const canonical = { locale: "zh-Hant", isCanonical: true };
+    assert.deepEqual(
+      persistSnapshotArtifacts(root, canonical, canonicalWork),
+      ["contact-sheet.jpg", "en", "frame-00-at-0s.png"]
+    );
+    assert.equal(fs.readFileSync(path.join(root, "snapshots", "frame-00-at-0s.png"), "utf8"), "canonical");
+    assert.equal(fs.readFileSync(path.join(root, "snapshots", "en", "keep.txt"), "utf8"), "english");
+    assert.equal(fs.existsSync(path.join(root, "snapshots", "frame-stale.png")), false);
+
+    const englishWork = path.join(root, ".hf-locale-work", "en");
+    const englishSource = path.join(englishWork, "snapshots");
+    fs.mkdirSync(englishSource, { recursive: true });
+    fs.writeFileSync(path.join(englishSource, "frame-00-at-0s.png"), "new-english");
+    const english = { locale: "en", isCanonical: false };
+    assert.deepEqual(persistSnapshotArtifacts(root, english, englishWork), ["frame-00-at-0s.png"]);
+    assert.equal(fs.readFileSync(path.join(root, "snapshots", "en", "frame-00-at-0s.png"), "utf8"), "new-english");
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }
